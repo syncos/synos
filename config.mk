@@ -25,7 +25,8 @@ ASM=nasm
 LINK=ld
 
 # Flags
-CC_FLAGS=-nostdinc -ffreestanding -Wall -Wextra -c -masm=intel -zmuldefs -fno-stack-protector
+INCLUDE_DIRS=-I$(SOURCE_DIR)/arch/include -I$(SOURCE_DIR)/drivers/include -I$(SOURCE_DIR)/newlibc/include
+CC_FLAGS=-nostdinc -ffreestanding -Wall -Wextra -c -masm=intel -zmuldefs -fno-stack-protector $(INCLUDE_DIRS)
 CXX_FLAGS=$(CC_FLAGS)
 ASM_FLAGS=-f elf64 -Wall
 LINK_FLAGS=-m elf_x86_64 -nostdlib -z muldefs
@@ -42,6 +43,25 @@ CXX_FLAGS += -O2
 ASM_FLAGS += -O2
 LINK_FLAGS += -O
 endif
+ifeq ($(BITS), 64)
+CC_FLAGS += -m64
+CXX_FLAGS += -m64
+else
+CC_FLAGS += -m32
+CXX_FLAGS += -m32
+endif
+
+# Color codes (for print)
+RED=\033[1;31m
+GREEN=\033[1;32m
+WHITE=\033[1;37m
+GRAY=\033[0;37m
+NC=\033[0m
+
+COMPILEC=$(GREEN)
+LINKC=$(NC)
+ERRORC=$(RED)
+SECTIONC=$(WHITE)
 
 # Documentation for variables:
 

@@ -1,3 +1,4 @@
+/* Used to link initIMG */
 ENTRY(_start)
 
 SECTIONS

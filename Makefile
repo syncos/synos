@@ -1,6 +1,6 @@
 include config.mk
 
-BUILDMODULES=
+MODULES=
 INITIMGOBJECTS=
 
 include arch/Makefile
@@ -9,20 +9,24 @@ include drivers/Makefile
 
 # Add modules
 ifeq ($(BUILD_KERNEL), TRUE)
-BUILDMODULES += arch kernel
+MODULES += arch kernel
 endif
 ifeq ($(BUILD_LIBC), TRUE)
-BUILDMODULES += libc
+MODULES += libc
 endif
 ifeq ($(BUILD_DRIVERS), TRUE)
-BUILDMODULES += drivers
+MODULES += drivers
 endif
 ifeq ($(CREATE_ROOTDIR), TRUE)
-BUILDMODULES += createRoot
+MODULES += createRoot
 endif
 ifeq ($(LINK_INITIMG), TRUE)
-BUILDMODULES += initimg
+MODULES += initimg
 endif
 
 .PHONY: all
-all: $(BUILDMODULES)
+.PHONY: clean
+all: $(MODULES)
+
+clean:
+	@find . -name "*.o" -type f -delete

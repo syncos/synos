@@ -62,6 +62,7 @@ COMPILEC=$(GREEN)
 LINKC=$(NC)
 ERRORC=$(RED)
 SECTIONC=$(WHITE)
+INFOC=$(WHITE)
 
 # Documentation for variables:
 

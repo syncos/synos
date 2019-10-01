@@ -1,7 +1,13 @@
 include config.mk
 
-MODULES=
+MODULES=startM
 INITIMGOBJECTS=
+
+.PHONY: startM
+.PHONY: all
+.PHONY: clean
+.PHONY: initimg
+
 
 include arch/Makefile
 include kernel/Makefile
@@ -24,8 +30,12 @@ ifeq ($(LINK_INITIMG), TRUE)
 MODULES += initimg
 endif
 
-.PHONY: all
-.PHONY: clean
+startM:
+	@echo -e "$(SECTIONC)[build]$(INFOC) Compiling newlix for target $(ARCH) using $(LOAD_SYSTEM)...$(NC)"
+initimg:
+	@mkdir -p $(ROOT_DIR)/boot/
+	@echo -e "$(SECTIONC)[initimg] $(LINKC)Linking object files -> $(ROOT_DIR)/boot/newlix.img$(NC)"
+
 all: $(MODULES)
 
 clean:

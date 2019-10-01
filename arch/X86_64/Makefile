@@ -1,7 +1,7 @@
 X64DIR=$(ARCHDIR)/X86_64
 
 IMG_LINK+=$(X64DIR)/initIMG.ld
-ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o
+ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o
 
 ifeq ($(LOAD_SYSTEM), MULTIBOOT2)
 ARCHOBJECTS += $(X64DIR)/multiboot2.o
@@ -32,6 +32,10 @@ $(X64DIR)/boot/initVar.o: $(X64DIR)/boot/initVar.asm
 $(X64DIR)/ports.o: $(X64DIR)/ports.c
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/ports.o$(NC)"
 	@$(CC) $(CC_FLAGS) $(X64DIR)/ports.c -o $(X64DIR)/ports.o
+
+$(X64DIR)/cpuid.o: $(X64DIR)/cpuid.c
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/cpuid.o$(NC)"
+	@$(CC) $(CC_FLAGS) $(X64DIR)/cpuid.c -o $(X64DIR)/cpuid.o
 
 $(X64DIR)/multiboot2.o: $(X64DIR)/multiboot2.c
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/multiboot2.o$(NC)"

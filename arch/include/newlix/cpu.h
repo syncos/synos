@@ -8,5 +8,5 @@ struct CPUID
 };
 
 struct CPUID getCPUID();
-extern uint32_t CPUID_enabled();
+extern uint64_t CPUID_enabled();
 #endif

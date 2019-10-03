@@ -18,3 +18,8 @@ CPUID_enabled:
     .true:
         mov rax, 1
         ret
+global CPUID
+CPUID:
+    mov eax, edi
+    cpuid
+    ret

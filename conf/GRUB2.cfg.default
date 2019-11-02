@@ -1,0 +1,7 @@
+set timeout=5 # Wait five seconds before booting default
+set default=0 # Set entry 0 to default
+
+menuentry "MKOS" {
+    multiboot2 /boot/mkos
+    boot
+}

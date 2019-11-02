@@ -1,9 +1,9 @@
-#include <newlix/cpu.h>
+#include <mkos/cpu.h>
 
 struct CPUID getCPUID()
 {
     struct CPUID cpu;
-    if (CPUID_enabled() == 0)
+    if (!CPUID_enabled())
     {
         cpu.enabled = false;
         return cpu;

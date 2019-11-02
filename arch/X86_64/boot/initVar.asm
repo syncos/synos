@@ -13,3 +13,14 @@ stack_bottom:
     resb 4096 * 1
 global stack_top
 stack_top:
+
+global PML4_T
+PML4_T:
+    resb 4096
+; These others are only used temporarily
+global PDP_T
+PDP_T:
+    resb 4096
+global PD_T
+PD_T:
+    resb 4096

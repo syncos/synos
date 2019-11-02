@@ -10,6 +10,6 @@ enum Log_Level
     INFO
 };
 
-void pr_log(Log_Level, char*);
+void pr_log(enum Log_Level, char*);
 
 #endif

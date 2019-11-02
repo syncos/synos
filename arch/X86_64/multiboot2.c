@@ -1,6 +1,6 @@
 #include <inttypes.h>
-#include <mkos/arch.h>
-#include <mkos/multiboot2.h>
+#include <mkos/arch/arch.h>
+#include <mkos/arch/multiboot2.h>
 
 bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data)
 {

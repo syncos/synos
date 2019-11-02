@@ -33,6 +33,38 @@ endif
 
 all: $(MODULES)
 
+ifeq ($(BUILD_TYPE), DEBUG)
+DEBUG=TRUE
+OPTIMIZE=FALSE
+endif
+ifeq ($(BUILD_TYPE), RELEASE)
+DEBUG=FALSE
+OPTIMIZE=TRUE
+endif
+ifeq ($(ASSEMBLY), TRUE)
+CC_FLAGS += -S
+CXX_FLAGS += -S
+endif
+ifeq ($(DEBUG), TRUE)
+CC_FLAGS += -g
+CXX_FLAGS += -g
+ASM_FLAGS += -g
+LINK_FLAGS += -g
+endif
+ifeq ($(OPTIMIZE), TRUE)
+CC_FLAGS += -O2
+CXX_FLAGS += -O2
+ASM_FLAGS += -O2
+LINK_FLAGS += -O
+endif
+ifeq ($(BITS), 64)
+CC_FLAGS += -m64
+CXX_FLAGS += -m64
+else
+CC_FLAGS += -m32
+CXX_FLAGS += -m32
+endif
+
 startM:
 	@echo -e "$(SECTIONC)[build]$(INFOC) Compiling mkos for target $(ARCH) using $(LOAD_SYSTEM)...$(NC)"
 initimg:

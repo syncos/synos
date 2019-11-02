@@ -11,4 +11,7 @@ _start64:
     mov fs, ax
     mov gs, ax
 
+    extern startup
+    call startup ; Call kernel
+
     hlt ; Parachute just in case if the main kernel function for some reason returns which it should not

@@ -77,4 +77,5 @@ struct CPUID
 struct CPUID getCPUID();
 extern uint64_t CPUID_enabled();
 extern void     CPUID(uint32_t eax);
+void            halt();
 #endif

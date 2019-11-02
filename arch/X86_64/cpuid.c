@@ -1,4 +1,4 @@
-#include <mkos/cpu.h>
+#include <mkos/arch/cpu.h>
 
 struct CPUID getCPUID()
 {
@@ -45,4 +45,11 @@ struct CPUID getCPUID()
     asm volatile ("mov esi, ecx" : "=S" (cpu.ProcessorInfoECX));
 
     return cpu;
+}
+void halt()
+{
+    while (1)
+    {
+        asm ("hlt");
+    }
 }

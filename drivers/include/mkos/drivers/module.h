@@ -3,7 +3,8 @@
 
 enum Module_Type
 {
-    FILESYSTEM
+    FILESYSTEM,
+    PMS
 };
 
 struct Module

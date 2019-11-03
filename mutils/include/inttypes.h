@@ -49,9 +49,9 @@ typedef unsigned char       uint8_t;
 typedef unsigned short int  uint16_t;
 typedef unsigned int        uint32_t;
 #ifdef __x86_64__
-typedef signed long int uint64_t;
+typedef unsigned long int uint64_t;
 #else
-typedef signed long long int uint64_t;
+typedef unsigned long long int uint64_t;
 #endif
 #define UINT8_MAX 0xFF
 #define UINT16_MAX 0xFFFF
@@ -108,6 +108,7 @@ typedef uint64_t uint_fast64_t;
 
 // Pointer
 typedef long int   intptr_t;
+typedef intptr_t   regmax_t;
 #ifdef __x86_64__
 #define INTPTR_MAX 0xFFFFFFFFFFFFFFFF
 #else

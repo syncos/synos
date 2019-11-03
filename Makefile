@@ -8,6 +8,7 @@ INITIMGOBJECTS=
 .PHONY: clean
 .PHONY: initimg
 .PHONY: grub
+.PHONY: install
 
 
 include arch/Makefile
@@ -80,3 +81,8 @@ grub:
 	@mkdir -p $(ROOT_DIR)/boot/grub
 	@cp conf/GRUB2.cfg.default $(ROOT_DIR)/boot/grub/grub.cfg
 	@grub-mkrescue -o mkos.iso $(ROOT_DIR)
+install:
+	@echo -e "$(SECTIONC)[install]$(INFOC) Installing mkos to $(INSTALL_DIR)/mkos ...$(NC)"
+	@cp $(ROOT_DIR)/boot/mkos $(INSTALL_DIR)/mkos
+	@chmod 644 $(INSTALL_DIR)/mkos
+	@echo -e "$(SECTIONC)[install]$(INFOC) Done!$(NC)"

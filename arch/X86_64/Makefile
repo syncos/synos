@@ -1,7 +1,7 @@
 X64DIR=$(ARCHDIR)/X86_64
 
 IMG_LINK+=$(X64DIR)/initIMG.ld
-ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o
+ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o $(X64DIR)/memory.o
 
 ifeq ($(LOAD_SYSTEM), MULTIBOOT2)
 ARCHOBJECTS += $(X64DIR)/multiboot2.o
@@ -47,3 +47,7 @@ $(X64DIR)/boot/multiboot2.o: $(X64DIR)/boot/multiboot2.asm
 $(X64DIR)/functions.o: $(X64DIR)/functions.asm
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $(X64DIR)/functions.o$(NC)"
 	@$(ASM) $(ASM_FLAGS) $(X64DIR)/functions.asm -o $(X64DIR)/functions.o
+
+$(X64DIR)/memory.o: $(X64DIR)/memory.c
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/memory.o$(NC)"
+	@$(CC) $(CC_FLAGS) $(X64DIR)/memory.c -o $(X64DIR)/memory.o

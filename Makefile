@@ -9,18 +9,16 @@ INITIMGOBJECTS=
 .PHONY: initimg
 .PHONY: grub
 .PHONY: install
-
+.PHONY: mutils
 
 include arch/Makefile
 include kernel/Makefile
 include drivers/Makefile
+include mutils/Makefile
 
 # Add modules
 ifeq ($(BUILD_KERNEL), TRUE)
-MODULES += arch kernel
-endif
-ifeq ($(BUILD_LIBC), TRUE)
-MODULES += libc
+MODULES += arch kernel mutils
 endif
 ifeq ($(BUILD_DRIVERS), TRUE)
 MODULES += drivers
@@ -68,6 +66,7 @@ endif
 
 startM:
 	@echo -e "$(SECTIONC)[build]$(INFOC) Compiling mkos for target $(ARCH) using $(LOAD_SYSTEM)...$(NC)"
+	@echo -e "$(SECTIONC)[build]$(INFOC) Modules staged for compilation: $(MODULES)$(NC)"
 initimg:
 	@echo -e "$(SECTIONC)[initimg] $(LINKC)Linking object files -> $(ROOT_DIR)/boot/mkos$(NC)"
 	@mkdir -p $(ROOT_DIR)/boot

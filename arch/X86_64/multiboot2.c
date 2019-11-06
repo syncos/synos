@@ -6,7 +6,7 @@ bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data)
 {
     struct multiboot_tag *tag;
 
-    if (magic != MULTIBOOT2_HEADER_MAGIC) return false;
+    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) return false;
 
     for (tag = (struct multiboot_tag *)(uint64_t)(addr + 8); tag->type != MULTIBOOT_TAG_TYPE_END; tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag + ((tag->size + 7) & ~7)))
     {
@@ -37,21 +37,22 @@ bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data)
                 break;
             case MULTIBOOT_TAG_TYPE_MMAP:
                 mb2Data->MM.enabled = true;
-                mb2Data->MM.mem_entries = (MM_entries_t*)_MemStack;
                 mb2Data->MM.nEntries = 0;
+                mb2Data->MM.mem_entries = (MM_entries_t*)MemStack-sizeof(MM_entries_t)+1;
                 multiboot_memory_map_t *mmap;
                 uint64_t i = 0;
                 for (mmap = ((struct multiboot_tag_mmap *) tag)->entries; (multiboot_uint8_t *) mmap < (multiboot_uint8_t *) tag + tag->size; mmap = (multiboot_memory_map_t *)((unsigned long) mmap + ((struct multiboot_tag_mmap *) tag)->entry_size))
                 {
-                    mb2Data->MM.mem_entries[i].enabled = true;
-                    mb2Data->MM.mem_entries[i].base_addr = (unsigned)mmap->addr;
-                    mb2Data->MM.mem_entries[i].length = (unsigned)mmap->len;
-                    mb2Data->MM.mem_entries[i].type = (unsigned) mmap->type;
+                    mb2Data->MM.mem_entries[-i].enabled = true;
+                    mb2Data->MM.mem_entries[-i].base_addr = (unsigned)mmap->addr;
+                    mb2Data->MM.mem_entries[-i].length = (unsigned)mmap->len;
+                    mb2Data->MM.mem_entries[-i].type = (unsigned) mmap->type;
 
                     i++;
                     mb2Data->MM.nEntries++;
                 }
-                _MemStack += sizeof(MM_entries_t) * mb2Data->MM.nEntries;
+                MemStack -= sizeof(MM_entries_t)*(mb2Data->MM.nEntries-1)+1;
+                mb2Data->MM.mem_entries -= sizeof(MM_entries_t)*(mb2Data->MM.nEntries-1);
                 break;
         }
     }

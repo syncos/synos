@@ -4,6 +4,7 @@ ENTRY(_start)
 SECTIONS
 {
     . = 1M;
+    _MemStart = .;
 
     .boot :
     {
@@ -31,6 +32,5 @@ SECTIONS
 	}
 
     _MemEnd = .;
-    _MemStack = .;
     _MemSize = _MemEnd - 1M;
 }

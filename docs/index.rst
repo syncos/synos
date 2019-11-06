@@ -14,7 +14,7 @@ Contributing
 You are more than welcome to give feedback, report issues, and open pull requests. If you have questions, do not hesitate to contact me!
 
 Configuring/Building
-=====
+================================
 
 The `.config` file consists of all important variables for tweaking the kernel. The default values works for most user, although if you are planning on using it for other reasons then to reprogram it, it is recommended to set `DEBUG` to `FALSE` and `OPTIMIZE` to `TRUE`. The recommended compiler to use is gcc since it is proven to work, but it is still possible to change the compiler to for example clang and other binaries like the assembly compiler. 
 
@@ -25,7 +25,7 @@ To compile the selected targets in `.config`, run:
     make all
 
 Running
-=====
+================================
 
 Currently, the only automated way to install mkos is to install mkos to an iso file along with grub:
 

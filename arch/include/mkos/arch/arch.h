@@ -2,9 +2,10 @@
 #define ARCH_H
 #include <inttypes.h>
 
-extern const intptr_t _MemEnd;
-extern intptr_t _MemStack;
-extern const intptr_t _MemSize;
+extern const uintptr_t _MemStart;
+extern const uintptr_t _MemEnd;
+extern uintptr_t MemStack;
+extern const uintptr_t _MemSize;
 
 /* Boot information structure */
 // Basic memory information (3.6.3)

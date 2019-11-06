@@ -1,8 +1,17 @@
 #include <mkos/mkos.h>
 #include <stdio.h>
+#include <string.h>
+
+struct SYS_STATE System;
 
 void startup()
 {
+    pr_log(INFO, "Starting version %d", VERSION);
+    printf("Starting version ");
+    printf(VERSION);
+    printf(" ");
+    printf(VERSION_NAME);
+    printf("\n");
     // Check that CPUID is supported
     if(!CPUID_enabled())
     {
@@ -12,25 +21,31 @@ void startup()
     System.cpuid = getCPUID();
     // Get memory info
     System.memid = getMEMID();
+    // Set interrupt_enabled bool to false
+    System.interrupt_enabled = false;
+
+    panic("System reached end of startup function, something has gone wrong.");
 }
 void panic(char* text)
 {
     // This is only a temporary solution. As soon as a working vga driver is working, it should be redirected there
-    pr_log(FATAL, "Panic encountered! Error message: %d", text);
+    pr_log(INFO, "Panic encountered! Error message: %d", text);
 
     printf("The system kernel has encountered a panic!\n");
-    printf("Error message: %d\n\n", text);
+    printf("Error message: ");
+    printf(text);
+    printf("\n\n");
     printf("System suspended");
 
-    pr_log(FATAL, "Suspending all processes...");
+    pr_log(INFO, "Suspending all processes...");
     // Suspend all processes except essential drivers
 
-    pr_log(FATAL, "Shutting down cores...");
+    pr_log(INFO, "Shutting down cores...");
     // Shut down all cores except core 0
-    pr_log(FATAL, "All cores except core 0 disabled.");
+    pr_log(INFO, "All cores except core 0 disabled.");
 
     // Disable process sheduler
-    pr_log(FATAL, "Process scheduler disabled, core passed to kernel.");
+    pr_log(INFO, "Process scheduler disabled, core passed to kernel.");
 
     // Shut down systems and halt
     halt();

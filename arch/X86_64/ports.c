@@ -1,4 +1,4 @@
-#include <mkos/arch/ports.h>
+#include <mkos/arch/io.h>
 #include <inttypes.h>
 
 uint8_t inb(uint32_t port)

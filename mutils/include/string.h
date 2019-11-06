@@ -134,6 +134,9 @@ char* strtok(char* restrict s1, const char* restrict s2);
  */
 size_t strxfrm(char* restrict s1, const char* restrict s2, size_t n);
 
+int tostring(size_t in, char* out);
+int reverse(char* format);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

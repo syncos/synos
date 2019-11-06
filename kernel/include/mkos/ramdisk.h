@@ -19,4 +19,6 @@ struct INITRD // Initial ramdisk layout
     unsigned int KEY_len;
 };
 
+extern struct INITRD ramd;
+
 #endif

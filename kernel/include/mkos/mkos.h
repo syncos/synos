@@ -5,11 +5,19 @@
 #include <mkos/arch/memory.h>
 #include <mkos/log.h>
 
-struct
+#ifndef VERSION
+#define VERSION "NaN"
+#define VERSION_NAME "NaN"
+#endif
+
+struct SYS_STATE
 {
     struct CPUID cpuid;
     struct MEMID memid;
-}System;
+    bool interrupt_enabled;
+};
+
+extern struct SYS_STATE System;
 
 void startup();
 void panic(char*);

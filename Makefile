@@ -1,3 +1,4 @@
+include .global
 include .config
 
 MODULES=startM
@@ -18,7 +19,7 @@ include mutils/Makefile
 
 # Add modules
 ifeq ($(BUILD_KERNEL), TRUE)
-MODULES += arch kernel mutils
+MODULES += arch kernel
 endif
 ifeq ($(BUILD_DRIVERS), TRUE)
 MODULES += drivers
@@ -27,7 +28,7 @@ ifeq ($(CREATE_ROOTDIR), TRUE)
 MODULES += createRoot
 endif
 ifeq ($(LINK_INITIMG), TRUE)
-MODULES += initimg
+MODULES += mutils initimg
 endif
 
 all: $(MODULES)
@@ -45,9 +46,9 @@ CC_FLAGS += -S
 CXX_FLAGS += -S
 endif
 ifeq ($(DEBUG), TRUE)
-CC_FLAGS += -g
-CXX_FLAGS += -g
-ASM_FLAGS += -g
+CC_FLAGS += -gdwarf
+CXX_FLAGS += -gdwarf
+ASM_FLAGS += -g -F dwarf
 LINK_FLAGS += -g
 endif
 ifeq ($(OPTIMIZE), TRUE)
@@ -80,6 +81,9 @@ grub:
 	@mkdir -p $(ROOT_DIR)/boot/grub
 	@cp conf/GRUB2.cfg.default $(ROOT_DIR)/boot/grub/grub.cfg
 	@grub-mkrescue -o mkos.iso $(ROOT_DIR)
+qemu:
+	@echo -e "$(SECTIONC)[qemu]$(INFOC) Starting qemu with command: qemu-system-x86_64 -cdrom $(INSTALL_DRIVE) -gdb tcp::9000 -S -monitor stdio$(NC)"
+	@qemu-system-x86_64 -cdrom $(INSTALL_DRIVE) -gdb tcp::9000 -S -monitor stdio
 install:
 	@echo -e "$(SECTIONC)[install]$(INFOC) Installing mkos to $(INSTALL_DIR)/mkos ...$(NC)"
 	@cp $(ROOT_DIR)/boot/mkos $(INSTALL_DIR)/mkos

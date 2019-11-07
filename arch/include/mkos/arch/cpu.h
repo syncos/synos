@@ -73,6 +73,13 @@ struct CPUID
     uint32_t ProcessorInfoECX;
     #define CPUID_FEATURE(CPUIDINFO, FEATURE) CPUIDINFO & (FEATURE)
 };
+struct ARGS
+{
+    long arg0;
+    long arg1;
+    long arg2;
+    long arg3;
+};
 
 struct CPUID getCPUID();
 extern uint64_t CPUID_enabled();

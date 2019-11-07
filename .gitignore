@@ -3,3 +3,4 @@
 *.iso
 rootdir/
 build/
+.vscode/

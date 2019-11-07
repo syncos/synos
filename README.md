@@ -15,5 +15,9 @@ Currently, the only automated way to install mkos is to install mkos to an iso f
 
     make grub INSTALL_DRIVE=...
 This will create or overwrite `INSTALL_DRIVE` with the kernel. If no `INSTALL_DRIVE` is provided, the script will default back to `mkos.iso`.
+
+The makefile has a built in `qemu` option which is compatible with the output of `make grub`:
+
+    make qemu INSTALL_DRIVE=...
 # Documentation
 Documentation is currenly very scarse. but more should hopefully show up in `docs/` in the future. The documentation system will probably use sphinx.

@@ -4,7 +4,6 @@ uintptr_t MemStack = 0x3FFFFFFF;
 void* memstck_malloc(size_t bytes)
 {
     void* pointer = (void*)MemStack -  bytes - 1;
-    if(pointer <= (void*)_MemEnd) return 0;
 
     MemStack -= bytes;
 

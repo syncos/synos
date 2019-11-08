@@ -74,7 +74,7 @@ struct CPUID
     #define CPUID_FEATURE(CPUIDINFO, FEATURE) CPUIDINFO & (FEATURE)
 };
 
-struct CPUID* getCPUID();
+struct CPUID    getCPUID();
 extern uint64_t CPUID_enabled();
 extern void     CPUID(uint32_t eax);
 void            halt();

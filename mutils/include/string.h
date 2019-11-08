@@ -30,7 +30,7 @@ int memcmp(const void* s1, const void* s2, size_t n);
 /**
  * C11 7.24.2.1
  */
-void* memcpy(void* restrict s1, const void* restrict s2, size_t n);
+void* memcpy(void* s1, const void* s2, size_t n);
 
 /**
  * C11 7.24.2.2

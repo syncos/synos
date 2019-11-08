@@ -8,7 +8,6 @@ const bool PRINTF_FB_ENABLE = false;
 #endif
 
 boot_t bootdata;
-uintptr_t MemStack = 0x3FFFFFFF;
 extern uint32_t mbp;
 extern uint32_t mbm;
 extern bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data);

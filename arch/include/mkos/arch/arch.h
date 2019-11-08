@@ -1,11 +1,22 @@
 #ifndef ARCH_H
 #define ARCH_H
 #include <inttypes.h>
+#include <stddef.h>
 
 extern const uintptr_t _MemStart;
 extern const uintptr_t _MemEnd;
 extern uintptr_t MemStack;
 extern const uintptr_t _MemSize;
+
+extern void* memstck_malloc(size_t bytes);
+
+enum ARCH
+{
+    X86,
+    X86_64,
+};
+
+extern enum ARCH arch;
 
 /* Boot information structure */
 // Basic memory information (3.6.3)
@@ -90,5 +101,17 @@ typedef struct
     ELFs_t ELFs;
     MM_t MM;
 }boot_t;
+
+struct StackFrame
+{
+
+};
+struct Stacktrace
+{
+    size_t length;
+    struct StackFrame *frames;
+};
+
+extern struct Stacktrace* TraceStack();
 
 #endif

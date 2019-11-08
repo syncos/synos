@@ -1,4 +1,7 @@
+#include <mkos/arch/arch.h>
 #include <mkos/arch/cpu.h>
+
+enum ARCH arch = X86_64;
 
 struct CPUID getCPUID()
 {

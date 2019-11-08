@@ -11,7 +11,7 @@ void* memstck_malloc(size_t bytes)
     return pointer;
 }
 
-struct Stacktrace* TraceStack()
+struct Stacktrace* KernTraceStack()
 {
     struct Stacktrace *trace = (struct Stacktrace*)memstck_malloc(sizeof(struct Stacktrace));
     struct Stackframe *stk;

@@ -18,7 +18,7 @@ void startup()
         panic("CPUID not supported on target system!");
     }
     // Get cpuid struct
-    System.cpuid = getCPUID();
+    System.cpuid = *getCPUID();
     // Get memory info
     System.memid = getMEMID();
     // Set interrupt_enabled bool to false

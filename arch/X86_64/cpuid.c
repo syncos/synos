@@ -1,6 +1,13 @@
+#include <mkos/arch/arch.h>
 #include <mkos/arch/cpu.h>
+#include <string.h>
 
-struct CPUID getCPUID()
+enum ARCH arch = X86_64;
+
+#define pushaq() asm("push rax"); asm("push rcx"); asm("push rdx"); asm("push rbx"); asm("push rbp"); asm("push rsi"); asm("push rdi")
+#define popaq() asm("pop rdi"); asm("pop rsi"); asm("pop rbp"); asm("pop rbx"); asm("pop rdx"); asm("pop rcx"); asm("pop rax")
+
+struct CPUID __attribute__((optimize("O0"))) getCPUID() 
 {
     struct CPUID cpu;
     if (!CPUID_enabled())
@@ -15,11 +22,13 @@ struct CPUID getCPUID()
     uint32_t ecx;
     uint32_t edx;
     // Since the CPUID function returns only the registers, we have to do this in inline assembly
+    pushaq();
     asm volatile ("mov edi, 0"); // Set edi to 0 = get manufacturer
     asm volatile ("call CPUID"); // Call CPUID
     asm volatile ("mov eax, ebx" : "=r" (ebx));
     asm volatile ("mov eax, ecx" : "=r" (ecx));
     asm volatile ("mov eax, edx" : "=r" (edx));
+    popaq();
     // Now that we have the strings we can start decoding them
     // Bytes 0 - 3
     cpu.manufacturer[0]  = ((uint8_t*)&ebx)[3];
@@ -38,11 +47,13 @@ struct CPUID getCPUID()
     cpu.manufacturer[11] = ((uint8_t*)&edx)[0];
 
     // Processor info
+    pushaq();
     asm volatile ("mov edi, 1");
     asm volatile ("call CPUID");
     asm volatile ("mov esi, eax" : "=S" (cpu.ProcessorInfoEAX));
     asm volatile ("mov esi, edx" : "=S" (cpu.ProcessorInfoEDX));
     asm volatile ("mov esi, ecx" : "=S" (cpu.ProcessorInfoECX));
+    popaq();
 
     return cpu;
 }

@@ -18,17 +18,21 @@ include drivers/Makefile
 include mutils/Makefile
 
 # Add modules
+ifeq ($(LINK_INITIMG), TRUE)
+MODULES += kernel arch mutils drivers initimg
+# To make sure they don't get added multiple times
+BUILD_KERNEL=FALSE
+BUILD_DRIVERS=FALSE
+BUILD_MUTILS=FALSE
+endif
 ifeq ($(BUILD_KERNEL), TRUE)
 MODULES += arch kernel
 endif
 ifeq ($(BUILD_DRIVERS), TRUE)
 MODULES += drivers
 endif
-ifeq ($(CREATE_ROOTDIR), TRUE)
-MODULES += createRoot
-endif
-ifeq ($(LINK_INITIMG), TRUE)
-MODULES += mutils initimg
+ifeq ($(BUILD_MUTILS), TRUE)
+MODULES += mutils
 endif
 
 all: $(MODULES)

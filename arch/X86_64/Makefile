@@ -2,7 +2,7 @@ X64DIR=$(ARCHDIR)/X86_64
 include $(X64DIR)/.config
 
 IMG_LINK+=$(X64DIR)/initIMG.ld
-ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o
+ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o $(X64DIR)/stack.o
 
 PF_ARGS=
 
@@ -63,3 +63,7 @@ $(X64DIR)/memory.o: $(X64DIR)/memory.c
 $(X64DIR)/printf.o: $(X64DIR)/printf.c
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/printf.o$(NC)"
 	@$(CC) $(CC_FLAGS) $(PF_ARGS) $(X64DIR)/printf.c -o $(X64DIR)/printf.o
+
+$(X64DIR)/stack.o: $(X64DIR)/stack.c
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/stack.o$(NC)"
+	@$(CC) $(CC_FLAGS) $(PF_ARGS) $(X64DIR)/stack.c -o $(X64DIR)/stack.o

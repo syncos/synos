@@ -12,6 +12,7 @@ _start64:
     mov gs, ax
 
     extern startup
+    xor rbp, rbp ; Set rbp to null to make stack tracing work
     call startup ; Call kernel
 
     hlt ; Parachute just in case if the main kernel function for some reason returns which it should not

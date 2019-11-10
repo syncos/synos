@@ -23,3 +23,23 @@ CPUID:
     mov eax, edi
     cpuid
     ret
+global CPUID_manufacturer
+CPUID_manufacturer:
+    push rbx
+    push rdx
+    push rcx
+
+    xor eax, eax
+    cpuid
+    mov [CPUID_MN_STR], ebx
+    mov [CPUID_MN_STR+4], edx
+    mov [CPUID_MN_STR+8], ecx
+    
+    pop rcx
+    pop rdx
+    pop rbx
+    mov rax, CPUID_MN_STR
+    ret
+
+section .rodata
+CPUID_MN_STR resb 12

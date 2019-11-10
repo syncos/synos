@@ -18,24 +18,9 @@ include drivers/Makefile
 include mutils/Makefile
 
 # Add modules
-ifeq ($(LINK_INITIMG), TRUE)
-MODULES += kernel arch mutils drivers initimg
-# To make sure they don't get added multiple times
-BUILD_KERNEL=FALSE
-BUILD_DRIVERS=FALSE
-BUILD_MUTILS=FALSE
-endif
-ifeq ($(BUILD_KERNEL), TRUE)
-MODULES += arch kernel
-endif
-ifeq ($(BUILD_DRIVERS), TRUE)
-MODULES += drivers
-endif
-ifeq ($(BUILD_MUTILS), TRUE)
-MODULES += mutils
-endif
+MODULES += kernel arch mutils drivers
 
-all: $(MODULES)
+all: initimg
 
 ifeq ($(BUILD_TYPE), DEBUG)
 DEBUG=TRUE
@@ -72,7 +57,7 @@ endif
 startM:
 	@echo -e "$(SECTIONC)[build]$(INFOC) Compiling mkos for target $(ARCH) using $(LOAD_SYSTEM)...$(NC)"
 	@echo -e "$(SECTIONC)[build]$(INFOC) Modules staged for compilation: $(MODULES)$(NC)"
-initimg:
+initimg: $(MODULES)
 	@echo -e "$(SECTIONC)[initimg] $(LINKC)Linking object files -> $(ROOT_DIR)/boot/mkos$(NC)"
 	@mkdir -p $(ROOT_DIR)/boot
 	@$(LINK) $(LINK_ARGS) -T $(IMG_LINK) $(INITIMGOBJECTS) -o $(ROOT_DIR)/boot/mkos
@@ -86,7 +71,7 @@ grub:
 	@cp conf/GRUB2.cfg.default $(ROOT_DIR)/boot/grub/grub.cfg
 	@grub-mkrescue -o mkos.iso $(ROOT_DIR)
 qemu:
-	@echo -e "$(SECTIONC)[qemu]$(INFOC) Starting qemu with command: qemu-system-x86_64 -cdrom $(INSTALL_DRIVE) -gdb tcp::9000 -S -monitor stdio$(NC)"
+	@echo -e "$(SECTIONC)[qemu]$(INFOC) Starting qemu with command: qemu-system-x86_64 -cdrom $(INSTALL_DRIVE) -gdb tcp::9000 -S -monitor stdio $(QEMU_ARGS)$(NC)"
 	@qemu-system-x86_64 -cdrom $(INSTALL_DRIVE) -gdb tcp::9000 -S -monitor stdio
 install:
 	@echo -e "$(SECTIONC)[install]$(INFOC) Installing mkos to $(INSTALL_DIR)/mkos ...$(NC)"

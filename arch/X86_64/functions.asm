@@ -31,15 +31,29 @@ CPUID_manufacturer:
 
     xor eax, eax
     cpuid
-    mov [CPUID_MN_STR], ebx
-    mov [CPUID_MN_STR+4], edx
-    mov [CPUID_MN_STR+8], ecx
+    mov [rdi], ebx
+    mov [rdi+4], edx
+    mov [rdi+8], ecx
     
     pop rcx
     pop rdx
     pop rbx
-    mov rax, CPUID_MN_STR
+    mov rax, rdi
     ret
+global CPUID_Info
+CPUID_Info:
+    push rdx
+    push rcx
+    push rbx
 
-section .rodata
-CPUID_MN_STR resb 12
+    mov eax, 1
+    cpuid
+    mov [rdi], eax
+    mov [rdi+4], edx
+    mov [rdi+8], ecx
+
+    pop rbx
+    pop rcx
+    pop rdx
+    mov rax, rdi
+    ret

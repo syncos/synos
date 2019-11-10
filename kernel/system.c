@@ -18,7 +18,11 @@ void startup()
         panic("CPUID not supported on target system!");
     }
     // Get cpuid struct
-    System.cpuid = getCPUID();
+    getCPUID(&System.cpuid);
+    if (System.cpuid.vendor == UNKNOWN)
+    {
+        pr_log(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");
+    }
     // Get memory info
     System.memid = getMEMID();
     // Set interrupt_enabled bool to false

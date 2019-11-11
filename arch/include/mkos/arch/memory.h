@@ -10,5 +10,5 @@ struct MEMID
     MM_entries_t* entries;
 };
 
-struct MEMID getMEMID();
+struct MEMID* getMEMID(struct MEMID*);
 #endif

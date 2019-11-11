@@ -24,7 +24,7 @@ void startup()
         pr_log(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");
     }
     // Get memory info
-    System.memid = getMEMID();
+    getMEMID(&System.memid);
     // Set interrupt_enabled bool to false
     System.interrupt_enabled = false;
 

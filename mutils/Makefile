@@ -10,6 +10,7 @@ include mutils/impl/Makefile
 include mutils/string/Makefile
 include mutils/stdatomic/Makefile
 include mutils/stdlib/Makefile
+include mutils/elf/Makefile
 
 .PHONY: mutils
 mutils: $(MUTILSOBJECTS)

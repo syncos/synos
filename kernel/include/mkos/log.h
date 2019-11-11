@@ -1,5 +1,6 @@
 #ifndef MKOS_LOG_H
 #define MKOS_LOG_H
+#include <stddef.h>
 
 enum Log_Level
 {
@@ -11,5 +12,6 @@ enum Log_Level
 };
 
 void pr_log(enum Log_Level, char*, ...);
+int log_init(size_t);
 
 #endif

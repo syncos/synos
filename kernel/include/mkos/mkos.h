@@ -15,6 +15,7 @@ struct SYS_STATE
     struct CPUID cpuid;
     struct MEMID memid;
     bool interrupt_enabled;
+    bool MMU_enabled;
 };
 
 extern struct SYS_STATE System;

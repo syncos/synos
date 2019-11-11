@@ -1,3 +1,4 @@
+#ifdef PRINTF_FALLBACK
 // Fallback stdio functions
 // If the system has working out-of-the-box vga support, this option should be enabled. Otherwise, the system logs and printf string 
 // will be stored and printed once full display support is initialized (after main kernel boot up).
@@ -14,9 +15,7 @@
 #define SCANLINE_LOW_D 0
 #define SCANLINE_HIGH_D 1
 
-#ifdef PRINTF_FALLBACK
-    const bool PRINTF_FB_ENABLE = true;
-#endif
+const bool PRINTF_FB_ENABLE = true;
 
 enum vga_color 
 {
@@ -36,7 +35,7 @@ enum vga_color
     BRIGHT_MAGENTA,
     YELLOW,
     WHITE,
-    };
+};
 
 uint8_t fore_color = WHITE, back_color = BLACK;
 uint16_t* display_buffer = (uint16_t*)VGA_ADDRESS_D;
@@ -131,3 +130,4 @@ struct PRINTF_FUNC* printf_init()
     
     return &funtiondata;
 }
+#endif

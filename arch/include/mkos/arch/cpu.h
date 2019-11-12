@@ -48,6 +48,9 @@ struct ARGS
     long arg3;
 };
 
+extern const int isLittleEndian;
+extern const int isBigEndian;
+
 struct CPUID*   getCPUID(struct CPUID*);
 extern uint64_t CPUID_enabled();
 extern void     CPUID(uint32_t eax);

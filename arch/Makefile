@@ -4,8 +4,10 @@ ARCHOBJECTS=
 
 ifeq ($(ARCH), X86)
 include arch/X86/Makefile
+DEFINE_VALS += -D_X86_
 else
 include arch/X86_64/Makefile
+DEFINE_VALS += -D_X86_64_
 endif
 
 INITIMGOBJECTS += $(SOURCE_DIR)/arch/arch.o

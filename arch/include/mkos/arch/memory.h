@@ -1,5 +1,6 @@
 #ifndef ARCH_MEMORY_H
 #define ARCH_MEMORY_H
+#include <mkos/arch/arch.h>
 #include <inttypes.h>
 
 struct MEMID
@@ -11,4 +12,9 @@ struct MEMID
 };
 
 struct MEMID* getMEMID(struct MEMID*);
+
+#ifdef MEMSTACK_ENABLE
+extern void* memstck_malloc(size_t bytes);
+#endif
+
 #endif

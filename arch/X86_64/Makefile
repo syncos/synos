@@ -9,7 +9,7 @@ PF_ARGS=
 include $(X64DIR)/interrupts/Makefile
 
 ifeq ($(PRINTF_FALLBACK), TRUE)
-PF_ARGS += -DPRINTF_FALLBACK="TRUE"
+DEFINE_VALS += -DPRINTF_FALLBACK
 endif
 ifeq ($(LOAD_SYSTEM), MULTIBOOT2)
 ARCHOBJECTS += $(X64DIR)/multiboot2.o
@@ -19,6 +19,9 @@ ifeq ($(LOAD_SYSTEM), MULTIBOOT)
 ARCHOBJECTS += $(X64DIR)/multiboot.o
 ARCHOBJECTS += $(X64DIR)/boot/multiboot.o
 endif
+endif
+ifeq ($(ENABLE_MEMSTACK), TRUE)
+DEFINE_VALS += -DMEMSTACK_ENABLE
 endif
 
 arch_x86_64: $(ARCHOBJECTS)
@@ -58,12 +61,12 @@ $(X64DIR)/functions.o: $(X64DIR)/functions.asm
 
 $(X64DIR)/memory.o: $(X64DIR)/memory.c
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/memory.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(PF_ARGS) $(X64DIR)/memory.c -o $(X64DIR)/memory.o
+	@$(CC) $(CC_FLAGS) $(X64DIR)/memory.c -o $(X64DIR)/memory.o
 
 $(X64DIR)/printf.o: $(X64DIR)/printf.c
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/printf.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(PF_ARGS) $(X64DIR)/printf.c -o $(X64DIR)/printf.o
+	@$(CC) $(CC_FLAGS) $(X64DIR)/printf.c -o $(X64DIR)/printf.o
 
 $(X64DIR)/stack.o: $(X64DIR)/stack.c
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/stack.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(PF_ARGS) $(X64DIR)/stack.c -o $(X64DIR)/stack.o
+	@$(CC) $(CC_FLAGS) $(X64DIR)/stack.c -o $(X64DIR)/stack.o

@@ -12,6 +12,7 @@
  */
 
 #include <stdnoreturn.h> /* for _Noreturn */
+#include <stddef.h>
 
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
@@ -54,6 +55,8 @@ long long int llabs(long long int j);
  * C11 7.22.4.7
  */
 _Noreturn void quick_exit(int status);
+
+void* malloc(size_t);
 
 #ifdef __cplusplus
 } /* extern "C" */

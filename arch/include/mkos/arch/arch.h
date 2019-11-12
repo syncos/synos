@@ -8,8 +8,6 @@ extern const uintptr_t _MemEnd;
 extern uintptr_t MemStack;
 extern const uintptr_t _MemSize;
 
-extern void* memstck_malloc(size_t bytes);
-
 enum ARCH
 {
     X86,

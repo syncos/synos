@@ -18,4 +18,6 @@ struct Stacktrace* KernTraceStack()
 {
     struct Stacktrace *trace = (struct Stacktrace*)malloc(sizeof(struct Stacktrace));
     struct Stackframe *stk;
+
+    return trace;
 }

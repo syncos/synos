@@ -15,5 +15,6 @@
  */
 int fclose(FILE* const stream) 
 {
-    return __sysio_close(stream);
+    //return __sysio_close(stream);
+    return 1;
 }

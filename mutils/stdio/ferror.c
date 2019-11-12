@@ -15,5 +15,6 @@
  */
 int ferror(FILE* const stream) 
 {
-    return *__sysio_errno(stream);
+    //return *__sysio_errno(stream);
+    return 1;
 }

@@ -4,18 +4,6 @@
 #include <mkos/arch/io.h>
 #include "../stdio/sysio.h"
 
-int __sysio_close(FILE* stream)
-{
-
-}
-int* __sysio_errno(FILE* stream)
-{
-
-}
-long __sysio_write( FILE* restrict stream, const void* restrict buffer, unsigned long count)
-{
-    
-}
 int _impl_printf(const char* restrict format)
 {
     #ifdef PRINTF_FALLBACK
@@ -27,4 +15,7 @@ int _impl_printf(const char* restrict format)
         else return 0;
     }
     #endif
+
+    // TODO: add printf syscall
+    return 0;
 }

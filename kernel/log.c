@@ -17,6 +17,7 @@ int log_init(size_t buffer)
 {
     log_buffer = (char*)malloc(buffer);
     
+    return 1;
 }
 
 void pr_log(enum Log_Level level, char* text, ...)

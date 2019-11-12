@@ -15,5 +15,5 @@
  */
 void clearerr(FILE* const stream) 
 {
-    *__sysio_errno(stream) = 0;
+    //*__sysio_errno(stream) = 0;
 }

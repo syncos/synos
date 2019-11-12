@@ -6,7 +6,7 @@ MUTILSOBJECTS += $(MUTDIR)/stdlib.o
 STDLIBOBJECTS += $(STDLIBDIR)/malloc.o
 
 $(MUTDIR)/stdlib.o: $(STDLIBOBJECTS)
-	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking stdio object files -> $(MUTDIR)/stdlib.o$(NC)"
+	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking stdlib object files -> $(MUTDIR)/stdlib.o$(NC)"
 	@$(LINK) -r $(STDLIBOBJECTS) -o $(MUTDIR)/stdlib.o
 
 $(STDLIBDIR)/malloc.o: $(STDLIBDIR)/malloc.c

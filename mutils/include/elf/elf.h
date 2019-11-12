@@ -91,43 +91,70 @@ struct ELF_HEADER
     char* e_ident;
 
     char* e_type;
-    uint16_t *e_type_16;
+    uint16_t e_type_16;
 
     char* e_machine;
-    uint16_t *e_machine_16;
+    uint16_t e_machine_16;
 
     char* e_version;
-    uint32_t *e_version_32;
+    uint32_t e_version_32;
 
     char* e_entry;
-    uintptr_t *e_entry_ptr;
+    uint64_t e_entry_ptr;
 
     char* e_phoff;
-    uintptr_t *e_phoff_ptr;
+    uint64_t e_phoff_ptr;
 
     char* e_shoff;
-    uintptr_t *e_shoff_ptr;
+    uint64_t e_shoff_ptr;
 
     char* e_flags;
-    uint32_t *e_flags_32;
+    uint32_t e_flags_32;
 
     char* e_ehsize;
-    uint16_t *e_ehsize_16;
+    uint16_t e_ehsize_16;
 
     char* e_phentsize;
-    uint16_t *e_phentsize_16;
+    uint16_t e_phentsize_16;
 
     char* e_phnum;
-    uint16_t *e_phnum_16;
+    uint16_t e_phnum_16;
 
     char* e_shentsize;
-    uint16_t *e_shentsize_16;
+    uint16_t e_shentsize_16;
 
     char* e_shnum;
-    uint16_t *e_shnum_16;
+    uint16_t e_shnum_16;
 
     char* e_shstrndx;
-    uint16_t *e_shstrndx_16;
+    uint16_t e_shstrndx_16;
+};
+
+struct ELF_PROGRAM_HEADER
+{
+    char* header;
+    size_t header_length;
+
+    uint32_t p_type;
+    uint32_t p_flags;
+
+    char* p_offset;
+    uintptr_t p_offset_ptr;
+
+    char* p_vaddr;
+    uintptr_t p_vaddr_ptr;
+
+    char* p_paddr;
+    uintptr_t p_paddr_ptr;
+
+    char* p_filesz;
+    uintptr_t p_filesz_ptr;
+
+    char* p_memsz;
+    uintptr_t p_memsz_ptr;
+
+    char* p_align;
+    uintptr_t p_align_ptr;
 };
 
 struct ELF_OBJ
@@ -135,11 +162,13 @@ struct ELF_OBJ
     char* FILE;
     size_t FILE_LENGTH;
 
-    struct ELF_HEADER* header;
+    struct ELF_HEADER *header;
+    struct ELF_PROGRAM_HEADER* program_headers; // The length of this array is defined in header->e_phnum_16
 };
 
 struct ELF_OBJ *ParseELF(const char*, const size_t);
 struct ELF_HEADER *ParseELF_HEADER(const char*);
+struct ELF_PROGRAM_HEADER* ParseELF_PRG_HEADER(const struct ELF_HEADER*, char*);
 
 bool FileIsELF(const char*);
 

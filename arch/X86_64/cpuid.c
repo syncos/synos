@@ -5,6 +5,9 @@
 
 enum ARCH arch = X86_64;
 
+const int isLittleEndian = 1;
+const int isBigEndian = 0;
+
 #define pushaq() asm("push rax"); asm("push rcx"); asm("push rdx"); asm("push rbx"); asm("push rbp"); asm("push rsi"); asm("push rdi")
 #define popaq() asm("pop rdi"); asm("pop rsi"); asm("pop rbp"); asm("pop rbx"); asm("pop rdx"); asm("pop rcx"); asm("pop rax")
 

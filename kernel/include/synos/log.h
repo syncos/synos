@@ -1,5 +1,5 @@
-#ifndef MKOS_LOG_H
-#define MKOS_LOG_H
+#ifndef SYNOS_LOG_H
+#define SYNOS_LOG_H
 #include <stddef.h>
 
 enum Log_Level

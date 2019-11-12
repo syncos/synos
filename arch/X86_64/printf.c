@@ -5,6 +5,7 @@
 // It is recommended to debug on a system which has support for this.
 #include <synos/arch/arch.h>
 #include <synos/arch/io.h>
+#include <synos/log.h>
 #include <string.h>
 
 #define VGA_ADDRESS_D 0xB8000
@@ -41,6 +42,7 @@ uint8_t fore_color = WHITE, back_color = BLACK;
 uint16_t* display_buffer = (uint16_t*)VGA_ADDRESS_D;
 uint16_t cursor_pos = 0;
 bool cursor_enable = true;
+bool hasInit = false;
 
 uint16_t _CharEntry(unsigned char ch)
 {
@@ -71,6 +73,14 @@ uint32_t _getCursorPosX()
 uint32_t _getCursorPosY()
 {
     return cursor_pos / VGA_WIDTH_D;
+}
+void _clearScreen()
+{
+    for(uint32_t i = 0; i < VGA_WIDTH_D * VGA_HEIGHT_D; i++)
+    {
+        display_buffer[i] = _CharEntry(0);
+    }
+    _setCursorPos(0, 0);
 }
 void _scrollStep()
 {
@@ -123,7 +133,13 @@ struct PRINTF_FUNC funtiondata;
 
 struct PRINTF_FUNC* printf_init()
 {
+    pr_log(INFO, "Initializing built in x86 printf using vga textmode...");
     if (!PRINTF_FB_ENABLE) return 0;
+    if(!hasInit)
+    {
+        hasInit = true;
+        _clearScreen();
+    }
 
     funtiondata.enabled = true;
     funtiondata.printf = arch_printf;

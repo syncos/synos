@@ -1,5 +1,5 @@
-#ifndef K_MKOS_H
-#define K_MKOS_H
+#ifndef K_SYNOS_H
+#define K_SYNOS_H
 #include <synos/arch/arch.h>
 #include <synos/arch/cpu.h>
 #include <synos/arch/memory.h>

@@ -1,4 +1,5 @@
 #include <elf/elf.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 bool FileIsELF(const char* file)
@@ -57,7 +58,20 @@ struct ELF_HEADER *ParseELF_HEADER(const char* header)
     hdr->e_ehsize = &((char*)header)[e_flags_start+4];
     hdr->e_ehsize_16 = (uint16_t*)hdr->e_ehsize;
 
-    // TODO: set all fields
+    hdr->e_phentsize = &((char*)header)[e_flags_start+6];
+    hdr->e_phentsize_16  = (uint16_t*)hdr->e_phentsize;
+
+    hdr->e_phnum = &((char*)header)[e_flags_start+8];
+    hdr->e_phnum_16 = (uint16_t*)hdr->e_phnum;
+
+    hdr->e_shentsize = &((char*)header)[e_flags_start+10];
+    hdr->e_shentsize_16 = (uint16_t*)hdr->e_shentsize;
+
+    hdr->e_shnum = &((char*)header)[e_flags_start+12];
+    hdr->e_shnum_16 = (uint16_t*)hdr->e_shnum;
+
+    hdr->e_shstrndx = &((char*)header)[e_flags_start+14];
+    hdr->e_shstrndx_16 = (uint16_t*)hdr->e_shstrndx;
 
     return hdr;
 }

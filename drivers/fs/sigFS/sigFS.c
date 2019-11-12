@@ -1,6 +1,6 @@
-#include <mkos/log.h>
-#include <mkos/drivers/module.h>
-#include <mkos/drivers/fs.h>
+#include <synos/log.h>
+#include <synos/drivers/module.h>
+#include <synos/drivers/fs.h>
 
 struct Module sigFS_module;
 struct Filesystem sigFS_fs;
@@ -8,7 +8,7 @@ struct Filesystem sigFS_fs;
 int sigFS_init(int argc, char** argv)
 {
     sigFS_module.name = "sigFS";
-    sigFS_module.description = "sigFS is a filesystem specifically designed for mkos. It is designed to be simple, fast, and reliable.";
+    sigFS_module.description = "sigFS is a filesystem specifically designed for synos. It is designed to be simple, fast, and reliable.";
     sigFS_module.author = "64epicks";
     sigFS_module.licence = "MIT";
 

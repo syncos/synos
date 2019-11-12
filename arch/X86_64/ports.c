@@ -1,4 +1,4 @@
-#include <mkos/arch/io.h>
+#include <synos/arch/io.h>
 #include <inttypes.h>
 
 char  portLocked[65536];

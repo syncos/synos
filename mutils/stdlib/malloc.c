@@ -1,8 +1,8 @@
 #include <stdlib.h>
-#include <mkos/mkos.h>
+#include <synos/synos.h>
 
 #ifdef MEMSTACK_ENABLE
-#include <mkos/arch/memory.h>
+#include <synos/arch/memory.h>
 #endif
 
 void* malloc(size_t bytes)

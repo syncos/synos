@@ -3,8 +3,8 @@
 // If the system has working out-of-the-box vga support, this option should be enabled. Otherwise, the system logs and printf string 
 // will be stored and printed once full display support is initialized (after main kernel boot up).
 // It is recommended to debug on a system which has support for this.
-#include <mkos/arch/arch.h>
-#include <mkos/arch/io.h>
+#include <synos/arch/arch.h>
+#include <synos/arch/io.h>
 #include <string.h>
 
 #define VGA_ADDRESS_D 0xB8000

@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'mkos'
+project = 'Synos'
 copyright = '2019, 64epicks'
 author = '64epicks'
 

@@ -1,6 +1,6 @@
 #ifndef ARCH_MEMORY_H
 #define ARCH_MEMORY_H
-#include <mkos/arch/arch.h>
+#include <synos/arch/arch.h>
 #include <inttypes.h>
 
 struct MEMID

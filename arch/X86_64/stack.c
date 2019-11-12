@@ -1,4 +1,4 @@
-#include <mkos/arch/arch.h>
+#include <synos/arch/arch.h>
 #include <stdlib.h>
 
 uintptr_t MemStack = 0x3FFFFFFF;

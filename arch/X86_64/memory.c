@@ -1,7 +1,7 @@
-#include <mkos/mkos.h>
-#include <mkos/arch/multiboot2.h>
+#include <synos/synos.h>
+#include <synos/arch/multiboot2.h>
 #include <inttypes.h>
-#include <mkos/arch/io.h>
+#include <synos/arch/io.h>
 
 #ifndef PRINTF_FALLBACK
 const bool PRINTF_FB_ENABLE = false;

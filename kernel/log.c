@@ -1,4 +1,4 @@
-#include <mkos/mkos.h>
+#include <synos/synos.h>
 #include <stdlib.h>
 #include <inttypes.h>
 

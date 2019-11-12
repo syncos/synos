@@ -1,4 +1,4 @@
-#include <mkos/mkos.h>
+#include <synos/synos.h>
 #include <stdio.h>
 #include <string.h>
 

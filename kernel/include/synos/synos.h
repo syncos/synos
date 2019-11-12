@@ -1,9 +1,9 @@
 #ifndef K_MKOS_H
 #define K_MKOS_H
-#include <mkos/arch/arch.h>
-#include <mkos/arch/cpu.h>
-#include <mkos/arch/memory.h>
-#include <mkos/log.h>
+#include <synos/arch/arch.h>
+#include <synos/arch/cpu.h>
+#include <synos/arch/memory.h>
+#include <synos/log.h>
 
 #ifndef VERSION
 #define VERSION "NaN"

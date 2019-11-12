@@ -1,5 +1,5 @@
-#include <mkos/arch/arch.h>
-#include <mkos/arch/cpu.h>
+#include <synos/arch/arch.h>
+#include <synos/arch/cpu.h>
 #include "cpuid.h"
 #include <string.h>
 

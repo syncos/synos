@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include "impl.h"
-#include <mkos/arch/io.h>
+#include <synos/arch/io.h>
 #include "../stdio/sysio.h"
 
 int _impl_printf(const char* restrict format)

@@ -1,5 +1,5 @@
 #include <elf/elf.h>
-#include <mkos/arch/cpu.h>
+#include <synos/arch/cpu.h>
 #include <stddef.h>
 #include <stdlib.h>
 

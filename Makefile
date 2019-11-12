@@ -60,12 +60,12 @@ endif
 
 .PHONY: startM
 startM:
-	@echo -e "$(SECTIONC)[build]$(INFOC) Compiling mkos for target $(ARCH) using $(LOAD_SYSTEM)...$(NC)"
+	@echo -e "$(SECTIONC)[build]$(INFOC) Compiling synos for target $(ARCH) using $(LOAD_SYSTEM)...$(NC)"
 
 .PHONY: initimg
 initimg: $(MODULES)
-	@echo -e "$(SECTIONC)[initimg] $(LINKC)Linking object files -> $(INITIMG_PREFIX)/mkos$(NC)"
-	@$(LINK) $(LINK_ARGS) -T $(IMG_LINK) $(INITIMGOBJECTS) -o $(INITIMG_PREFIX)/mkos
+	@echo -e "$(SECTIONC)[initimg] $(LINKC)Linking object files -> $(INITIMG_PREFIX)/synos$(NC)"
+	@$(LINK) $(LINK_ARGS) -T $(IMG_LINK) $(INITIMGOBJECTS) -o $(INITIMG_PREFIX)/synos
 
 .PHONY: clean
 clean:
@@ -73,11 +73,11 @@ clean:
 
 .PHONY: grub
 grub:
-	@echo -e "$(SECTIONC)[install]$(INFOC) Installing mkos along with GRUB to iso file $(INSTALL_DRIVE)...$(NC)"
+	@echo -e "$(SECTIONC)[install]$(INFOC) Installing synos along with GRUB to iso file $(INSTALL_DRIVE)...$(NC)"
 	@mkdir -p $(ROOT_DIR)/boot/grub
 	@cp conf/GRUB2.cfg.default $(ROOT_DIR)/boot/grub/grub.cfg
-	@cp $(INITIMG_PREFIX)/mkos $(ROOT_DIR)/boot/mkos
-	@grub-mkrescue -o mkos.iso $(ROOT_DIR)
+	@cp $(INITIMG_PREFIX)/synos $(ROOT_DIR)/boot/synos
+	@grub-mkrescue -o synos.iso $(ROOT_DIR)
 	@rm -rf $(ROOT_DIR)
 	@echo -e "$(SECTIONC)[install]$(INFOC) $(INSTALL_DRIVE) created!$(NC)"
 qemu:
@@ -86,7 +86,7 @@ qemu:
 
 .PHONY: install
 install:
-	@echo -e "$(SECTIONC)[install]$(INFOC) Installing mkos to $(INSTALL_DIR)/mkos ...$(NC)"
-	@cp $(ROOT_DIR)/boot/mkos $(INSTALL_DIR)/mkos
-	@chmod 644 $(INSTALL_DIR)/mkos
+	@echo -e "$(SECTIONC)[install]$(INFOC) Installing synos to $(INSTALL_DIR)/synos ...$(NC)"
+	@cp $(ROOT_DIR)/boot/synos $(INSTALL_DIR)/synos
+	@chmod 644 $(INSTALL_DIR)/synos
 	@echo -e "$(SECTIONC)[install]$(INFOC) Done!$(NC)"

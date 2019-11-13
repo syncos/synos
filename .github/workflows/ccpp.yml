@@ -1,0 +1,20 @@
+name: synos
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: nasm
+      run: apt-get install nasm
+    - name: make
+      run: make all BUILD_TYPE=RELEASE
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: grub
+        run: apt-get install grub2 xorriso mtools
+      - name: install
+        run: make grub

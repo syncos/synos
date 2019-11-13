@@ -1,4 +1,5 @@
 #include <synos/synos.h>
+#include <synos/arch/io.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -6,7 +7,13 @@ struct SYS_STATE System;
 
 void startup()
 {
-    pr_log(INFO, "Starting version %d", VERSION);
+    // Set up logging and printf (if enabled)
+    log_init();
+    #ifdef PRINTF_FALLBACK
+    printf_init(); // Initialize printf fallback function if enabled
+    #endif
+
+    pr_log(INFO, "Starting version %d");//, VERSION);
     printf("Starting version ");
     printf(VERSION);
     printf(" ");
@@ -33,7 +40,7 @@ void startup()
 void panic(char* text)
 {
     // This is only a temporary solution. As soon as a working vga driver is working, it should be redirected there
-    pr_log(INFO, "Panic encountered! Error message: %d", text);
+    pr_log(INFO, "Panic encountered! Error message: %d");//, text);
 
     printf("The system kernel has encountered a panic!\n");
     printf("Error message: ");

@@ -3,10 +3,6 @@
 #include <inttypes.h>
 #include <synos/arch/io.h>
 
-#ifndef PRINTF_FALLBACK
-const bool PRINTF_FB_ENABLE = false;
-#endif
-
 boot_t bootdata;
 extern uint32_t mbp;
 extern uint32_t mbm;

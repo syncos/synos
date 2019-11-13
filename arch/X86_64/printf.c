@@ -6,6 +6,7 @@
 #include <synos/arch/arch.h>
 #include <synos/arch/io.h>
 #include <synos/log.h>
+#include <stdint.h>
 #include <string.h>
 
 #define VGA_ADDRESS_D 0xB8000
@@ -17,6 +18,7 @@
 #define SCANLINE_HIGH_D 1
 
 const bool PRINTF_FB_ENABLE = true;
+struct PRINTF_FUNC printf_fallback_fn;
 
 enum vga_color 
 {
@@ -129,8 +131,6 @@ int arch_printf(const char* restrict text)
     return 1;
 }
 
-struct PRINTF_FUNC funtiondata;
-
 struct PRINTF_FUNC* printf_init()
 {
     pr_log(INFO, "Initializing built in x86 printf using vga textmode...");
@@ -141,9 +141,12 @@ struct PRINTF_FUNC* printf_init()
         _clearScreen();
     }
 
-    funtiondata.enabled = true;
-    funtiondata.printf = arch_printf;
+    printf_fallback_fn.enabled = true;
+    printf_fallback_fn.printf = arch_printf;
     
-    return &funtiondata;
+    return &printf_fallback_fn;
 }
+#else
+const bool PRINTF_FB_ENABLE = false;
+struct PRINTF_FUNC printf_fallback_fn;
 #endif

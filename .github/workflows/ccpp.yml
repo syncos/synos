@@ -8,13 +8,13 @@ jobs:
     
     steps:
     - name: nasm
-      run: apt-get install nasm
+      run: sudo apt-get install nasm
     - name: make
       run: make all BUILD_TYPE=RELEASE
   install:
     runs-on: ubuntu-latest
     steps:
       - name: grub
-        run: apt-get install grub2 xorriso mtools
+        run: sudo apt-get install grub2 xorriso mtools
       - name: install
         run: make grub

@@ -1,17 +1,8 @@
-sudo: false
 language: C
 compiler:
   - gcc
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.8
-    packages:
-    - nasm
-    - grub2
-    - xorriso
-    - mtools
 script:
+  - sudo apt-get update
+  - sudo apt-get install nasm grub2 xorriso mtools
   - make all BUILD_TYPE=RELEASE
   - make grub

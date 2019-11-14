@@ -1,11 +1,17 @@
+sudo: false
 language: C
-jobs:
-  before_build:
-    - sudo apt-get update
-    - sudo apt-get install nasm
-  build:
-    - make all BUILD_TYPE=RELEASE
-  before_install:
-    - sudo apt-get install grub2 xorriso mtools
-  install:
-    - make grub
+compiler:
+  - gcc
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.8
+    packages:
+    - nasm
+    - grub2
+    - xorriso
+    - mtools
+script:
+  - make all BUILD_TYPE=RELEASE
+  - make grub

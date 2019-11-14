@@ -1,0 +1,11 @@
+language: C
+
+before_build:
+  - sudo apt-get update
+  - sudo apt-get install nasm
+build:
+  - make all BUILD_TYPE=RELEASE
+before_install:
+  - sudo apt-get install grub2 xorriso mtools
+install:
+  - make grub

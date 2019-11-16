@@ -7,7 +7,8 @@ struct MEMID
 {
     bool enabled;
 
-    uint64_t nEntries;
+    size_t nEntries;
+    uintptr_t totalSize;
     MM_entries_t* entries;
 };
 

@@ -25,6 +25,7 @@ void startup()
     }
     // Get memory info
     getMEMID(&System.memid);
+    pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
     // Set interrupt_enabled bool to false
     System.interrupt_enabled = false;
 

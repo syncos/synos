@@ -82,8 +82,8 @@ typedef struct
     uint32_t entry_size;
     uint32_t entry_version;
 
-    uint64_t sEntries;
-    uint64_t nEntries;
+    size_t sEntries;
+    size_t nEntries;
     MM_entries_t* mem_entries;
 }MM_t;
 // Boot information data structure

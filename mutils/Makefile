@@ -16,3 +16,7 @@ include mutils/elf/Makefile
 mutils: $(MUTILSOBJECTS)
 	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking mutils object files -> mutils/mutils.o$(NC)"
 	@$(LINK) -r $(MUTILSOBJECTS) -o mutils/mutils.o
+
+$(MUTDIR)/%.o: $(MUTDIR)/%.c
+	@echo -e "$(SECTIONC)[mutils] $(COMPILEC)Compiling C object $@$(NC)"
+	@$(CC) $(CC_FLAGS) $< -o $@

@@ -28,45 +28,14 @@ arch_x86_64: $(ARCHOBJECTS)
 	@echo -e "$(SECTIONC)[arch] $(LINKC)Linking arch_x86_64 object files -> arch/arch.o$(NC)"
 	@$(LINK) -r $(ARCHOBJECTS) -o $(SOURCE_DIR)/arch/arch.o
 
-$(X64DIR)/boot/init.o: $(X64DIR)/boot/init.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $(X64DIR)/boot/init.o$(NC)"
-	@$(ASM) $(ASM_FLAGS) -i $(X64DIR)/boot/ $(X64DIR)/boot/init.asm -o $(X64DIR)/boot/init.o
+$(X64DIR)/boot/%.o: $(X64DIR)/boot/%.asm
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
+	@$(ASM) $(ASM_FLAGS) -i $(X64DIR)/boot/ $< -o $@
 
-$(X64DIR)/boot/init32.o: $(X64DIR)/boot/init32.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $(X64DIR)/boot/init32.o$(NC)"
-	@$(ASM) $(ASM_FLAGS) -i $(X64DIR)/boot/ $(X64DIR)/boot/init32.asm -o $(X64DIR)/boot/init32.o
+$(X64DIR)/%.o: $(X64DIR)/%.asm
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
+	@$(ASM) $(ASM_FLAGS) $< -o $@
 
-$(X64DIR)/boot/initVar.o: $(X64DIR)/boot/initVar.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $(X64DIR)/boot/initVar.o$(NC)"
-	@$(ASM) $(ASM_FLAGS) -i $(X64DIR)/boot/ $(X64DIR)/boot/initVar.asm -o $(X64DIR)/boot/initVar.o
-
-$(X64DIR)/ports.o: $(X64DIR)/ports.c
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/ports.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(X64DIR)/ports.c -o $(X64DIR)/ports.o
-
-$(X64DIR)/cpuid.o: $(X64DIR)/cpuid.c
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/cpuid.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(X64DIR)/cpuid.c -o $(X64DIR)/cpuid.o
-
-$(X64DIR)/multiboot2.o: $(X64DIR)/multiboot2.c
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/multiboot2.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(X64DIR)/multiboot2.c -o $(X64DIR)/multiboot2.o
-$(X64DIR)/boot/multiboot2.o: $(X64DIR)/boot/multiboot2.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $(X64DIR)/boot/multiboot2.o$(NC)"
-	@$(ASM) $(ASM_FLAGS) -i $(X64DIR)/boot/ $(X64DIR)/boot/multiboot2.asm -o $(X64DIR)/boot/multiboot2.o
-
-$(X64DIR)/functions.o: $(X64DIR)/functions.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $(X64DIR)/functions.o$(NC)"
-	@$(ASM) $(ASM_FLAGS) $(X64DIR)/functions.asm -o $(X64DIR)/functions.o
-
-$(X64DIR)/memory.o: $(X64DIR)/memory.c
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/memory.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(X64DIR)/memory.c -o $(X64DIR)/memory.o
-
-$(X64DIR)/printf.o: $(X64DIR)/printf.c
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/printf.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(X64DIR)/printf.c -o $(X64DIR)/printf.o
-
-$(X64DIR)/stack.o: $(X64DIR)/stack.c
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $(X64DIR)/stack.o$(NC)"
-	@$(CC) $(CC_FLAGS) $(X64DIR)/stack.c -o $(X64DIR)/stack.o
+$(X64DIR)/%.o: $(X64DIR)/%.c
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $@$(NC)"
+	@$(CC) $(CC_FLAGS) $< -o $@

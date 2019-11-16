@@ -4,6 +4,8 @@ include .config
 MODULES=startM
 INITIMGOBJECTS=
 
+.PHONY: all
+all: initimg
 
 include arch/Makefile
 include kernel/Makefile
@@ -12,9 +14,6 @@ include mutils/Makefile
 
 # Add modules
 MODULES += kernel arch mutils drivers
-
-.PHONY: all
-all: initimg
 
 ifeq ($(BUILD_TYPE), DEBUG)
 DEBUG=TRUE

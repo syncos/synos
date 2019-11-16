@@ -15,6 +15,7 @@ void* memstck_malloc(size_t bytes)
     void* pointer = (void*)MemStack;
 
     MemStack += bytes + 1;
+    ((char*)pointer)[bytes] = 0;
 
     return pointer;
 }

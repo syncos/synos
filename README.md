@@ -1,4 +1,6 @@
 # Synos kernel
+<img src="https://travis-ci.com/syncos/synos.svg?branch=master"></img>
+
 The Synos kernel is the kernel underlying the 'Micro Kernel Operating System'. It it built to be as modular and customizable as possible. The kernel is still under heavy development. Plans is to first finish support for X86_64 platform and some basic firmware such as file systems and power management.
 # Contributing
 You are more than welcome to give feedback, report issues, and open pull requests. If you have questions, do not hesitate to contact me!

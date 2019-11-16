@@ -1,0 +1,8 @@
+language: C
+compiler:
+  - gcc
+script:
+  - sudo apt-get update
+  - sudo apt-get install nasm grub2 xorriso mtools
+  - make all BUILD_TYPE=RELEASE
+  - make grub

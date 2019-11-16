@@ -32,6 +32,7 @@ void startup()
     }
     // Get memory info
     getMEMID(&System.memid);
+    pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
     // Set interrupt_enabled bool to false
     System.interrupt_enabled = false;
 
@@ -40,7 +41,7 @@ void startup()
 void panic(char* text)
 {
     // This is only a temporary solution. As soon as a working vga driver is working, it should be redirected there
-    pr_log(INFO, "Panic encountered! Error message: %d");//, text);
+    pr_log(INFO, "Panic encountered! Error message: %d", text);
 
     printf("The system kernel has encountered a panic!\n");
     printf("Error message: ");

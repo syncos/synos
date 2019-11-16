@@ -4,7 +4,7 @@ ENTRY(_start)
 SECTIONS
 {
     . = 1M;
-    _MemStart = .;
+    PROVIDE(__KERN_MEM_START = .);
 
     .boot :
     {
@@ -31,6 +31,6 @@ SECTIONS
 		*(.bss)
 	}
 
-    _MemEnd = .;
-    _MemSize = _MemEnd - 1M;
+    PROVIDE (__KERN_MEM_END = .);
+    PROVIDE (__KERN_MEM_SIZE = __KERN_MEM_END - __KERN_MEM_START);
 }

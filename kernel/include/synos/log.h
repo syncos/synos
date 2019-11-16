@@ -16,7 +16,7 @@ enum Log_Level
 extern const enum Log_Level log_level;
 extern const bool log_level_d;
 
-void pr_log(enum Log_Level, const char*);
+void pr_log(enum Log_Level, const char*, ...);
 int log_init();
 
 #endif

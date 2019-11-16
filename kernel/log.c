@@ -50,7 +50,21 @@ int log_init()
     return 1;
 }
 
-void pr_log(enum Log_Level level, const char* text)
+void pr_log(enum Log_Level level, const char* text, ...)
 {
-    
+    if (n_free_entry == log_entries_size) panic("Allocated log space reached!");
+
+    size_t i = n_free_entry;
+    log_entries[i].length = strlen(text);
+    log_entries[i].level = level;
+
+    log_entries[i].string = (char*)malloc(log_entries[i].length);
+    memcpy(log_entries[i].string, text, log_entries[i].length+1);
+
+    if (log_entries[i].level <= log_level)
+    {
+        printf(log_entries[i].string);
+        printf("\n");
+    }
+    n_free_entry++;
 }

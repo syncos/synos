@@ -10,8 +10,7 @@ int _impl_printf(const char* restrict format)
     extern const bool PRINTF_FB_ENABLE;
     if (PRINTF_FB_ENABLE)
     {
-        struct PRINTF_FUNC* printf_data = printf_init();
-        if (printf_data->enabled) return printf_data->printf(format);
+        if (printf_fallback_fn.enabled) return printf_fallback_fn.printf(format);
         else return 0;
     }
     #endif

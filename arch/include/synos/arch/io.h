@@ -16,6 +16,7 @@ struct PRINTF_FUNC
     int (*disableCursor)();
     int (*setCursorPos)();
 };
+extern struct PRINTF_FUNC printf_fallback_fn;
 struct PRINTF_FUNC* printf_init();
 #endif
 #endif

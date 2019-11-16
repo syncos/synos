@@ -1,14 +1,20 @@
 #include <synos/arch/arch.h>
 #include <stdlib.h>
 
-uintptr_t MemStack = 0x3FFFFFFF;
+bool MemStack_init = false;
+uintptr_t MemStack;
 
 #ifdef MEMSTACK_ENABLE
 void* memstck_malloc(size_t bytes)
 {
-    void* pointer = (void*)MemStack -  bytes - 1;
+    if (!MemStack_init)
+    {
+        MemStack = _MemEnd + 64; // Padding just in case
+        MemStack_init = true;
+    }
+    void* pointer = (void*)MemStack;
 
-    MemStack -= bytes;
+    MemStack += bytes + 1;
 
     return pointer;
 }

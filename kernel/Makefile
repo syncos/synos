@@ -8,9 +8,7 @@ INITIMGOBJECTS += kernel/kernel.o
 kernel: $(KERNOBJECTS)
 	@echo -e "$(SECTIONC)[kernel] $(LINKC)Linking kernel object files -> kernel/kernel.o$(NC)"
 	@$(LINK) -r $(KERNOBJECTS) -o kernel/kernel.o
-kernel/system.o: kernel/system.c
-	@echo -e "$(SECTIONC)[kernel] $(COMPILEC)Compiling C object kernel/system.o$(NC)"
-	@$(CC) $(CC_FLAGS) kernel/system.c -o kernel/system.o
-kernel/log.o: kernel/log.c
-	@echo -e "$(SECTIONC)[kernel] $(COMPILEC)Compiling C object kernel/log.o$(NC)"
-	@$(CC) $(CC_FLAGS) kernel/log.c -o kernel/log.o
+
+kernel/%.o: kernel/%.c
+	@echo -e "$(SECTIONC)[kernel] $(COMPILEC)Compiling C object $@$(NC)"
+	@$(CC) $(CC_FLAGS) $< -o $@

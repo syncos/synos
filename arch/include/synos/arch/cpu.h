@@ -40,13 +40,6 @@ struct CPUID
 
     char fbp[1];
 };
-struct ARGS
-{
-    long arg0;
-    long arg1;
-    long arg2;
-    long arg3;
-};
 
 extern const int isLittleEndian;
 extern const int isBigEndian;

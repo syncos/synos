@@ -13,6 +13,6 @@ struct IDT_Entry
     uint32_t zero;
 };
 
-extern struct IDT_Entry* IDT;
+extern struct IDT_Entry IDT[];
 
 #endif

@@ -23,6 +23,9 @@ endif
 ifeq ($(ENABLE_MEMSTACK), TRUE)
 DEFINE_VALS += -DMEMSTACK_ENABLE
 endif
+ifdef SYSCALL_IRQ
+DEFINE_VALS += -DSYSCALL_IRQ=$(SYSCALL_IRQ)
+endif
 
 arch_x86_64: $(ARCHOBJECTS)
 	@echo -e "$(SECTIONC)[arch] $(LINKC)Linking arch_x86_64 object files -> arch/arch.o$(NC)"

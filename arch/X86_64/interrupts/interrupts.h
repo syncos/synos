@@ -11,8 +11,11 @@ struct IDT_Entry
     uint16_t offset_1;
     uint16_t offset_2;
     uint32_t zero;
-};
+}__attribute__((packed));
 
 extern struct IDT_Entry IDT[];
+
+extern const uintptr_t syscall_asm;
+extern void syscall(uint32_t id, ...);
 
 #endif

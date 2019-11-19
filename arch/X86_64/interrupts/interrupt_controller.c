@@ -8,7 +8,7 @@
 enum Interrupt_Controller_Type Controller_Type()
 {
     if ((((struct X64_CPUID*)System.cpuid.asp)->FI_EDX & CPUID_FEAT_EDX_APIC) > 0)
-        return APIC;
+        return PIC; //APIC is not currently supported
     return PIC;
 }
 

@@ -15,7 +15,7 @@ struct IDT_Entry
 
 extern struct IDT_Entry IDT[];
 
-extern const uintptr_t syscall_asm;
+extern const uintptr_t irq_syscall;
 extern void syscall(uint32_t id, ...);
 
 #endif

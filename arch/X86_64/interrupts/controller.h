@@ -12,4 +12,5 @@ int IC_INIT();
 
 void IC_SOI(uint8_t); // Interrupt Controller Start Of Interrupt
 void IC_EOI(uint8_t); // Interrupt Controller End Of Interrupt
+int IC_isSpurious(uint8_t);
 #endif

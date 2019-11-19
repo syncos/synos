@@ -1,6 +1,39 @@
 BITS 64
 section .text
 
+extern IC_SOI
+extern IC_EOI
+extern IC_isSpurious
+
+%macro PUSHA 0
+    push rax
+    push rcx
+    push rdx
+    push rbx
+    push rsp
+    push rbp
+    push rsi
+    push rdi
+%endmacro
+%macro POPA 0
+    pop rdi
+    pop rsi
+    pop rbp
+    pop rsp
+    pop rbx
+    pop rdx
+    pop rcx
+    pop rax
+%endmacro
+
+irq715_ret:
+    call IC_isSpurious
+    cmp eax, 1
+    je .J0
+    call IC_EOI
+.J0:
+    iret
+
 global interrupt_enabled
 interrupt_enabled:
     pushf
@@ -35,3 +68,120 @@ interrupt_disable:
     cli
     pop rax
     ret
+
+; Syscall
+global irq_syscall
+irq_syscall:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+; Unused interrupt
+; Interrupt functions
+irq_0:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_1:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_2:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_3:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_4:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_5:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_6:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_7:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_8:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_9:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_10:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_11:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_12:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_13:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+irq_14:
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret

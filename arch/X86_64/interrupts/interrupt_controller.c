@@ -20,3 +20,29 @@ int IC_INIT()
     }
     return PIC_init();
 }
+
+void IC_SOI(uint8_t irq)
+{
+    if (Controller_Type() == APIC)
+    {
+        return APIC_SOI(irq);
+    }
+    return PIC_SOI(irq);
+}
+void IC_EOI(uint8_t irq)
+{
+    if (Controller_Type() == APIC)
+    {
+        return APIC_EOI(irq);
+    }
+    return PIC_EOI(irq);
+}
+int IC_isSpurious(uint8_t irq)
+{
+    if (Controller_Type() == APIC)
+    {
+        return 0;
+    }
+    if (PIC_isSpurious(irq)) return 1;
+    return 0;
+}

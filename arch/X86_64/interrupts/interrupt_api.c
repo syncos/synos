@@ -19,9 +19,9 @@ int interrupt_init(uint8_t syscall_port)
     // Initialize the controller
     IC_INIT();
 
-    SYSCALL_IE.offset_0 = syscall_asm & 0xFFFF;
-    SYSCALL_IE.offset_1 = (syscall_asm & 0xFFFF0000) >> 16;
-    SYSCALL_IE.offset_2 = (syscall_asm & 0xFFFF00000000) >> 16;
+    SYSCALL_IE.offset_0 = irq_syscall & 0xFFFF;
+    SYSCALL_IE.offset_1 = (irq_syscall & 0xFFFF0000) >> 16;
+    SYSCALL_IE.offset_2 = (irq_syscall & 0xFFFF00000000) >> 16;
     
     return 0;
 }

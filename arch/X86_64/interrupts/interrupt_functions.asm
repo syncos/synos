@@ -80,105 +80,203 @@ irq_syscall:
     iret
 ; Unused interrupt
 ; Interrupt functions
-irq_0:
+; IRQ
+global irq_0
+irq_0: ; PIT timer
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_1:
+
+; Exceptions
+global int_0
+int_0:  ; Divide-by-zero
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_2:
+global int_1
+int_1:  ; Debug
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_3:
+global int_2
+int_2:  ; NMI
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_4:
+global int_3
+int_3:  ; Breakpoint
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_5:
+global int_4
+int_4:  ; Overflow
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_6:
+global int_5
+int_5:  ; BRE
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_7:
+global int_6
+int_6:  ; Invalid Opcode
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_8:
+global int_7
+int_7:  ; Device not available
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_9:
+global int_8
+int_8:  ; Double fault
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_10:
+global int_9
+int_9:  ; CSO
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_11:
+global int_10
+int_10: ; Invalid TSS
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_12:
+global int_11
+int_11: ; Segment not present
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_13:
+global int_12
+int_12: ; Stack segment fault
     PUSHA
     call IC_SOI
 
     call IC_EOI
     POPA
     iret
-irq_14:
+global int_13
+int_13: ; General Protection Fault
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_14
+int_14: ; Page fault
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_15
+int_15: ; Reserved
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_16
+int_16: ; x87 FPE
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_17
+int_17: ; Alignment check
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_18
+int_18: ; Machine check
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_19
+int_19: ; SIMD FPE
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_20
+int_20: ; Virtualization Exception
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_21_29
+int_21_29: ; Reserved
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_30
+int_30: ; Security exception
+    PUSHA
+    call IC_SOI
+
+    call IC_EOI
+    POPA
+    iret
+global int_31
+int_31: ; Reserved
     PUSHA
     call IC_SOI
 

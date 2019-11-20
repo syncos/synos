@@ -32,6 +32,25 @@ extern uintptr_t int_21_29;
 extern uintptr_t int_30;
 extern uintptr_t int_31;
 
+extern uintptr_t irq_0;
+extern uintptr_t irq_1;
+extern uintptr_t irq_2;
+extern uintptr_t irq_3;
+extern uintptr_t irq_4;
+extern uintptr_t irq_5;
+extern uintptr_t irq_6;
+extern uintptr_t irq_7;
+extern uintptr_t irq_8;
+extern uintptr_t irq_9;
+extern uintptr_t irq_10;
+extern uintptr_t irq_11;
+extern uintptr_t irq_12;
+extern uintptr_t irq_13;
+extern uintptr_t irq_14;
+extern uintptr_t irq_15;
+
+extern uintptr_t int_unused;
+
 struct IDT_Entry
 {
     uint16_t offset_0;

@@ -2,7 +2,7 @@
 #define ARCH_INTERRUPT_H
 #include <inttypes.h>
 
-extern const uint8_t syscall_irq;
+extern const uint8_t syscall_int;
 
 int interrupt_enabled(); // Returns a value >0 if true
 void interrupt_enable();

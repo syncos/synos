@@ -53,7 +53,42 @@ int interrupt_init(uint8_t syscall_port)
     for (int i = 21; i <= 29; i++) { SET_INT_ENTRY(i, int_21_29, INT_GATE_INTERRUPT); }
     SET_INT_ENTRY(30, int_30, INT_GATE_INTERRUPT);
     SET_INT_ENTRY(31, int_31, INT_GATE_INTERRUPT);
-    // Load 
+    // Set IRQs
+    SET_INT_ENTRY(32+0,  irq_0,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+1,  irq_1,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+2,  irq_2,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+3,  irq_3,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+4,  irq_4,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+5,  irq_5,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+6,  irq_6,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+7,  irq_7,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+8,  irq_8,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+9,  irq_9,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+10, irq_10, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+11, irq_11, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+12, irq_12, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+13, irq_13, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+14, irq_14, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(32+15, irq_15, INT_GATE_INTERRUPT);
+
+    for (int i = 32+16; i < 256; i++)
+    {
+        if (i == syscall_int) continue;
+
+        SET_INT_ENTRY(i, int_unused, INT_GATE_INTERRUPT);
+    }
+
+    struct
+    {
+        uint16_t size; 
+        uintptr_t offset;
+    }__attribute__((packed)) IDTR;
+
+    IDTR.size = (8 * 256) - 1;
+    IDTR.offset = (uintptr_t)&IDT;
+    extern void IDT_load(void* rdi);
+    IDT_load(&IDTR);
+    pr_log(INFO, "IDT loaded");
 
     // Set controller
     Interrupt_Info.controller = Controller_Type();

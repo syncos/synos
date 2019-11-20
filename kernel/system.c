@@ -1,4 +1,5 @@
 #include <synos/synos.h>
+#include <synos/arch/interrupt.h>
 #include <synos/arch/io.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,6 +8,10 @@ struct SYS_STATE System;
 
 void startup()
 {
+    // Set interrupt_enabled bool to false
+    if (interrupt_enabled()) interrupt_disable();
+    System.interrupt_enabled = false;
+
     // Set up logging and printf (if enabled)
     log_init();
     #ifdef PRINTF_FALLBACK
@@ -33,8 +38,9 @@ void startup()
     // Get memory info
     getMEMID(&System.memid);
     pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
-    // Set interrupt_enabled bool to false
-    System.interrupt_enabled = false;
+
+    // Initialize interrupts
+    interrupt_init(syscall_int);
 
     panic("System reached end of startup function, something has gone wrong.");
 }

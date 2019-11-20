@@ -33,12 +33,18 @@ uint8_t inb(uint32_t port)
     port_lock(port);
     uint8_t ret;
     asm volatile ("inb al, dx" : "=r" (ret): "r" (port));
-    return ret;
     port_unlock(port);
+    return ret;
 }
 void outb(uint32_t port, uint8_t value)
 {
     port_lock(port);
     asm volatile ("outb dx, al": :"d" (port), "a" (value));
     port_unlock(port);
+}
+void io_wait()
+{
+    port_lock(0x80); // 0x80 is a free port to use
+    asm volatile ("outb dx, al": :"d" (0x80), "a" (0));
+    port_unlock(0x80);
 }

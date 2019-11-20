@@ -2,7 +2,7 @@ X64DIR=$(ARCHDIR)/X86_64
 include $(X64DIR)/.config
 
 IMG_LINK+=$(X64DIR)/initIMG.ld
-ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o $(X64DIR)/stack.o
+ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o $(X64DIR)/stack.o $(X64DIR)/gdt.o
 
 PF_ARGS=
 
@@ -22,6 +22,9 @@ endif
 endif
 ifeq ($(ENABLE_MEMSTACK), TRUE)
 DEFINE_VALS += -DMEMSTACK_ENABLE
+endif
+ifdef SYSCALL_INT
+DEFINE_VALS += -DSYSCALL_INT=$(SYSCALL_INT)
 endif
 
 arch_x86_64: $(ARCHOBJECTS)

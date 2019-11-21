@@ -1,2 +1,23 @@
 VERSION="0.1"
 VERSION_NAME="ALPHA"
+
+# Paths
+SOURCE_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+ROOT_DIR=rootdir
+IMG_LINK=
+INSTALL_DRIVE=synos.iso # Default option
+INSTALL_DIR=/boot
+INITIMG_PREFIX=.
+
+# Color codes (for print)
+RED=\033[1;31m
+GREEN=\033[1;32m
+WHITE=\033[1;37m
+GRAY=\033[0;37m
+NC=\033[0m
+
+COMPILEC=$(GREEN)
+LINKC=$(NC)
+ERRORC=$(RED)
+SECTIONC=$(WHITE)
+INFOC=$(WHITE)

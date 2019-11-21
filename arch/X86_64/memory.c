@@ -3,10 +3,6 @@
 #include <inttypes.h>
 #include <synos/arch/io.h>
 
-#ifndef PRINTF_FALLBACK
-const bool PRINTF_FB_ENABLE = false;
-#endif
-
 extern volatile uintptr_t __KERN_MEM_START[];
 extern volatile uintptr_t __KERN_MEM_END[];
 extern volatile uintptr_t __KERN_MEM_SIZE[];

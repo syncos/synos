@@ -14,6 +14,8 @@ struct MEMID
 
 struct MEMID* getMEMID(struct MEMID*);
 
+int memc_init();
+
 #ifdef MEMSTACK_ENABLE
 extern void* memstck_malloc(size_t bytes);
 #endif

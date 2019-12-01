@@ -30,12 +30,15 @@ Running
 Currently, the only automated way to install synos is to install synos to an iso file along with grub:
 
     make grub INSTALL_DRIVE=...
+
 This will create or overwrite `INSTALL_DRIVE` with the kernel. If no `INSTALL_DRIVE` is provided, the script will default back to `synos.iso`.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   kernel/index.rst
+   drivers/index.rst
 
 Indices and tables
 ==================

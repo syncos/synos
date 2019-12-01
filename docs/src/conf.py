@@ -22,7 +22,7 @@ copyright = '2019, 64epicks'
 author = '64epicks'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '0.1 ALPHA'
 
 
 # -- General configuration ---------------------------------------------------

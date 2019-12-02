@@ -54,4 +54,7 @@ typedef char bool;
 #define true 1
 #define false 0
 
+// Register wide typedef
+typedef unsigned long uintreg_t;
+
 #endif /* _STDINT_H */

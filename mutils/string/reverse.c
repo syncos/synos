@@ -8,9 +8,9 @@ int reverse(char* format)
      
     for (size_t i = 0; i < swN; i++)
     {
-        char save = format[len - 1 - i];
-        format[len - 1 - i] = format[i];
-        format[i] = save;
+        format[len - 1 - i] = format[len - 1 - i] ^ format[i];
+        format[i] = format[len - 1 - i] ^ format[i];
+        format[len - 1 - i] = format[len - 1 - i] ^ format[i];
     }
     
     return 1;

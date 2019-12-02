@@ -1,5 +1,6 @@
 #include <synos/synos.h>
 #include <synos/arch/interrupt.h>
+#include <synos/syscall.h>
 #include <synos/arch/io.h>
 #include <stdio.h>
 #include <string.h>
@@ -40,7 +41,14 @@ void startup()
     pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
 
     // Initialize interrupts
-    interrupt_init(syscall_int);
+    interrupt_init();
+
+    // Load syscalls
+    syscall_init();
+
+    // Enable interrupts
+    // Interrupts not fully implemented yet
+    // interrupt_enable();
 
     panic("System reached end of startup function, something has gone wrong.");
 }

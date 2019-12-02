@@ -7,6 +7,8 @@
 #define INT_GATE_ABORT      INT_GATE_FAULT
 #define INT_GATE_TRAP       0b10001111
 
+extern const uint8_t syscall_int;
+
 extern uintptr_t int_0;
 extern uintptr_t int_1;
 extern uintptr_t int_2;
@@ -58,7 +60,7 @@ struct IDT_Entry
     uint8_t  ist;
     uint8_t  attr;
     uint16_t offset_1;
-    uint16_t offset_2;
+    uint32_t offset_2;
     uint32_t zero;
 }__attribute__((packed));
 

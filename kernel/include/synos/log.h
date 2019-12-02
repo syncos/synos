@@ -2,6 +2,7 @@
 #define SYNOS_LOG_H
 #include <stddef.h>
 
+#define DEFAULT_LOG_LEVEL ERROR
 #define DEFAULT_LOG_ENTRY_SIZE 512
 
 enum Log_Level

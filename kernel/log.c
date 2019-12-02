@@ -11,15 +11,15 @@ const bool log_level_d = true; // LOGLEVEL was not defined
 #else
 const bool log_level_d = false;
 #if LOGLEVEL == 0
-const enum Log_Level log_level = 0;
+const enum Log_Level log_level = FATAL;
 #elif LOGLEVEL == 1
-const enum Log_Level log_level = 1;
+const enum Log_Level log_level = CRITICAL;
 #elif LOGLEVEL == 2
-const enum Log_Level log_level = 2;
+const enum Log_Level log_level = ERROR;
 #elif LOGLEVEL == 3
-const enum Log_Level log_level = 3;
+const enum Log_Level log_level = WARNING;
 #else 
-const enum Log_Level log_level = 4;
+const enum Log_Level log_level = INFO;
 #endif
 #endif
 #ifndef LOGENTRY_SIZE
@@ -47,6 +47,11 @@ int log_init()
     if (log_entries == NULL) return 0;
     log_enable = true;
     
+    if (log_level_d)
+    {
+        pr_log(WARNING, "Log level not set during compile time. Please set it by defining 'LOGLEVEL=...' in .config. Falling back to default log level %s...", STR(DEFAULT_LOG_LEVEL));
+    }
+
     return 1;
 }
 

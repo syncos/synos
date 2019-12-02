@@ -1,3 +1,4 @@
+#include <stdint.h>
 #ifdef PRINTF_FALLBACK
 // Fallback stdio functions
 // If the system has working out-of-the-box vga support, this option should be enabled. Otherwise, the system logs and printf string 
@@ -6,7 +7,6 @@
 #include <synos/arch/arch.h>
 #include <synos/arch/io.h>
 #include <synos/log.h>
-#include <stdint.h>
 #include <string.h>
 
 #define VGA_ADDRESS_D 0xB8000
@@ -148,5 +148,4 @@ struct PRINTF_FUNC* printf_init()
 }
 #else
 const bool PRINTF_FB_ENABLE = false;
-struct PRINTF_FUNC printf_fallback_fn;
 #endif

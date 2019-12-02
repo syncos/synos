@@ -1,32 +1,35 @@
 #include <synos/synos.h>
+#include <synos/syscall.h>
 #include <synos/arch/interrupt.h>
 #include "../memory.h"
 #include "interrupts.h"
 #include "controller.h"
 #include <stdlib.h>
+#include <string.h>
 
 struct IDT_Entry IDT[256]; // Set the IDT table to a static size, since malloc can sometimes return NULL and that would cause a panic.
 struct IDT_Entry SYSCALL_IE;
 
-#define SET_INT_ENTRY(i, addr, attri) IDT[i].offset_0 = addr & 0xFFFF; IDT[i].offset_1 = (addr & 0xFFFF0000) >> 16; IDT[i].offset_2 = (addr & 0xFFFF00000000) >> 16; IDT[i].selector = GDT_KERN_CODE_SELECTOR; IDT[i].ist = 0; IDT[i].attr = attri; IDT[i].zero = 0
+#define SET_INT_ENTRY(i, addr, attri) IDT[i].offset_0 = addr & 0xFFFF; IDT[i].offset_1 = (addr & 0xFFFF0000) >> 16; IDT[i].offset_2 = (addr & 0xFFFFFFFF00000000) >> 32; IDT[i].selector = GDT_KERN_CODE_SELECTOR; IDT[i].ist = 0; IDT[i].attr = attri; IDT[i].zero = 0
 
 struct
 {
     enum Interrupt_Controller_Type controller;
 }Interrupt_Info;
 
-int interrupt_init(uint8_t syscall_port)
+int interrupt_init()
 {
-    if (syscall_port <= 0x40)
+    memset(&IDT, 0, 256 * 8);
+    if (syscall_int <= 0x40)
         panic("Invalid syscall interrupt id");
-    IDT[syscall_port].offset_0 = irq_syscall & 0xFFFF;
-    IDT[syscall_port].offset_1 = (irq_syscall & 0xFFFF0000) >> 16;
-    IDT[syscall_port].offset_2 = (irq_syscall & 0xFFFF00000000) >> 16;
+    IDT[syscall_int].offset_0 = irq_syscall & 0xFFFF;
+    IDT[syscall_int].offset_1 = (irq_syscall & 0xFFFF0000) >> 16;
+    IDT[syscall_int].offset_2 = (irq_syscall & 0xFFFFFFFF00000000) >> 32;
 
-    IDT[syscall_port].selector = GDT_KERN_CODE_SELECTOR;
-    IDT[syscall_port].ist      = 0;
-    IDT[syscall_port].attr     = 0b11101110;
-    IDT[syscall_port].zero     = 0;
+    IDT[syscall_int].selector = GDT_KERN_CODE_SELECTOR;
+    IDT[syscall_int].ist      = 0;
+    IDT[syscall_int].attr     = 0b11101110;
+    IDT[syscall_int].zero     = 0;
 
     // Load every CPU exception interrupt
     SET_INT_ENTRY(0,  int_0,  INT_GATE_FAULT);
@@ -84,7 +87,7 @@ int interrupt_init(uint8_t syscall_port)
         uintptr_t offset;
     }__attribute__((packed)) IDTR;
 
-    IDTR.size = (8 * 256) - 1;
+    IDTR.size = 2048 - 1;
     IDTR.offset = (uintptr_t)&IDT;
     extern void IDT_load(void* rdi);
     IDT_load(&IDTR);

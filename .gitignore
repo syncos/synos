@@ -4,4 +4,4 @@
 rootdir/
 build/
 .vscode/
-synos
+/synos

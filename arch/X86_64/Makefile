@@ -42,3 +42,23 @@ $(X64DIR)/%.o: $(X64DIR)/%.asm
 $(X64DIR)/%.o: $(X64DIR)/%.c
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $@$(NC)"
 	@$(CC) $(CC_FLAGS) $< -o $@
+
+.PHONY: grub
+grub:
+	@echo -e "$(SECTIONC)[install]$(INFOC) Installing synos along with GRUB to iso file $(INSTALL_DRIVE)...$(NC)"
+	@mkdir -p $(ROOT_DIR)/boot/grub
+	@cp conf/GRUB2.cfg.default $(ROOT_DIR)/boot/grub/grub.cfg
+	@cp $(INITIMG_PREFIX)/synos $(ROOT_DIR)/boot/synos
+	@grub-mkrescue -o synos.iso $(ROOT_DIR)
+	@rm -rf $(ROOT_DIR)
+	@echo -e "$(SECTIONC)[install]$(INFOC) $(INSTALL_DRIVE) created!$(NC)"
+.PHONY: qemu
+qemu:
+	@echo -e "$(SECTIONC)[qemu]$(INFOC) Starting qemu with command: qemu-system-x86_64 -cpu qemu64 -display gtk -smp 2 -m 2G -vga std -cdrom $(INSTALL_DRIVE) -gdb tcp::9000 -S -monitor stdio $(QEMU_ARGS)$(NC)"
+	@qemu-system-x86_64 -cpu qemu64 -display gtk -smp 2 -m 2G -vga std -cdrom $(INSTALL_DRIVE) -gdb tcp::9000 -S -monitor stdio
+.PHONY: install
+install:
+	@echo -e "$(SECTIONC)[install]$(INFOC) Installing synos to $(INSTALL_DIR)/synos ...$(NC)"
+	@cp $(ROOT_DIR)/boot/synos $(INSTALL_DIR)/synos
+	@chmod 644 $(INSTALL_DIR)/synos
+	@echo -e "$(SECTIONC)[install]$(INFOC) Done!$(NC)"

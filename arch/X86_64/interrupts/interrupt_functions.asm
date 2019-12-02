@@ -37,7 +37,7 @@ irq715_ret:
     je .J0
     
 .J0:
-    iret
+    iretq
 
 global interrupt_enabled
 interrupt_enabled:
@@ -47,49 +47,29 @@ interrupt_enabled:
     ret
 global interrupt_enable
 interrupt_enable:
-    push rax
-    pushf
-    pop rax
-    and rax, (1 << 9)
-    cmp rax, 0
-    je .J0
-    pop rax
-    ret
-.J0:
+    cli
     sti
-    pop rax
     ret
 global interrupt_disable
 interrupt_disable:
-    push rax
-    pushf
-    pop rax
-    and rax, (1 << 9)
-    cmp rax, 0
-    jne .J0
-    pop rax
-    ret
-.J0:
     cli
-    pop rax
     ret
 
 ; Syscall
 global irq_syscall
 irq_syscall:
     PUSHA
-    call IC_SOI
-
-    call IC_EOI
+    extern syscall_c
+    call syscall_c
     POPA
-    iret
+    iretq
 ; Unused interrupt
 global int_unused
 int_unused:
     PUSHA
 
     POPA
-    iret
+    iretq
 ; Interrupt functions
 ; IRQ
 global irq_0
@@ -99,7 +79,7 @@ irq_0: ; PIT timer
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_1
 irq_1: ; Keyboard interrupt
     PUSHA
@@ -108,7 +88,7 @@ irq_1: ; Keyboard interrupt
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_2
 irq_2: ; Cascade
     PUSHA
@@ -116,7 +96,7 @@ irq_2: ; Cascade
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_3
 irq_3: ; COM2
     PUSHA
@@ -124,7 +104,7 @@ irq_3: ; COM2
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_4
 irq_4: ; COM1
     PUSHA
@@ -132,7 +112,7 @@ irq_4: ; COM1
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_5
 irq_5: ; LPT2
     PUSHA
@@ -140,7 +120,7 @@ irq_5: ; LPT2
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_6
 irq_6: ; Floppy
     PUSHA
@@ -148,7 +128,7 @@ irq_6: ; Floppy
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_7
 irq_7: ; LPT1 / Spurious (if pic)
     PUSHA
@@ -160,10 +140,10 @@ irq_7: ; LPT1 / Spurious (if pic)
 
     call IC_EOI
     POPA
-    iret
+    iretq
 .J0:
     POPA
-    iret
+    iretq
 global irq_8
 irq_8: ; CMOS clock
     PUSHA
@@ -171,7 +151,7 @@ irq_8: ; CMOS clock
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_9
 irq_9: ; Free
     PUSHA
@@ -179,7 +159,7 @@ irq_9: ; Free
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_10
 irq_10: ; Free
     PUSHA
@@ -187,7 +167,7 @@ irq_10: ; Free
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_11
 irq_11: ; Free
     PUSHA
@@ -195,7 +175,7 @@ irq_11: ; Free
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_12
 irq_12: ; PS2 Mouse
     PUSHA
@@ -203,7 +183,7 @@ irq_12: ; PS2 Mouse
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_13
 irq_13: ; FPU
     PUSHA
@@ -211,7 +191,7 @@ irq_13: ; FPU
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_14
 irq_14: ; Primary ATA
     PUSHA
@@ -219,7 +199,7 @@ irq_14: ; Primary ATA
 
     call IC_EOI
     POPA
-    iret
+    iretq
 global irq_15
 irq_15: ; Secondary ATA / Spurious
     PUSHA
@@ -231,12 +211,12 @@ irq_15: ; Secondary ATA / Spurious
 
     call IC_EOI
     POPA
-    iret
+    iretq
 .J0:
     mov al, 0x20
     out 0x20, al ; EOI PIC master
     POPA
-    iret
+    iretq
 
 ; Exceptions
 global int_0
@@ -245,7 +225,7 @@ int_0:  ; Divide-by-zero
 
     
     POPA
-    iret
+    iretq
 global int_1
 int_1:  ; Debug
     PUSHA
@@ -253,7 +233,7 @@ int_1:  ; Debug
 
     
     POPA
-    iret
+    iretq
 global int_2
 int_2:  ; NMI
     PUSHA
@@ -261,7 +241,7 @@ int_2:  ; NMI
 
     
     POPA
-    iret
+    iretq
 global int_3
 int_3:  ; Breakpoint
     PUSHA
@@ -269,7 +249,7 @@ int_3:  ; Breakpoint
 
     
     POPA
-    iret
+    iretq
 global int_4
 int_4:  ; Overflow
     PUSHA
@@ -277,7 +257,7 @@ int_4:  ; Overflow
 
     
     POPA
-    iret
+    iretq
 global int_5
 int_5:  ; BRE
     PUSHA
@@ -285,7 +265,7 @@ int_5:  ; BRE
 
     
     POPA
-    iret
+    iretq
 global int_6
 int_6:  ; Invalid Opcode
     PUSHA
@@ -293,7 +273,7 @@ int_6:  ; Invalid Opcode
 
     
     POPA
-    iret
+    iretq
 global int_7
 int_7:  ; Device not available
     PUSHA
@@ -301,7 +281,7 @@ int_7:  ; Device not available
 
     
     POPA
-    iret
+    iretq
 global int_8
 int_8:  ; Double fault
     PUSHA
@@ -309,7 +289,7 @@ int_8:  ; Double fault
 
     
     POPA
-    iret
+    iretq
 global int_9
 int_9:  ; CSO
     PUSHA
@@ -317,7 +297,7 @@ int_9:  ; CSO
 
     
     POPA
-    iret
+    iretq
 global int_10
 int_10: ; Invalid TSS
     PUSHA
@@ -325,7 +305,7 @@ int_10: ; Invalid TSS
 
     
     POPA
-    iret
+    iretq
 global int_11
 int_11: ; Segment not present
     PUSHA
@@ -333,7 +313,7 @@ int_11: ; Segment not present
 
     
     POPA
-    iret
+    iretq
 global int_12
 int_12: ; Stack segment fault
     PUSHA
@@ -341,7 +321,7 @@ int_12: ; Stack segment fault
 
     
     POPA
-    iret
+    iretq
 global int_13
 int_13: ; General Protection Fault
     PUSHA
@@ -349,7 +329,7 @@ int_13: ; General Protection Fault
 
     
     POPA
-    iret
+    iretq
 global int_14
 int_14: ; Page fault
     PUSHA
@@ -357,7 +337,7 @@ int_14: ; Page fault
 
     
     POPA
-    iret
+    iretq
 global int_15
 int_15: ; Reserved
     PUSHA
@@ -365,7 +345,7 @@ int_15: ; Reserved
 
     
     POPA
-    iret
+    iretq
 global int_16
 int_16: ; x87 FPE
     PUSHA
@@ -373,7 +353,7 @@ int_16: ; x87 FPE
 
     
     POPA
-    iret
+    iretq
 global int_17
 int_17: ; Alignment check
     PUSHA
@@ -381,7 +361,7 @@ int_17: ; Alignment check
 
     
     POPA
-    iret
+    iretq
 global int_18
 int_18: ; Machine check
     PUSHA
@@ -389,7 +369,7 @@ int_18: ; Machine check
 
     
     POPA
-    iret
+    iretq
 global int_19
 int_19: ; SIMD FPE
     PUSHA
@@ -397,7 +377,7 @@ int_19: ; SIMD FPE
 
     
     POPA
-    iret
+    iretq
 global int_20
 int_20: ; Virtualization Exception
     PUSHA
@@ -405,7 +385,7 @@ int_20: ; Virtualization Exception
 
     
     POPA
-    iret
+    iretq
 global int_21_29
 int_21_29: ; Reserved
     PUSHA
@@ -413,7 +393,7 @@ int_21_29: ; Reserved
 
     
     POPA
-    iret
+    iretq
 global int_30
 int_30: ; Security exception
     PUSHA
@@ -421,7 +401,7 @@ int_30: ; Security exception
 
     
     POPA
-    iret
+    iretq
 global int_31
 int_31: ; Reserved
     PUSHA
@@ -429,4 +409,4 @@ int_31: ; Reserved
 
     
     POPA
-    iret
+    iretq

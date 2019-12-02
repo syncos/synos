@@ -13,6 +13,8 @@
 
 #include <stddef.h> /* for NULL and size_t */
 
+#define STR(x) #x
+
 #ifdef __cplusplus
 extern "C" {
 #endif

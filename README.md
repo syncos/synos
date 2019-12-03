@@ -7,7 +7,9 @@ You are more than welcome to give feedback, report issues, and open pull request
 # Configuring/Building
 The `.config` file consists of all important variables for tweaking the kernel. The default values works for most user, although if you are planning on using it for other reasons then to reprogram it, it is recommended to set `DEBUG` to `FALSE` and `OPTIMIZE` to `TRUE`. The recommended compiler to use is gcc since it is proven to work, but it is still possible to change the compiler to for example clang and other binaries like the assembly compiler. 
 
-With the default config, the binaries needed to build synos is: `make`, `gcc`, `g++`, `nasm`, and `ld` (if you are compiling on the same platform as the target, if not then you'll have to configure the config to use a cross-compiler). To be able to install synos to an iso file with grub, `grub`, `xorriso`, and `mtools` is also needed.
+Default config files exist in the `conf/` directory. You need to copy the correct configuration to .config for the kernel to compile.
+
+With the default config for X86_64 (`cp conf/X86_64.config .config`), the binaries needed to build synos is: `make`, `gcc`, `g++`, `nasm`, and `ld` (if you are compiling on the same platform as the target, if not then you'll have to configure the config to use a cross-compiler). To be able to install synos to an iso file with grub, `grub`, `xorriso`, and `mtools` is also needed.
 
 To compile the selected targets in `.config`, run:
 

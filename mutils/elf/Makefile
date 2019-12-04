@@ -7,4 +7,4 @@ ELFOBJECTS += $(ELFDIR)/elf.o $(ELFDIR)/header.o
 
 $(MUTDIR)/elf.o: $(ELFOBJECTS)
 	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking elf object files -> $(MUTDIR)/elf.o$(NC)"
-	@$(LINK) -r $(ELFOBJECTS) -o $(MUTDIR)/elf.o
+	@$(LINK) $(LINK_ARCH) -r $(ELFOBJECTS) -o $(MUTDIR)/elf.o

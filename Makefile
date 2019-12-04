@@ -41,7 +41,7 @@ ifeq ($(OPTIMIZE), TRUE)
 CC_FLAGS += -O2
 CXX_FLAGS += -O2
 ASM_FLAGS += -O2
-LINK_FLAGS += -O
+LINK_FLAGS += -O2
 DEFINE_VALS += -DOPTIMIZE
 endif
 ifeq ($(BITS), 64)
@@ -64,8 +64,10 @@ startM:
 .PHONY: initimg
 initimg: $(MODULES)
 	@echo -e "$(SECTIONC)[initimg] $(LINKC)Linking object files -> $(INITIMG_PREFIX)/synos$(NC)"
-	@$(LINK) $(LINK_ARGS) -T $(IMG_LINK) $(INITIMGOBJECTS) -o $(INITIMG_PREFIX)/synos
+	@$(LINK) -T $(IMG_LINK) $(INITIMGOBJECTS) -o $(INITIMG_PREFIX)/synos $(LINK_FLAGS)
 
 .PHONY: clean
 clean:
 	@find . -name "*.o" -type f -delete
+	@rm -f synos
+	@rm -f synos.iso

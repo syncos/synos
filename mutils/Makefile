@@ -15,7 +15,7 @@ include mutils/elf/Makefile
 .PHONY: mutils
 mutils: $(MUTILSOBJECTS)
 	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking mutils object files -> mutils/mutils.o$(NC)"
-	@$(LINK) -r $(MUTILSOBJECTS) -o mutils/mutils.o
+	@$(LINK) $(LINK_ARCH) -r $(MUTILSOBJECTS) -o mutils/mutils.o
 
 $(MUTDIR)/%.o: $(MUTDIR)/%.c
 	@echo -e "$(SECTIONC)[mutils] $(COMPILEC)Compiling C object $@$(NC)"

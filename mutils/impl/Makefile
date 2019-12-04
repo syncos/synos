@@ -7,4 +7,4 @@ IMPLOBJECTS=$(IMPLDIR)/stdio.o
 
 $(MUTDIR)/impl.o: $(IMPLOBJECTS)
 	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking impl object files -> $(MUTDIR)/impl.o$(NC)"
-	@$(LINK) -r $(IMPLOBJECTS) -o $(MUTDIR)/impl.o
+	@$(LINK) $(LINK_ARCH) -r $(IMPLOBJECTS) -o $(MUTDIR)/impl.o

@@ -7,4 +7,4 @@ STDIOOBJECTS += $(STDIODIR)/stdin.o $(STDIODIR)/stdout.o $(STDIODIR)/stderr.o $(
 
 $(MUTDIR)/stdio.o: $(STDIOOBJECTS)
 	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking stdio object files -> $(MUTDIR)/stdio.o$(NC)"
-	@$(LINK) -r $(STDIOOBJECTS) -o $(MUTDIR)/stdio.o
+	@$(LINK) $(LINK_ARCH) -r $(STDIOOBJECTS) -o $(MUTDIR)/stdio.o

@@ -7,7 +7,7 @@ INITIMGOBJECTS += kernel/kernel.o
 .PHONY: kernel
 kernel: $(KERNOBJECTS)
 	@echo -e "$(SECTIONC)[kernel] $(LINKC)Linking kernel object files -> kernel/kernel.o$(NC)"
-	@$(LINK) -r $(KERNOBJECTS) -o kernel/kernel.o
+	@$(LINK) $(LINK_ARCH) -r $(KERNOBJECTS) -o kernel/kernel.o
 
 kernel/%.o: kernel/%.c
 	@echo -e "$(SECTIONC)[kernel] $(COMPILEC)Compiling C object $@$(NC)"

@@ -1,10 +1,10 @@
 X64DIR=$(ARCHDIR)/X86_64
 include $(X64DIR)/.config
 
+DEFINE_VALS += -D_X86_64_
+
 IMG_LINK+=$(X64DIR)/initIMG.ld
 ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o $(X64DIR)/stack.o $(X64DIR)/gdt.o
-
-PF_ARGS=
 
 include $(X64DIR)/interrupts/Makefile
 
@@ -27,9 +27,9 @@ ifdef SYSCALL_INT
 DEFINE_VALS += -DSYSCALL_INT=$(SYSCALL_INT)
 endif
 
-arch_x86_64: $(ARCHOBJECTS)
+X86_64: $(ARCHOBJECTS)
 	@echo -e "$(SECTIONC)[arch] $(LINKC)Linking arch_x86_64 object files -> arch/arch.o$(NC)"
-	@$(LINK) -r $(ARCHOBJECTS) -o $(SOURCE_DIR)/arch/arch.o
+	@$(LINK) $(LINK_ARCH) -r $(ARCHOBJECTS) -o $(SOURCE_DIR)/arch/arch.o
 
 $(X64DIR)/boot/%.o: $(X64DIR)/boot/%.asm
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"

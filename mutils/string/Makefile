@@ -7,4 +7,4 @@ STRINGOBJECTS=$(STRINGDIR)/strlen.o $(STRINGDIR)/tostring.o $(STRINGDIR)/reverse
 
 $(MUTDIR)/string.o: $(STRINGOBJECTS)
 	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking stdio object files -> $(MUTDIR)/string.o$(NC)"
-	@$(LINK) -r $(STRINGOBJECTS) -o $(MUTDIR)/string.o
+	@$(LINK) $(LINK_ARCH) -r $(STRINGOBJECTS) -o $(MUTDIR)/string.o

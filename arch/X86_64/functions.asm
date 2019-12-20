@@ -57,3 +57,13 @@ CPUID_Info:
     pop rdx
     mov rax, rdi
     ret
+global RFLAGS
+RFLAGS:
+    pushfq
+    pop rax
+    ret
+
+global gdt_switch
+gdt_switch:
+    lgdt [rdi]
+    ret

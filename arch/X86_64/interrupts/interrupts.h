@@ -1,74 +1,63 @@
-#ifndef X86_64_INTERRUPTS_H
-#define X86_64_INTERRUPTS_H
+#ifndef X64_INTERRUPTS_H
+#define X64_INTERRUPTS_H
 #include <inttypes.h>
+
+#define SYSCALL_ISR_DEFAULT 0x80
 
 #define INT_GATE_FAULT      0b10001110
 #define INT_GATE_INTERRUPT  INT_GATE_FAULT
 #define INT_GATE_ABORT      INT_GATE_FAULT
 #define INT_GATE_TRAP       0b10001111
+#define INT_GATE_SYSCALL    0b11101110
 
-extern const uint8_t syscall_int;
-
-extern const uint8_t IRQ_start;
-
-extern uintptr_t int_0;
-extern uintptr_t int_1;
-extern uintptr_t int_2;
-extern uintptr_t int_3;
-extern uintptr_t int_4;
-extern uintptr_t int_5;
-extern uintptr_t int_6;
-extern uintptr_t int_7;
-extern uintptr_t int_8;
-extern uintptr_t int_9;
-extern uintptr_t int_10;
-extern uintptr_t int_11;
-extern uintptr_t int_12;
-extern uintptr_t int_13;
-extern uintptr_t int_14;
-extern uintptr_t int_15;
-extern uintptr_t int_16;
-extern uintptr_t int_17;
-extern uintptr_t int_18;
-extern uintptr_t int_19;
-extern uintptr_t int_20;
-extern uintptr_t int_21_29;
-extern uintptr_t int_30;
-extern uintptr_t int_31;
-
-extern uintptr_t irq_0;
-extern uintptr_t irq_1;
-extern uintptr_t irq_2;
-extern uintptr_t irq_3;
-extern uintptr_t irq_4;
-extern uintptr_t irq_5;
-extern uintptr_t irq_6;
-extern uintptr_t irq_7;
-extern uintptr_t irq_8;
-extern uintptr_t irq_9;
-extern uintptr_t irq_10;
-extern uintptr_t irq_11;
-extern uintptr_t irq_12;
-extern uintptr_t irq_13;
-extern uintptr_t irq_14;
-extern uintptr_t irq_15;
-
-extern uintptr_t int_unused;
+enum IRQ_CONTROLLERS
+{
+    PIC,
+    APIC
+};
 
 struct IDT_Entry
 {
-    uint16_t offset_0;
-    uint16_t selector;
-    uint8_t  ist;
-    uint8_t  attr;
     uint16_t offset_1;
-    uint32_t offset_2;
-    uint32_t zero;
+    uint16_t selector;
+    uint8_t zero0;
+    uint8_t type_attr;
+    uint16_t offset_2;
+    uint32_t offset_3;
+    uint32_t zero1;
+}__attribute__((packed));
+struct IDT_Desc
+{
+    uint16_t limit;
+    uint64_t offset;
 }__attribute__((packed));
 
-extern struct IDT_Entry IDT[];
+extern const uint8_t IRQ_start;
+extern const uint8_t syscall_isr;
 
-extern const uintptr_t irq_syscall;
-extern void syscall(uint32_t id, ...);
+extern struct IDT_Entry IDT[];
+extern struct IDT_Desc IDTR;
+
+enum IRQ_CONTROLLERS IC_Controller();
+int IC_Configure(enum IRQ_CONTROLLERS controller);
+
+extern void syscall_fn();
+
+extern void irq_0();
+extern void irq_1();
+extern void irq_2();
+extern void irq_3();
+extern void irq_4();
+extern void irq_5();
+extern void irq_6();
+extern void irq_7();
+extern void irq_8();
+extern void irq_9();
+extern void irq_10();
+extern void irq_11();
+extern void irq_12();
+extern void irq_13();
+extern void irq_14();
+extern void irq_15();
 
 #endif

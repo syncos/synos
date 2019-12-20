@@ -4,7 +4,7 @@ include $(X64DIR)/.config
 DEFINE_VALS += -D_X86_64_
 
 IMG_LINK+=$(X64DIR)/initIMG.ld
-ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o $(X64DIR)/stack.o $(X64DIR)/gdt.o
+ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpuid.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o $(X64DIR)/stack.o $(X64DIR)/gdt.o $(X64DIR)/arch.o $(X64DIR)/tss.o
 
 include $(X64DIR)/interrupts/Makefile
 

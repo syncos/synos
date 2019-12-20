@@ -6,9 +6,9 @@ int interrupt_enabled(); // Returns a value >0 if true
 void interrupt_enable();
 void interrupt_disable();
 
-int interrupt_init();
 
-// Define exception interrupt and other special functions
+// Set the correct interrupts, syscalls etc
+int interrupt_init();
 
 
 #endif

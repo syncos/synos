@@ -104,4 +104,6 @@ enum CPUID_FEAT
 
 extern char* CPUID_manufacturer(char* format);
 extern uint32_t* CPUID_Info(uint32_t* format);
+extern uint64_t  RFLAGS();
+
 #endif

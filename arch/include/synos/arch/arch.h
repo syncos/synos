@@ -112,4 +112,6 @@ struct Stacktrace
 
 extern struct Stacktrace* TraceStack();
 
+extern int arch_init();
+
 #endif

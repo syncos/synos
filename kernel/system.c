@@ -6,10 +6,10 @@
 #include <string.h>
 
 struct SYS_STATE System;
-const char* str_hello_pit = "PIT!";
 
 void startup()
 {
+    // Initialize arch
     // Set interrupt_enabled bool to false
     if (interrupt_enabled()) interrupt_disable();
     System.interrupt_enabled = false;
@@ -20,6 +20,8 @@ void startup()
     printf_init(); // Initialize printf fallback function if enabled
     #endif
 
+    if (arch_init() != 0) panic("Arch initialization error");
+
     pr_log(INFO, "Starting version %d");//, VERSION);
     printf("Starting version ");
     printf(VERSION);
@@ -28,15 +30,11 @@ void startup()
     printf("\n");
     // Check that CPUID is supported
     if(!CPUID_enabled())
-    {
         panic("CPUID not supported on target system!");
-    }
     // Get cpuid struct
     getCPUID(&System.cpuid);
     if (System.cpuid.vendor == UNKNOWN)
-    {
         pr_log(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");
-    }
     // Get memory info
     getMEMID(&System.memid);
     pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
@@ -46,6 +44,8 @@ void startup()
 
     // Load syscalls
     syscall_init();
+
+    interrupt_enable();
 
     panic("System reached end of startup function, something has gone wrong.");
 }

@@ -9,6 +9,8 @@
 
 extern const uint8_t syscall_int;
 
+extern const uint8_t IRQ_start;
+
 extern uintptr_t int_0;
 extern uintptr_t int_1;
 extern uintptr_t int_2;

@@ -6,6 +6,7 @@
 #include <string.h>
 
 struct SYS_STATE System;
+const char* str_hello_pit = "PIT!";
 
 void startup()
 {
@@ -45,10 +46,6 @@ void startup()
 
     // Load syscalls
     syscall_init();
-
-    // Enable interrupts
-    // Interrupts not fully implemented yet
-    // interrupt_enable();
 
     panic("System reached end of startup function, something has gone wrong.");
 }

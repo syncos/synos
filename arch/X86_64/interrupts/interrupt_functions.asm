@@ -47,7 +47,6 @@ interrupt_enabled:
     ret
 global interrupt_enable
 interrupt_enable:
-    cli
     sti
     ret
 global interrupt_disable

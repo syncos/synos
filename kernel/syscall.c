@@ -1,4 +1,5 @@
 #include <synos/syscall.h>
+#include <stdio.h>
 
 #define DEFAULT_SYSCALL_INT 0x80
 #ifdef  SYSCALL_INT
@@ -25,5 +26,5 @@ int syscall_add(uint32_t id, int (*f)(const struct Syscall_I*))
 
 void syscall_c(const struct Syscall_Args *args)
 {
-
+    printf("Syscall!");
 }

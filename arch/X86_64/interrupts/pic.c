@@ -1,4 +1,5 @@
 #include "pic.h"
+#include "interrupts.h"
 #include <synos/arch/io.h>
 
 int PIC_init()
@@ -17,9 +18,9 @@ int PIC_init()
     io_wait();
 
     // Send vector offset
-    outb(PIC1_DATA, ICW2_1);
+    outb(PIC1_DATA, IRQ_start);
     io_wait();
-    outb(PIC2_DATA, ICW2_2);
+    outb(PIC2_DATA, IRQ_start+8);
     io_wait();
 
     // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)

@@ -18,9 +18,6 @@
 #define ICW1_INTERVAL4	0x04		/* Call address interval 4 (8) */
 #define ICW1_LEVEL	    0x08		/* Level triggered (edge) mode */
 #define ICW1_INIT	    0x10		/* Initialization - required! */
-
-#define ICW2_1          0x20        /* Remap the pic to after the exception interrupts */
-#define ICW2_2          0x28        /* Remap PIC2 after the PIC1 */
  
 #define ICW4_8086	    0x01		/* 8086/88 (MCS-80/85) mode */
 #define ICW4_AUTO	    0x02		/* Auto (normal) EOI */

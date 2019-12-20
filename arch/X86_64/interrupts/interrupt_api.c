@@ -10,6 +10,8 @@
 struct IDT_Entry IDT[256]; // Set the IDT table to a static size, since malloc can sometimes return NULL and that would cause a panic.
 struct IDT_Entry SYSCALL_IE;
 
+const uint8_t IRQ_start = 100; // IRQ offset
+
 #define SET_INT_ENTRY(i, addr, attri) IDT[i].offset_0 = addr & 0xFFFF; IDT[i].offset_1 = (addr & 0xFFFF0000) >> 16; IDT[i].offset_2 = (addr & 0xFFFFFFFF00000000) >> 32; IDT[i].selector = GDT_KERN_CODE_SELECTOR; IDT[i].ist = 0; IDT[i].attr = attri; IDT[i].zero = 0
 
 struct
@@ -57,24 +59,24 @@ int interrupt_init()
     SET_INT_ENTRY(30, int_30, INT_GATE_INTERRUPT);
     SET_INT_ENTRY(31, int_31, INT_GATE_INTERRUPT);
     // Set IRQs
-    SET_INT_ENTRY(32+0,  irq_0,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+1,  irq_1,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+2,  irq_2,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+3,  irq_3,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+4,  irq_4,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+5,  irq_5,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+6,  irq_6,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+7,  irq_7,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+8,  irq_8,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+9,  irq_9,  INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+10, irq_10, INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+11, irq_11, INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+12, irq_12, INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+13, irq_13, INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+14, irq_14, INT_GATE_INTERRUPT);
-    SET_INT_ENTRY(32+15, irq_15, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+0,  irq_0,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+1,  irq_1,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+2,  irq_2,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+3,  irq_3,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+4,  irq_4,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+5,  irq_5,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+6,  irq_6,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+7,  irq_7,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+8,  irq_8,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+9,  irq_9,  INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+10, irq_10, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+11, irq_11, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+12, irq_12, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+13, irq_13, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+14, irq_14, INT_GATE_INTERRUPT);
+    SET_INT_ENTRY(IRQ_start+15, irq_15, INT_GATE_INTERRUPT);
 
-    for (int i = 32+16; i < 256; i++)
+    for (int i = IRQ_start+16; i < 256; i++)
     {
         if (i == syscall_int) continue;
 

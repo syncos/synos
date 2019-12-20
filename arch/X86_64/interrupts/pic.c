@@ -61,3 +61,9 @@ void PIC_EOI(uint8_t irq)
         outb(PIC2_COMMAND, PIC_EOI_CODE);
     outb(PIC1_COMMAND, PIC_EOI_CODE);
 }
+
+void PIC_disable()
+{
+	outb(PIC2_DATA, 0xFF);
+	outb(PIC1_DATA, 0xFF);
+}

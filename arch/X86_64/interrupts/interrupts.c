@@ -91,7 +91,6 @@ int interrupt_init()
     idt_map();
     // Configure the irq controller
     IC_Configure(IC_Controller());
-    uint32_t data = ((struct X64_CPUID*)System.cpuid.asp)->FI_EDX;
 
     IDTR.limit = 0x1000;
     IDTR.offset = (uint64_t)&IDT;

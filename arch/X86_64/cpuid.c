@@ -9,12 +9,13 @@ enum ARCH arch = X86_64;
 const int isLittleEndian = 1;
 const int isBigEndian = 0;
 
+struct X64_CPUID x64ID;
+
 #define pushaq() asm("push rax"); asm("push rcx"); asm("push rdx"); asm("push rbx"); asm("push rbp"); asm("push rsi"); asm("push rdi")
 #define popaq() asm("pop rdi"); asm("pop rsi"); asm("pop rbp"); asm("pop rbx"); asm("pop rdx"); asm("pop rcx"); asm("pop rax")
 
 struct CPUID* __attribute__((optimize("O0"))) getCPUID(struct CPUID* cpu) 
 {
-    struct X64_CPUID x64ID;
     if (!CPUID_enabled())
     {
         cpu->enabled = false;
@@ -64,6 +65,8 @@ struct CPUID* __attribute__((optimize("O0"))) getCPUID(struct CPUID* cpu)
 
     x64ID.FI_EDX = regInfo[1];
     x64ID.FI_ECX = regInfo[2];
+
+    x64ID.APIC = (x64ID.FI_EDX & CPUID_FEAT_EDX_APIC) >> 9;
 
     return cpu;
 }

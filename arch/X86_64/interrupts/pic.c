@@ -1,6 +1,7 @@
 #include "interrupts.h"
 #include <synos/arch/io.h>
 #include <stddef.h>
+#include "../cpuid.h"
 
 #define PIC1		0x20		/* IO base address for master PIC */
 #define PIC2		0xA0		/* IO base address for slave PIC */
@@ -21,10 +22,14 @@
 #define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	0x10		/* Special fully nested (not) */
 
+extern void APIC_disable();
+
 size_t irq_spurious = 0;
 
 int PIC_Configure(uint8_t offset1, uint8_t offset2)
 {
+	if(x64ID.APIC) APIC_disable();
+
     unsigned char a1, a2;
  
 	a1 = inb(PIC1_DATA);                        // save masks
@@ -99,12 +104,6 @@ void PIC_EOI(uint8_t irq)
     outb(PIC1_COMMAND, PIC_EOI_CODE);
 }
 
-void PIC_disable()
-{
-	outb(PIC2_DATA, 0xFF);
-	outb(PIC1_DATA, 0xFF);
-}
-
 uint8_t irq1, irq2;
 void PIC_IRQ_save()
 {
@@ -120,4 +119,9 @@ void PIC_IRQ_restore()
 {
 	outb(PIC1_DATA, irq1);
 	outb(PIC2_DATA, irq2);
+}
+
+void PIC_disable()
+{
+	PIC_IRQ_kill();
 }

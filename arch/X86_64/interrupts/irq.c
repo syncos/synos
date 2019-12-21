@@ -21,7 +21,7 @@ enum IRQ_CONTROLLERS ic_control;
 
 enum IRQ_CONTROLLERS IC_Controller()
 {
-    if ((((struct X64_CPUID*)System.cpuid.asp)->FI_EDX & CPUID_FEAT_EDX_APIC) > 0)
+    if (x64ID.APIC)
         return PIC;
     return PIC;
 }

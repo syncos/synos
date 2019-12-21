@@ -29,13 +29,8 @@
 struct X64_CPUID
 {
     char vendor_string[12];
-    uint8_t STEPID;
-    uint8_t MODEL;
-    uint8_t FAMID;
-    uint8_t RESRV_0;
-    uint8_t EMID;
-    uint8_t EFID;
-    uint8_t RESRV_1;
+
+    uint8_t APIC;
 
     uint32_t FI_EDX;
     uint32_t FI_ECX;
@@ -101,6 +96,8 @@ enum CPUID_FEAT
     CPUID_FEAT_EDX_IA64         = (1 << 30),
     CPUID_FEAT_EDX_PBE          = (1 << 31)
 };
+
+extern struct X64_CPUID x64ID;
 
 extern char* CPUID_manufacturer(char* format);
 extern uint32_t* CPUID_Info(uint32_t* format);

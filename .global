@@ -1,5 +1,6 @@
 VERSION="0.1"
-VERSION_NAME="ALPHA"
+VERSION_NAME="PRIMITIVE"
+VERSION_DOMAIN="ALPHA"
 
 # Paths
 SOURCE_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))

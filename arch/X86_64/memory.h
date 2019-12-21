@@ -20,7 +20,7 @@
 #define PAGE_DIRTY         (1 << 6)
 #define PAGE_HUGE          (1 << 7)
 #define PAGE_GLOBAL        (1 << 8)
-#define PAGE_NO_EXECUTE    (1 << 63)
+#define PAGE_NO_EXECUTE    ((uint64_t)1 << 63)
 
 struct GDT_entry
 {

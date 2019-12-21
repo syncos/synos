@@ -12,6 +12,7 @@
  */
 
 #include <stddef.h> /* for NULL and size_t */
+#include <stdint.h>
 
 #define STR(x) #x
 
@@ -139,6 +140,7 @@ size_t strxfrm(char* restrict s1, const char* restrict s2, size_t n);
 int tostring(size_t in, char* out);
 const char* c_str(size_t in);
 int reverse(char* format);
+const char* hex_str(uint64_t in);
 
 #ifdef __cplusplus
 } /* extern "C" */

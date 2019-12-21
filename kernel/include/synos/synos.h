@@ -7,7 +7,8 @@
 
 #ifndef VERSION
 #define VERSION "NaN"
-#define VERSION_NAME "NaN"
+#define VERSION_NAME "UNDEFINED"
+#define VERSION_DOMAIN "UNDEFINED"
 #endif
 
 struct SYS_STATE

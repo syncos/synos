@@ -100,18 +100,8 @@ typedef struct
     MM_t MM;
 }boot_t;
 
-struct StackFrame
-{
-
-};
-struct Stacktrace
-{
-    size_t length;
-    struct StackFrame *frames;
-};
-
 extern struct Stacktrace* TraceStack();
-
+extern void PrintStackTrace();
 extern int arch_init();
 
 #endif

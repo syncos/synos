@@ -27,6 +27,8 @@ void startup()
     printf(VERSION);
     printf(" ");
     printf(VERSION_NAME);
+    printf("-");
+    printf(VERSION_DOMAIN);
     printf("\n");
     // Check that CPUID is supported
     if(!CPUID_enabled())
@@ -60,7 +62,11 @@ void panic(char* text)
     printf("The system kernel has encountered a panic!\n");
     printf("Error message: ");
     printf(text);
-    printf("\n\n");
+    printf("\n");
+
+    PrintStackTrace();
+
+    printf("\n");
     printf("System suspended");
 
     pr_log(INFO, "Suspending all processes...");

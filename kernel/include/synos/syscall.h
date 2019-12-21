@@ -1,6 +1,7 @@
 #ifndef K_SYSCALL_H
 #define K_SYSCALL_H
 #include <inttypes.h>
+#include <stddef.h>
 
 #define SYC_RETURN_ACK 0
 #define SYC_RETURN_ERR 1
@@ -26,36 +27,17 @@ enum SYSCALL_SYC_INDEX
     SYSCALL_SYC_INDEX_SIZE
 };
 
-#ifdef _64BIT_
-struct Syscall_Args
-{
-    uint64_t arg0;
-    uint64_t arg1;
-    uint64_t arg2;
-    uint64_t arg3;
-    uint64_t arg4;
-    uint64_t arg5;
-};
-#else
-struct Syscall_Args
-{
-    uint32_t arg0;
-    uint32_t arg1;
-    uint32_t arg2;
-    uint32_t arg3;
-    uint32_t arg4;
-    uint32_t arg5;
-};
-#endif
-
-struct Syscall_I
+struct Syscall_Entry
 {
     uint32_t id;
-    struct Syscall_Args *args;
+    void* function;
 };
 
-int syscall_init();
-int syscall_add(uint32_t id, int (*f)(const struct Syscall_I*));
+extern struct Syscall_Entry* *syscall_VT;
+extern size_t syscall_VT_length;
 
-void syscall_c(const struct Syscall_Args *);
+int syscall_init();
+int syscall_set(uint32_t id, void* function);
+
+void syscall_c();
 #endif

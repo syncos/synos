@@ -16,8 +16,12 @@ struct MEMID* getMEMID(struct MEMID*);
 
 int memc_init();
 
+extern void* kmalloc(size_t bytes);
+extern void* kfree(size_t bytes);
+
 #ifdef MEMSTACK_ENABLE
 extern void* memstck_malloc(size_t bytes);
+extern void* memstck_realloc(void* p, size_t bytes);
 #endif
 
 #endif

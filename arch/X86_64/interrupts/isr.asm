@@ -49,6 +49,19 @@ IDT_load:
 
 global syscall_fn
 syscall_fn:
+    push rbx    ; Push all registers that should be saved across functions
+    push rbp    ; Also remember that syscalls operate on the callers stack (which means that everything you push should be popped too)
+    push r12
+    push r13
+    push r14
+    push r15
+
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
+    pop rbx
     iretq
 
 global exc_0

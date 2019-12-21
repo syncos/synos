@@ -1,6 +1,6 @@
 #include <inttypes.h>
 #include <synos/arch/arch.h>
-#include <stdlib.h>
+#include <synos/synos.h>
 #include <synos/arch/multiboot2.h>
 
 bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data)
@@ -44,7 +44,7 @@ bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data)
                 {
                     mb2Data->MM.nEntries++;
                 }
-                mb2Data->MM.mem_entries = (MM_entries_t*)malloc(sizeof(MM_entries_t)*mb2Data->MM.nEntries);
+                mb2Data->MM.mem_entries = (MM_entries_t*)kmalloc(sizeof(MM_entries_t)*mb2Data->MM.nEntries);
                 uint64_t i = 0;
                 for (mmap = ((struct multiboot_tag_mmap *) tag)->entries; (multiboot_uint8_t *) mmap < (multiboot_uint8_t *) tag + tag->size; mmap = (multiboot_memory_map_t *)((unsigned long) mmap + ((struct multiboot_tag_mmap *) tag)->entry_size))
                 {

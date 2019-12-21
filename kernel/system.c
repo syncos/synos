@@ -39,6 +39,9 @@ void startup()
     getMEMID(&System.memid);
     pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
 
+    // Initialize memory controller
+    memc_init();
+
     // Initialize interrupts
     interrupt_init();
 

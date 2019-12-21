@@ -13,6 +13,7 @@
 
 #include <stdnoreturn.h> /* for _Noreturn */
 #include <stddef.h>
+#include <synos/synos.h>
 
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
@@ -57,6 +58,7 @@ long long int llabs(long long int j);
 _Noreturn void quick_exit(int status);
 
 void* malloc(size_t);
+void* realloc(void* p0, size_t);
 
 #ifdef __cplusplus
 } /* extern "C" */

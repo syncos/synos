@@ -11,6 +11,17 @@
 #define GDT_PROG_DATA_SELECTOR 0x0020
 #define GDT_TSS_SELECTOR       0x0028
 
+#define PAGE_PRESENT       1
+#define PAGE_WRITABLE      2
+#define PAGE_USER          4
+#define PAGE_CACHE_WRITE   8
+#define PAGE_CACHE_DISABLE 16
+#define PAGE_ACCESSED      (1 << 5)
+#define PAGE_DIRTY         (1 << 6)
+#define PAGE_HUGE          (1 << 7)
+#define PAGE_GLOBAL        (1 << 8)
+#define PAGE_NO_EXECUTE    (1 << 63)
+
 struct GDT_entry
 {
     uint16_t limit_low;
@@ -57,8 +68,9 @@ struct TSS
 }__attribute__((packed));
 
 extern struct GDT_entry* gdt; // The "WIP" gdt (not the actual one thats loaded)
-
 extern struct TSS *proc_tss;
+
+extern uint64_t* PML_4;
 
 void initGDT();
 void initTSS();

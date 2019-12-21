@@ -23,7 +23,7 @@ void* memstck_malloc(size_t bytes)
 
 struct Stacktrace* KernTraceStack()
 {
-    struct Stacktrace *trace = (struct Stacktrace*)malloc(sizeof(struct Stacktrace));
+    struct Stacktrace *trace = (struct Stacktrace*)kmalloc(sizeof(struct Stacktrace));
     struct Stackframe *stk;
 
     return trace;

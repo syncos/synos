@@ -38,10 +38,8 @@ LINK_FLAGS += -g
 DEFINE_VALS += -DDEBUG
 endif
 ifeq ($(OPTIMIZE), TRUE)
-CC_FLAGS += -O2
-CXX_FLAGS += -O2
-ASM_FLAGS += -O2
-LINK_FLAGS += -O2
+CC_FLAGS += 
+CXX_FLAGS += 
 DEFINE_VALS += -DOPTIMIZE
 endif
 ifeq ($(BITS), 64)

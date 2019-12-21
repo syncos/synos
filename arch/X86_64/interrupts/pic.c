@@ -1,5 +1,6 @@
 #include "interrupts.h"
 #include <synos/arch/io.h>
+#include <stddef.h>
 
 #define PIC1		0x20		/* IO base address for master PIC */
 #define PIC2		0xA0		/* IO base address for slave PIC */
@@ -19,6 +20,8 @@
 #define ICW4_BUF_SLAVE	0x08		/* Buffered mode/slave */
 #define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	0x10		/* Special fully nested (not) */
+
+size_t irq_spurious = 0;
 
 int PIC_Configure(uint8_t offset1, uint8_t offset2)
 {
@@ -50,11 +53,45 @@ int PIC_Configure(uint8_t offset1, uint8_t offset2)
 
     return 0;
 }
+
+#define PIC_READ_IRR 0x0a
+#define PIC_READ_ISR 0x0b
+static uint16_t _pic_read(uint8_t ocw3)
+{
+	outb(PIC1_COMMAND, ocw3);
+	outb(PIC2_COMMAND, ocw3);
+	return (inb(PIC2_COMMAND) << 8) | inb(PIC1_COMMAND);
+}
+static uint16_t _pic_isr()
+{
+	return _pic_read(PIC_READ_ISR);
+}
+
+#define PIC_EOI_CODE 0x20
+
+#define IRQ_RET asm ("iretq")
+#define ISR_MASTER(isr) (isr & 0xFF00)
+#define ISR_SLAVE(isr) (isr & 0xFF)
 void PIC_SOI(uint8_t irq)
 {
+	if (irq != 7 && irq != 15) return;
 
+	// Check if interrupt was spurious
+	uint16_t isr = _pic_isr();
+	if (irq == 7 && ISR_MASTER(isr) != 7)
+	{
+		// Interrupt 7 was spurious
+		++irq_spurious;
+		IRQ_RET;
+	}
+	if (irq == 15 && ISR_SLAVE(isr) != 15)
+	{
+		// Interrupt 15 was spurious
+		++irq_spurious;
+		outb(PIC1_COMMAND, PIC_EOI_CODE); // We still need to send master pic an EOI
+		IRQ_RET;
+	}
 }
-#define PIC_EOI_CODE 0x20
 void PIC_EOI(uint8_t irq)
 {
     if (irq >= 8)

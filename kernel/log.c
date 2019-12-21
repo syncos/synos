@@ -63,7 +63,7 @@ void pr_log(enum Log_Level level, const char* text, ...)
     log_entries[i].length = strlen(text);
     log_entries[i].level = level;
 
-    log_entries[i].string = (char*)malloc(log_entries[i].length);
+    log_entries[i].string = (char*)kmalloc(log_entries[i].length);
     memcpy(log_entries[i].string, text, log_entries[i].length+1);
 
     if (log_entries[i].level <= log_level)

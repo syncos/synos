@@ -32,7 +32,7 @@ struct ELF_HEADER *ParseELF_HEADER(const char* header)
 {
     if (!FileIsELF(header)) return NULL;
 
-    struct ELF_HEADER *hdr = (struct ELF_HEADER*)malloc(sizeof(struct ELF_HEADER));
+    struct ELF_HEADER *hdr = (struct ELF_HEADER*)kmalloc(sizeof(struct ELF_HEADER));
 
     hdr->header = ((char*)header);
     
@@ -114,7 +114,7 @@ struct ELF_HEADER *ParseELF_HEADER(const char* header)
 
 struct ELF_PROGRAM_HEADER* ParseELF_PRG_HEADER(const struct ELF_HEADER* hdr, char* prg_hdr_start)
 {
-    struct ELF_PROGRAM_HEADER* prg_hdr = (struct ELF_PROGRAM_HEADER*)malloc(sizeof(struct ELF_PROGRAM_HEADER) * hdr->e_phnum_16);
+    struct ELF_PROGRAM_HEADER* prg_hdr = (struct ELF_PROGRAM_HEADER*)kmalloc(sizeof(struct ELF_PROGRAM_HEADER) * hdr->e_phnum_16);
 
     int hdr_ent_size;
     int p_offset_offset;

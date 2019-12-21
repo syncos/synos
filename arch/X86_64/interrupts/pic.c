@@ -104,3 +104,20 @@ void PIC_disable()
 	outb(PIC2_DATA, 0xFF);
 	outb(PIC1_DATA, 0xFF);
 }
+
+uint8_t irq1, irq2;
+void PIC_IRQ_save()
+{
+	irq1 = inb(PIC1_DATA);
+	irq2 = inb(PIC2_DATA);
+}
+void PIC_IRQ_kill()
+{
+	outb(PIC1_DATA, 0xFF);
+	outb(PIC2_DATA, 0xFF);
+}
+void PIC_IRQ_restore()
+{
+	outb(PIC1_DATA, irq1);
+	outb(PIC2_DATA, irq2);
+}

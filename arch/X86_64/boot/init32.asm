@@ -34,9 +34,9 @@ _ISMB2_32: ; Check if os was booted with multiboot2
     mov eax, [mbm]      ; Load magic number
     cmp eax, 0x36d76289 ; Check magic number
     je .done
-    mov esi, str_no_mb2
-    call _print
-    hlt
+    ; Synos was not started with multiboot2, pass that info to the kernel
+    mov al, 0
+    mov [mb2], al
     .done:
         ret
 _ISX64_32: ; Check if the target system is x64

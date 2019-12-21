@@ -6,10 +6,16 @@
 extern int PIC_Configure(uint8_t offset1, uint8_t offset2);
 extern void PIC_SOI(uint8_t irq);
 extern void PIC_EOI(uint8_t irq);
+extern void PIC_IRQ_save();
+extern void PIC_IRQ_kill();
+extern void PIC_IRQ_restore();
 // APIC related
 extern int APIC_Configure(uint8_t offset);
 extern void APIC_SOI(uint8_t irq);
 extern void APIC_EOI(uint8_t irq);
+extern void APIC_IRQ_save();
+extern void APIC_IRQ_kill();
+extern void APIC_IRQ_restore();
 
 enum IRQ_CONTROLLERS ic_control;
 
@@ -46,6 +52,34 @@ void IC_EOI(uint8_t irq)
     {
         case PIC: return PIC_EOI(irq);
         case APIC: return APIC_EOI(irq);
+        default: panic("Invalid irq controller type");
+    }
+}
+
+void IRQ_save()
+{
+    switch (ic_control)
+    {
+        case PIC: return PIC_IRQ_save();
+        case APIC: return APIC_IRQ_save();
+        default: panic("Invalid irq controller type");
+    }
+}
+void IRQ_kill()
+{
+    switch (ic_control)
+    {
+        case PIC: return PIC_IRQ_kill();
+        case APIC: return APIC_IRQ_kill();
+        default: panic("Invalid irq controller type");
+    }
+}
+void IRQ_restore()
+{
+    switch (ic_control)
+    {
+        case PIC: return PIC_IRQ_restore();
+        case APIC: return APIC_IRQ_restore();
         default: panic("Invalid irq controller type");
     }
 }

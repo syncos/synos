@@ -26,6 +26,9 @@ endif
 ifdef SYSCALL_INT
 DEFINE_VALS += -DSYSCALL_INT=$(SYSCALL_INT)
 endif
+ifeq ($(MEMORY_ALLOW_MANUAL_PROBE), TRUE)
+DEFINE_VALS += -DMEM_MANUAL_PROBE
+endif
 
 X86_64: $(ARCHOBJECTS)
 	@echo -e "$(SECTIONC)[arch] $(LINKC)Linking arch_x86_64 object files -> arch/arch.o$(NC)"

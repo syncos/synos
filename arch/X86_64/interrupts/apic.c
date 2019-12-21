@@ -39,3 +39,16 @@ void APIC_EOI(uint8_t irq)
 {
 
 }
+
+void APIC_IRQ_save()
+{
+
+}
+void APIC_IRQ_kill()
+{
+
+}
+void APIC_IRQ_restore()
+{
+    
+}

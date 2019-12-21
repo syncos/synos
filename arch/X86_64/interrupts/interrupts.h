@@ -40,6 +40,9 @@ extern struct IDT_Desc IDTR;
 
 enum IRQ_CONTROLLERS IC_Controller();
 int IC_Configure(enum IRQ_CONTROLLERS controller);
+void IRQ_save();
+void IRQ_kill();
+void IRQ_restore();
 
 extern void syscall_fn();
 

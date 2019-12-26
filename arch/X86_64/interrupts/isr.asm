@@ -208,3 +208,7 @@ irq_15:
     SOI 15
     EOI 15
     iretq
+
+global isr_spurious
+isr_spurious:
+    iretq

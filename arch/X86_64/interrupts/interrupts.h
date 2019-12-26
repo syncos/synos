@@ -38,6 +38,8 @@ extern const uint8_t syscall_isr;
 extern struct IDT_Entry IDT[];
 extern struct IDT_Desc IDTR;
 
+void idt_set(uint8_t index, uintptr_t address, uint8_t attributes);
+
 enum IRQ_CONTROLLERS IC_Controller();
 int IC_Configure(enum IRQ_CONTROLLERS controller);
 void IRQ_save();
@@ -62,5 +64,7 @@ extern void irq_12();
 extern void irq_13();
 extern void irq_14();
 extern void irq_15();
+
+extern void isr_spurious();
 
 #endif

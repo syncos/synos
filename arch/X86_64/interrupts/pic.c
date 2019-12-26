@@ -22,13 +22,17 @@
 #define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	0x10		/* Special fully nested (not) */
 
+#ifdef APIC_ENABLE
 extern void APIC_disable();
+#endif
 
 size_t irq_spurious = 0;
 
 int PIC_Configure(uint8_t offset1, uint8_t offset2)
 {
+	#ifdef APIC_ENABLE
 	if(x64ID.APIC) APIC_disable();
+	#endif
 
     unsigned char a1, a2;
  

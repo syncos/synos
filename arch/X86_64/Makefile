@@ -29,6 +29,9 @@ endif
 ifeq ($(MEMORY_ALLOW_MANUAL_PROBE), TRUE)
 DEFINE_VALS += -DMEM_MANUAL_PROBE
 endif
+ifeq ($(APIC_SUPPORT), TRUE)
+DEFINE_VALS += -DAPIC_ENABLE
+endif
 
 X86_64: $(ARCHOBJECTS)
 	@echo -e "$(SECTIONC)[arch] $(LINKC)Linking arch_x86_64 object files -> arch/arch.o$(NC)"

@@ -1,6 +1,7 @@
 #ifndef X64_MEMORY_H
 #define X64_MEMORY_H
 #include <inttypes.h>
+#include <stddef.h>
 
 #define GDT_LEN (1 + 2 + 2 + 1) // Null entry + ring 0 code and data + ring 3 code and data + tss entry
 
@@ -74,5 +75,10 @@ extern uint64_t* PML_4;
 
 void initGDT();
 void initTSS();
+
+#ifdef MEMSTACK_ENABLE
+extern void* memstck_malloc(size_t bytes);
+extern void* memstck_realloc(void* p, size_t bytes);
+#endif
 
 #endif

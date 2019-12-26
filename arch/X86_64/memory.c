@@ -36,6 +36,14 @@ void* kmalloc(size_t bytes)
     #endif
     return NULL;
 }
+void kfree(void* pointer)
+{
+    if (!System.MMU_enabled)
+    {
+        return;
+    }
+    return;
+}
 
 static void pm_lowmem_fill()
 {

@@ -20,8 +20,7 @@ enum SYSCALL_INDEX
 enum SYSCALL_SYC_INDEX
 {
     SYSCALL_ADD, // Add syscall
-    SYSCALL_RMV, // Remove syscall
-    SYSCALL_PRT, // Set syscall port
+    SYSCALL_SET, // Set syscall
     SYSCALL_FSI, // Get free syscall id
 
     SYSCALL_SYC_INDEX_SIZE
@@ -30,14 +29,14 @@ enum SYSCALL_SYC_INDEX
 struct Syscall_Entry
 {
     uint32_t id;
-    void* function;
+    int (*function)(uint32_t, ...);
 };
 
 extern struct Syscall_Entry* *syscall_VT;
 extern size_t syscall_VT_length;
 
 int syscall_init();
-int syscall_set(uint32_t id, void* function);
+int syscall_set(uint32_t id, int (*function)(uint32_t, ...));
 
 void syscall_c();
 #endif

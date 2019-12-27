@@ -1,5 +1,4 @@
 #include <synos/synos.h>
-#include <synos/arch/multiboot2.h>
 #include <inttypes.h>
 #include <synos/arch/io.h>
 #include <string.h>
@@ -101,7 +100,7 @@ extern bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data);
 #ifdef MEM_MANUAL_PROBE
 static uint64_t mem_probe()
 {
-    panic("Manual probing currently not supported. Please use the multiboot standard instead.");
+    panic("Manual probing currently not supported. Please use the multiboot/multiboot2 standard instead.");
 
     IRQ_save();
     IRQ_kill();
@@ -127,39 +126,6 @@ static uint64_t mem_probe()
 
 struct MEMID* getMEMID(struct MEMID* mem)
 {
-    if (mb2 == 1 && mbm != MULTIBOOT2_BOOTLOADER_MAGIC)
-    {
-        mem->enabled = false;
-        return mem;
-    }
-    mem->enabled = true;
-
-    if (mb2 == 1)
-    {
-        if(!mboot2Init(mbp, mbm, &bootdata) || !bootdata.MM.enabled)
-        {
-            mem->enabled = false;
-            return mem;
-        }
-
-        mem->enabled = true;
-        mem->nEntries = bootdata.MM.nEntries;
-        mem->entries = bootdata.MM.mem_entries;
-
-        mem->totalSize = 0;
-        for (size_t i = 0; i < mem->nEntries; i++)
-        {
-            mem->totalSize += bootdata.MM.mem_entries[i].length;
-        }
-    }
-    else
-    {
-        #ifndef MEM_MANUAL_PROBE
-        panic("System was not booted with multiboot or multiboot2. The system must resort to manual probing, but is prohibited. To allow manual memory probing, change 'MEMORY_ALLOW_MANUAL_PROBE' to 'TRUE' in arch/X86_64/.config and recompile.");
-        #else
-        mem->totalSize = mem_probe();
-        #endif
-    }
 
     return mem;
 }

@@ -1,6 +1,6 @@
 #include "interrupts.h"
 #include <synos/synos.h>
-#include "../cpuid.h"
+#include "../cpu.h"
 
 // PIC related
 extern int PIC_Configure(uint8_t offset1, uint8_t offset2);

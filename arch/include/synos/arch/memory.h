@@ -9,7 +9,6 @@ struct MEMID
 
     size_t nEntries;
     uintptr_t totalSize;
-    MM_entries_t* entries;
 };
 
 struct MEMID* getMEMID(struct MEMID*);

@@ -30,22 +30,18 @@ enum Manufacturer
 
     UNKNOWN
 };
-struct CPUID
+struct CPUINFO
 {
     bool enabled;
     void* asp; // Architecture Specific Properties
 
     enum Manufacturer vendor;
     bool isVM;
-
-    char fbp[1];
 };
 
 extern const int isLittleEndian;
 extern const int isBigEndian;
 
-struct CPUID*   getCPUID(struct CPUID*);
-extern uint64_t CPUID_enabled();
-extern void     CPUID(uint32_t eax);
-void            halt();
+struct CPUINFO*   getCPUINFO(struct CPUINFO*);
+void              halt();
 #endif

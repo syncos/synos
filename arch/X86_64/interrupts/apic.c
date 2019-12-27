@@ -1,6 +1,6 @@
 #include "interrupts.h"
 #include <synos/arch/io.h>
-#include "../cpuid.h"
+#include "../cpu.h"
 
 extern void PIC_disable();
 

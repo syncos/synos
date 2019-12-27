@@ -5,4 +5,5 @@ rootdir/
 build/
 .vscode/
 /synos
+/synos.map
 /.config

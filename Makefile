@@ -38,8 +38,10 @@ LINK_FLAGS += -g
 DEFINE_VALS += -DDEBUG
 endif
 ifeq ($(OPTIMIZE), TRUE)
-CC_FLAGS += 
-CXX_FLAGS += 
+CC_FLAGS += -O2
+CXX_FLAGS += -O2
+ASM_FLAGS += -O2
+LINK_FLAGS += -O2
 DEFINE_VALS += -DOPTIMIZE
 endif
 ifeq ($(BITS), 64)
@@ -69,3 +71,4 @@ clean:
 	@find . -name "*.o" -type f -delete
 	@rm -f synos
 	@rm -f synos.iso
+	@rm -f synos.map

@@ -13,7 +13,7 @@
 
 struct SYS_STATE
 {
-    struct CPUID cpuid;
+    struct CPUINFO cpuinfo;
     struct MEMID memid;
     bool interrupt_enabled;
     bool MMU_enabled;

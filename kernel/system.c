@@ -30,12 +30,11 @@ void startup()
     printf("-");
     printf(VERSION_DOMAIN);
     printf("\n");
-    // Check that CPUID is supported
-    if(!CPUID_enabled())
-        panic("CPUID not supported on target system!");
     // Get cpuid struct
-    getCPUID(&System.cpuid);
-    if (System.cpuid.vendor == UNKNOWN)
+    getCPUINFO(&System.cpuinfo);
+    if (System.cpuinfo.enabled == 0)
+        panic("CPUID not supported on target system!");
+    if (System.cpuinfo.vendor == UNKNOWN)
         pr_log(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");
     // Get memory info
     getMEMID(&System.memid);

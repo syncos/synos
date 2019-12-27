@@ -1,7 +1,7 @@
 #include "interrupts.h"
 #include <synos/arch/io.h>
 #include <stddef.h>
-#include "../cpuid.h"
+#include "../cpu.h"
 
 #define PIC1		0x20		/* IO base address for master PIC */
 #define PIC2		0xA0		/* IO base address for slave PIC */

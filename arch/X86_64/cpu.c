@@ -1,7 +1,7 @@
 #include <synos/arch/arch.h>
 #include <synos/arch/cpu.h>
 #include <synos/synos.h>
-#include "cpuid.h"
+#include "cpu.h"
 #include <string.h>
 
 enum ARCH arch = X86_64;
@@ -14,7 +14,8 @@ struct X64_CPUID x64ID;
 #define pushaq() asm("push rax"); asm("push rcx"); asm("push rdx"); asm("push rbx"); asm("push rbp"); asm("push rsi"); asm("push rdi")
 #define popaq() asm("pop rdi"); asm("pop rsi"); asm("pop rbp"); asm("pop rbx"); asm("pop rdx"); asm("pop rcx"); asm("pop rax")
 
-struct CPUID* __attribute__((optimize("O0"))) getCPUID(struct CPUID* cpu) 
+extern uint64_t CPUID_enabled();
+struct CPUINFO* __attribute__((optimize("O0"))) getCPUINFO(struct CPUINFO* cpu) 
 {
     if (!CPUID_enabled())
     {

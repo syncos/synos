@@ -1,5 +1,5 @@
 #include <synos/synos.h>
-#include "../cpuid.h"
+#include "../cpu.h"
 #include <synos/arch/interrupt.h>
 #include "interrupts.h"
 #include "../memory.h"

@@ -1,7 +1,8 @@
 #include <inttypes.h>
 #include <synos/arch/arch.h>
 #include <synos/synos.h>
-#include <synos/arch/multiboot2.h>
+#include "memory.h"
+#include "multiboot2.h"
 
 bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data)
 {

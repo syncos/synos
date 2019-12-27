@@ -3,6 +3,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef uint16_t ELF32_uint16_t, ELF64_uint16_t;
+typedef uint32_t ELF32_uint32_t, ELF32_uintptr_t, ELF64_uint32_t;
+
+typedef uint64_t ELF64_uintptr_t;
+
 enum HEADER_FIELDS
 {
     EI_MAG0 = 0,
@@ -78,6 +83,67 @@ struct ELF_OBJ
     struct ELF_HEADER *header;
     struct ELF_PROGRAM_HEADER* program_headers; // The length of this array is defined in header->e_phnum
     struct ELF_SECTION_HEADER* section_headers; // The length of this array is defined in header->e_shnum
+};
+
+enum Section_Types
+{
+    SHT_NULL,
+    SHT_PROGBITS,
+    SHT_SYMTAB,
+    SHT_STRTAB,
+    SHT_RELA,
+    SHT_HASH,
+    SHT_DYNAMIC,
+    SHT_NOTE,
+    SHT_NOBITS,
+    SHT_REL,
+    SHT_SHLIB,
+    SHT_DYNSUM,
+};
+struct ELF32_Shdr
+{
+    ELF32_uint32_t  sh_name;
+    ELF32_uint32_t  sh_type;
+    ELF32_uint32_t  sh_flags;
+    ELF32_uintptr_t sh_addr;
+    ELF32_uint32_t  sh_offset;
+    ELF32_uint32_t  sh_size;
+    ELF32_uint32_t  sh_link;
+    ELF32_uint32_t  sh_info;
+    ELF32_uint32_t  sh_addralign;
+    ELF32_uint32_t  sh_entsize;
+};
+struct ELF64_Shdr
+{
+    ELF64_uint32_t  sh_name;
+    ELF64_uint32_t  sh_type;
+    ELF64_uint32_t  sh_flags;
+    ELF64_uintptr_t sh_addr;
+    ELF64_uint32_t  sh_offset;
+    ELF64_uint32_t  sh_size;
+    ELF64_uint32_t  sh_link;
+    ELF64_uint32_t  sh_info;
+    ELF64_uint32_t  sh_addralign;
+    ELF64_uint32_t  sh_entsize;
+};
+
+struct ELF32_Sym
+{
+    ELF32_uint32_t  st_name;
+    ELF32_uintptr_t st_value;
+    ELF32_uint32_t  st_size;
+    unsigned char   st_info;
+    unsigned char   st_other;
+    ELF32_uint16_t  st_shndx;
+};
+struct ELF64_Sym
+{
+    ELF64_uint32_t  st_name;
+    ELF64_uintptr_t st_value;
+    ELF64_uint32_t  st_size;
+    unsigned char   st_info;
+    unsigned char   st_other;
+    ELF64_uint16_t  st_shndx;
 };
 
 struct ELF_OBJ *ParseELF(const char*, const size_t);

@@ -12,10 +12,9 @@ BITS 32
 
 _start:
     mov esp, stack_top
-    mov [mbp], ebx ; Multiboot2 pointer
-    mov [mbm], eax ; Multiboot2 magic
+    mov [mbm], eax ; Multiboot/Multiboot2 magic   (if present)
+    mov [mbp], ebx ; Multiboot/Multiboot2 pointer (if present)
 
-    call _ISMB2_32
     call _CPUID_enabled32
     call _ISX64_32
 
@@ -30,15 +29,6 @@ _start:
     extern _start64
     jmp GDT.Code:_start64
 
-_ISMB2_32: ; Check if os was booted with multiboot2
-    mov eax, [mbm]      ; Load magic number
-    cmp eax, 0x36d76289 ; Check magic number
-    je .done
-    ; Synos was not started with multiboot2, pass that info to the kernel
-    mov al, 0
-    mov [mb2], al
-    .done:
-        ret
 _ISX64_32: ; Check if the target system is x64
     ; test if extended processor info in available
     mov eax, 0x80000000    ; implicit argument for cpuid

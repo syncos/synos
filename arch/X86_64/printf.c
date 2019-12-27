@@ -13,7 +13,7 @@
 #define BUFFER_SIZE_D 2200
 
 #define VGA_WIDTH_D 80
-#define VGA_HEIGHT_D 24
+#define VGA_HEIGHT_D 25
 #define SCANLINE_LOW_D 0
 #define SCANLINE_HIGH_D 1
 

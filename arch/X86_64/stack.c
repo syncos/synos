@@ -1,5 +1,6 @@
 #include <synos/arch/arch.h>
 #include "memory.h"
+#include "x64.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +30,23 @@ struct StackFrame
     struct StackFrame* rbp;
     uintptr_t rip;
 };
+const char* func_noname = "";
+static const char* TraceName(uintptr_t address)
+{
+    if (X64.symbols.elf_sym == NULL || X64.symbols.elf_sym_size / sizeof(struct ELF64_Sym) < 1)
+        return func_noname;
+    
+    uint32_t currentSymIndex = 0;
+    for (uint32_t i = 1; i < X64.symbols.elf_sym_size / sizeof(struct ELF64_Sym); ++i)
+    {
+        if (X64.symbols.elf_sym[i].st_value > address)
+            continue;
+        if (X64.symbols.elf_sym[i].st_value - address > X64.symbols.elf_sym[currentSymIndex].st_value)
+            currentSymIndex = i;
+    }
+
+    return &X64.symbols.elf_str[X64.symbols.elf_sym[currentSymIndex].st_name];
+}
 void PrintStackTrace()
 {
     printf("Stack trace (most recent call first):\n");
@@ -41,8 +59,8 @@ void PrintStackTrace()
         if (stk == NULL)
             break;
         printf(hex_str(stk->rip));
-        printf(": RSP = ");
-        printf(hex_str((uint64_t)stk));
+        printf(" ");
+        printf(TraceName(stk->rip));
         printf("\n");
         stk = stk->rbp;
     }

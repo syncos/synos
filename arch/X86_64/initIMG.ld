@@ -6,9 +6,9 @@ SECTIONS
     . = 1M;
     PROVIDE(__KERN_MEM_START = .);
 
-    .boot :
+    .boot BLOCK(4) : ALIGN(4)
     {
-        *(.multiboot_header)
+        *(.multiboot_header)  /* Used if multiboot or multiboot2 is used*/
     }
     .text :
     {

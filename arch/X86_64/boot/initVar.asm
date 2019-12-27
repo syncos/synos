@@ -4,8 +4,6 @@ global mbp
 mbp: dd 0
 global mbm
 mbm: dd 0
-global mb2
-mb2: db 1
 
 section .bss
 align 4096 ; Needs to be 4KiB aligned for paging to work

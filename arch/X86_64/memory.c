@@ -91,11 +91,9 @@ int memc_init()
     return 0;
 }
 
-boot_t bootdata;
 extern uint32_t mbp;
 extern uint32_t mbm;
 extern uint8_t mb2;
-extern bool mboot2Init(uint32_t addr, uint32_t magic, boot_t* mb2Data);
 
 #ifdef MEM_MANUAL_PROBE
 static uint64_t mem_probe()

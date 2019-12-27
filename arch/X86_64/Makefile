@@ -4,21 +4,12 @@ include $(X64DIR)/.config
 DEFINE_VALS += -D_X86_64_
 
 IMG_LINK+=$(X64DIR)/initIMG.ld
-ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpu.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o $(X64DIR)/stack.o $(X64DIR)/gdt.o $(X64DIR)/arch.o $(X64DIR)/tss.o
+ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpu.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/printf.o $(X64DIR)/stack.o $(X64DIR)/gdt.o $(X64DIR)/arch.o $(X64DIR)/tss.o $(X64DIR)/multiboot2.o $(X64DIR)/multiboot.o $(X64DIR)/boot/multiboot2.o $(X64DIR)/boot/multiboot.o
 
 include $(X64DIR)/interrupts/Makefile
 
 ifeq ($(PRINTF_FALLBACK), TRUE)
 DEFINE_VALS += -DPRINTF_FALLBACK
-endif
-ifeq ($(LOAD_SYSTEM), MULTIBOOT2)
-ARCHOBJECTS += $(X64DIR)/multiboot2.o
-ARCHOBJECTS += $(X64DIR)/boot/multiboot2.o
-else
-ifeq ($(LOAD_SYSTEM), MULTIBOOT)
-ARCHOBJECTS += $(X64DIR)/multiboot.o
-ARCHOBJECTS += $(X64DIR)/boot/multiboot.o
-endif
 endif
 ifeq ($(ENABLE_MEMSTACK), TRUE)
 DEFINE_VALS += -DMEMSTACK_ENABLE

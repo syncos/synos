@@ -1,4 +1,8 @@
 include .global
+
+ifeq (, $(wildcard ./.config))
+$(error .config not found!)
+endif
 include .config
 
 MODULES=startM

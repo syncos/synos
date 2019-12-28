@@ -16,12 +16,12 @@ int mbootInit()
         panic("System not booted with multiboot standard. mbootInit() still invoked (possible kernel bug).");
     load_sys = MULTIBOOT;
 
-    mbinf = (struct multiboot_info*)(uint64_t)mbp;
+    mbinf = (struct multiboot_info*)(uintptr_t)mbp;
 
     if (mbinf->flags & MULTIBOOT_INFO_ELF_SHDR)
     {
-        X64.sections.elf_sh = (struct ELF64_Shdr*)(uint64_t)mbinf->u.elf_sec.addr;
         X64.sections.elf_sh_length = mbinf->u.elf_sec.num;
+        X64.sections.elf_sh = (struct ELF64_Shdr*)(uintptr_t)mbinf->u.elf_sec.addr;
         tab_search();
     }
     else

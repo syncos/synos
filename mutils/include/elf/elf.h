@@ -6,7 +6,7 @@
 typedef uint16_t ELF32_uint16_t, ELF64_uint16_t;
 typedef uint32_t ELF32_uint32_t, ELF32_uintptr_t, ELF64_uint32_t;
 
-typedef uint64_t ELF64_uintptr_t;
+typedef uint64_t ELF64_uintptr_t, ELF32_uint64_t, ELF64_uint64_t;
 
 enum HEADER_FIELDS
 {
@@ -100,6 +100,23 @@ enum Section_Types
     SHT_SHLIB,
     SHT_DYNSUM,
 };
+enum Symbol_Types
+{
+    STT_NOTYPE,
+    STT_OBJECT,
+    STT_FUNC,
+    STT_SECTION,
+    STT_FILE,
+    STT_COMMON,
+    STT_TLS,
+
+    STT_LOOS = 10,
+    STT_HIOS = 12,
+    STT_LOPROC,
+    STT_SPARC_REGISTER = 13,
+    STT_HIPROC = 15,
+};
+
 struct ELF32_Shdr
 {
     ELF32_uint32_t  sh_name;
@@ -117,16 +134,23 @@ struct ELF64_Shdr
 {
     ELF64_uint32_t  sh_name;
     ELF64_uint32_t  sh_type;
-    ELF64_uint32_t  sh_flags;
+    ELF64_uint64_t  sh_flags;
     ELF64_uintptr_t sh_addr;
-    ELF64_uint32_t  sh_offset;
-    ELF64_uint32_t  sh_size;
+    ELF64_uint64_t  sh_offset;
+    ELF64_uint64_t  sh_size;
     ELF64_uint32_t  sh_link;
     ELF64_uint32_t  sh_info;
-    ELF64_uint32_t  sh_addralign;
-    ELF64_uint32_t  sh_entsize;
+    ELF64_uint64_t  sh_addralign;
+    ELF64_uint64_t  sh_entsize;
 };
 
+#define ELF32_ST_BIND(info)          ((info) >> 4)
+#define ELF32_ST_TYPE(info)          ((info) & 0xf)
+#define ELF32_ST_INFO(bind, type)    (((bind)<<4)+((type)&0xf))
+
+#define ELF64_ST_BIND(info)          ((info) >> 4)
+#define ELF64_ST_TYPE(info)          ((info) & 0xf)
+#define ELF64_ST_INFO(bind, type)    (((bind)<<4)+((type)&0xf))
 struct ELF32_Sym
 {
     ELF32_uint32_t  st_name;
@@ -139,11 +163,11 @@ struct ELF32_Sym
 struct ELF64_Sym
 {
     ELF64_uint32_t  st_name;
-    ELF64_uintptr_t st_value;
-    ELF64_uint32_t  st_size;
     unsigned char   st_info;
     unsigned char   st_other;
     ELF64_uint16_t  st_shndx;
+    ELF64_uintptr_t st_value;
+    ELF64_uint32_t  st_size;
 };
 
 struct ELF_OBJ *ParseELF(const char*, const size_t);

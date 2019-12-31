@@ -18,7 +18,7 @@ void tab_search()
     X64.symbols.elf_sym_size = 0;
     X64.symbols.elf_str_size = 0;
 
-    for (uint32_t i = 0; (X64.symbols.elf_sym == 0 || X64.symbols.elf_str == 0) && i < X64.sections.elf_sh_length; ++i)
+    for (uint32_t i = 1; (X64.symbols.elf_sym == 0 || X64.symbols.elf_str == 0) && i < X64.sections.elf_sh_length; ++i)
     {
         if (X64.symbols.elf_sym == 0 && X64.sections.elf_sh[i].sh_type == SHT_SYMTAB)
         {

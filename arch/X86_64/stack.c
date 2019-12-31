@@ -40,9 +40,9 @@ static const char* TraceName(uintptr_t address)
     uintptr_t currentSymDiff = address - X64.symbols.elf_sym[currentSymIndex].st_value;
     for (uint32_t i = 1; i < X64.symbols.elf_sym_size / sizeof(struct ELF64_Sym); ++i)
     {
-        if (X64.symbols.elf_sym[i].st_value > address || ELF64_ST_TYPE(X64.symbols.elf_sym[i].st_info) != STT_FUNC)
+        if (X64.symbols.elf_sym[i].st_value > address || (ELF64_ST_TYPE(X64.symbols.elf_sym[i].st_info) != STT_FUNC && ELF64_ST_TYPE(X64.symbols.elf_sym[i].st_info) != STT_NOTYPE))
             continue;
-        if (ELF64_ST_TYPE(X64.symbols.elf_sym[currentSymIndex].st_info) != STT_FUNC)
+        if ((ELF64_ST_TYPE(X64.symbols.elf_sym[i].st_info) != STT_FUNC && ELF64_ST_TYPE(X64.symbols.elf_sym[i].st_info) != STT_NOTYPE))
         {
             currentSymIndex = i;
             currentSymDiff = address - X64.symbols.elf_sym[i].st_value;

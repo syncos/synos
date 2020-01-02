@@ -3,6 +3,13 @@ ENTRY(_start)
 
 SECTIONS
 {
+    . = 0x7C00;
+    .init :
+    {
+        *(.init)
+        . = . + 4096;
+        *(.init_X86)
+    }
     . = 1M;
     PROVIDE(__KERN_MEM_START = .);
 

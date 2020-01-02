@@ -1,44 +1,34 @@
-section .init_X86
+section .text
+global _start
 BITS 32
 
-extern cInit_sl
+%INCLUDE "initVar.inc"
+%DEFINE SCREEN_WIDTH 80
+%DEFINE VGA_ADDRESS_D 0xB8000
 
-global _init32
-_init32:
-    cli
+; Initially, the bootloader dumps us in 32-bit protective mode. 
+; This code will not be included if the bootloader drops us in 64-bit mode.
+; What we need to do now is to call everything that needs to be executed before jumping to 64-bit mode
 
-    mov ax, 16
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov ss, ax
+_start:
+    mov esp, stack_top
+    mov [mbm], eax ; Multiboot/Multiboot2 magic   (if present)
+    mov [mbp], ebx ; Multiboot/Multiboot2 pointer (if present)
 
     call _CPUID_enabled32
     call _ISX64_32
 
+    ; We've now checked that the system supports X64. Now we need to initialize page tables and GDT to be able to enter 64-bit.
+    ; All of these will be changed later
     call _64INIT
 
+    ; All that's left to do is to load a temporarly GDT
     lgdt [GDT.Pointer]
 
-    extern _init64
-    jmp GDT.Code:_init64
-_CPUID_enabled32:
-    pushfd                               ;Save EFLAGS
-    pushfd                               ;Store EFLAGS
-    xor dword [esp],0x00200000           ;Invert the ID bit in stored EFLAGS
-    popfd                                ;Load stored EFLAGS (with ID bit inverted)
-    pushfd                               ;Store EFLAGS again (ID bit may or may not be inverted)
-    pop eax                              ;eax = modified EFLAGS (ID bit may or may not be inverted)
-    xor eax,[esp]                        ;eax = whichever bits were changed
-    popfd                                ;Restore original EFLAGS
-    and eax,0x00200000                   ;eax = zero if ID bit can't be changed, else non-zero
-    cmp eax, 0
-    je .no_CPUID
-    ret
-    .no_CPUID:
-        mov byte [cInit_sl], 0
-        hlt
+    ; Then do a far jump to 64-bit code
+    extern _start64
+    jmp GDT.Code:_start64
+
 _ISX64_32: ; Check if the target system is x64
     ; test if extended processor info in available
     mov eax, 0x80000000    ; implicit argument for cpuid
@@ -53,8 +43,27 @@ _ISX64_32: ; Check if the target system is x64
     jz .no_long_mode       ; If it's not set, there is no long mode
     ret
     .no_long_mode:
-        mov byte [cInit_sl], 0
+        mov esi, str_no_x64
+        call _print
         hlt
+_CPUID_enabled32:
+    pushfd                               ;Save EFLAGS
+    pushfd                               ;Store EFLAGS
+    xor dword [esp],0x00200000           ;Invert the ID bit in stored EFLAGS
+    popfd                                ;Load stored EFLAGS (with ID bit inverted)
+    pushfd                               ;Store EFLAGS again (ID bit may or may not be inverted)
+    pop eax                              ;eax = modified EFLAGS (ID bit may or may not be inverted)
+    xor eax,[esp]                        ;eax = whichever bits were changed
+    popfd                                ;Restore original EFLAGS
+    and eax,0x00200000                   ;eax = zero if ID bit can't be changed, else non-zero
+    cmp eax, 0
+    je .no_CPUID
+    ret
+    .no_CPUID:
+        mov esi, str_no_cpuid
+        call _print
+        hlt
+
 _64INIT:
     ; Start with setting up a temporary page tables
     ; Start by mapping a PDP table to PML4
@@ -102,17 +111,91 @@ _64INIT:
     mov cr0, eax
 
     ret
-section .bss
-align 4096
 
-PML4_T:
-    resb 4096
-PDP_T:
-    resb 4096
-PD_T:
-    resb 4096
+; Screen related functions
+_setCursorPos: ; eax = x, ebx = y
+    push eax
+    push ebx
+    push ecx
+    mov [x], eax
+    mov [y], ebx
+    xchg eax, ebx
+    mov ecx, SCREEN_WIDTH
+    mul ecx
+    add eax, ebx
+    mov ecx, 2
+    mul ecx
+    mov [cursor], eax
+    pop ecx
+    pop ebx
+    pop eax
+    ret
+_XY_calc:
+    push eax
+    push edx
+    push ecx
+    mov eax, [cursor]
+    mov ecx, SCREEN_WIDTH
+    div ecx
+    mov [x], edx
+    mov [y], eax
+    pop ecx
+    pop edx
+    pop eax
+    ret
+_print: ; esi = pointer to string
+    push ebx
+    push esi
+    push eax
+    push ecx
+    mov ebx, VGA_ADDRESS_D
+    mov ecx, [cursor]
+    add ebx, ecx
+    .loop:
+        lodsb
+        cmp al, 0
+        je .done
+        cmp al, 0xA
+        je .jmp_line
+        mov ah, 0b00001111
+        mov [ebx], ax
+        add ebx, 2
+        mov ecx, [cursor]
+        add ecx, 2
+        mov [cursor], ecx
+        call _XY_calc
+        jmp .loop
+        .jmp_line:
+            push eax
+            push ebx
+            call _XY_calc ; Just in case
+            mov eax, [x]
+            mov ebx, [y]
+            add ebx, 1
+            call _setCursorPos
+            pop ebx
+            pop eax
+            jmp .loop
+    .done:
+        pop ecx
+        pop eax
+        pop esi
+        pop ebx
+        ret
 
 section .rodata
+
+; Local variables
+cursor dd 0 ; Cursor postition
+x dd 0
+y dd 0
+
+; Strings
+str_no_mb2   db 'Panic: system not booted with multiboot2! ', 0x0A, 'System halted', 0x00
+str_no_cpuid db 'Panic: no CPUID detected on system! ', 0x0A, 'System halted', 0x00
+str_no_x64   db 'Panic: x86-64 architecture not detected, wrong architecture selected! ', 0x0A, 'System halted', 0x00 
+
+; Temp. GDT
 GDT:                           ; Global Descriptor Table (64-bit).
     .Null: equ $ - GDT         ; The null descriptor.
     dw 0xFFFF                    ; Limit (low).

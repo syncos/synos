@@ -41,7 +41,10 @@ int mbootInit()
         X64.mmap = kmalloc(sizeof(struct mem_regions));
         X64.mmap->chain_length = 0;
         struct mem_regions *creg = NULL;
-        for (multiboot_memory_map_t *ent = (multiboot_memory_map_t*)(uintptr_t)mbinf->mmap_addr; (uintptr_t)ent < mbinf->mmap_addr + mbinf->mmap_length; ent += ent->size)
+        for (multiboot_memory_map_t *ent = (multiboot_memory_map_t*)(uintptr_t)mbinf->mmap_addr;
+            (uintptr_t)ent < (uintptr_t)mbinf->mmap_addr + (uintptr_t)mbinf->mmap_length;
+            ent = (multiboot_memory_map_t*)((uintptr_t)ent + ent->size + sizeof(ent->size))
+        )
         {
             if (creg == NULL)
                 creg = X64.mmap;
@@ -55,17 +58,24 @@ int mbootInit()
             creg->start = ent->addr;
             creg->size = ent->len;
             
-            creg->attrib = 0;
-            if (ent->type & MULTIBOOT_MEMORY_AVAILABLE)
-                creg->attrib |= MEM_REGION_AVAILABLE | MEM_REGION_MAPPED | MEM_REGION_READ;
-            if (ent->type & MULTIBOOT_MEMORY_RESERVED)
-                creg->attrib |= MEM_REGION_PRESERVE | MEM_REGION_PROTECTED | MEM_REGION_READ;
-            if (ent->type & MULTIBOOT_MEMORY_ACPI_RECLAIMABLE)
-                creg->attrib |= MEM_REGION_PROTECTED | MEM_REGION_READ | MEM_REGION_WRITE;
-            if (ent->type & MULTIBOOT_MEMORY_NVS)
-                creg->attrib |= MEM_REGION_PRESERVE | MEM_REGION_READ;
-            if (ent->type & MULTIBOOT_MEMORY_BADRAM)
-                creg->attrib |= MEM_REGION_BAD;
+            switch (ent->type)
+            {
+                case MULTIBOOT_MEMORY_AVAILABLE:
+                    creg->attrib = MEM_REGION_AVAILABLE | MEM_REGION_MAPPED | MEM_REGION_READ | MEM_REGION_WRITE;
+                    break;
+                case MULTIBOOT_MEMORY_RESERVED:
+                    creg->attrib = MEM_REGION_PROTECTED;
+                    break;
+                case MULTIBOOT_MEMORY_ACPI_RECLAIMABLE:
+                    creg->attrib = MEM_REGION_PROTECTED | MEM_REGION_MAPPED | MEM_REGION_READ | MEM_REGION_WRITE;
+                    break;
+                case MULTIBOOT_MEMORY_NVS:
+                    creg->attrib = MEM_REGION_PRESERVE | MEM_REGION_MAPPED | MEM_REGION_READ | MEM_REGION_WRITE;
+                    break;
+                case MULTIBOOT_MEMORY_BADRAM:
+                    creg->attrib = MEM_REGION_BAD | MEM_REGION_MAPPED | MEM_REGION_PROTECTED;
+                    break;
+            }
 
             ++X64.mmap->chain_length;
         }

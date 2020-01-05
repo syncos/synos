@@ -37,6 +37,49 @@ int mboot2Init()
                 tab_search();
                 break;
             }
+            case MULTIBOOT2_TAG_TYPE_MMAP:
+            {
+                X64.mmap = kmalloc(sizeof(struct mem_regions));
+                X64.mmap->chain_length = 0;
+
+                struct mem_regions *creg = NULL;
+                for (multiboot2_memory_map_t *mmap = ((struct multiboot2_tag_mmap*)tag)->entries;
+                    (uintptr_t)mmap < ((uintptr_t)tag + tag->size);
+                    mmap = (multiboot2_memory_map_t*)((uintptr_t)mmap + ((struct multiboot2_tag_mmap*)tag)->entry_size))
+                {
+                    if (creg == NULL)
+                        creg = X64.mmap;
+                    else
+                    {
+                        struct mem_regions *creg_new = kmalloc(sizeof(struct mem_regions));
+                        creg->next = creg_new;
+                        creg = creg_new;
+                    }
+
+                    creg->start = mmap->addr;
+                    creg->size = mmap->len;
+
+                    switch (mmap->type)
+                    {
+                        case MULTIBOOT2_MEMORY_AVAILABLE:
+                            creg->attrib = MEM_REGION_AVAILABLE | MEM_REGION_MAPPED | MEM_REGION_READ | MEM_REGION_WRITE;
+                            break;
+                        case MULTIBOOT2_MEMORY_RESERVED:
+                            creg->attrib = MEM_REGION_PROTECTED;
+                            break;
+                        case MULTIBOOT2_MEMORY_ACPI_RECLAIMABLE:
+                            creg->attrib = MEM_REGION_PROTECTED | MEM_REGION_MAPPED | MEM_REGION_READ | MEM_REGION_WRITE;
+                            break;
+                        case MULTIBOOT2_MEMORY_NVS:
+                            creg->attrib = MEM_REGION_PRESERVE | MEM_REGION_MAPPED | MEM_REGION_READ | MEM_REGION_WRITE;
+                            break;
+                        case MULTIBOOT2_MEMORY_BADRAM:
+                            creg->attrib = MEM_REGION_BAD | MEM_REGION_MAPPED | MEM_REGION_PROTECTED;
+                            break;
+                    }
+                }
+                break;
+            }
         }
     }
 

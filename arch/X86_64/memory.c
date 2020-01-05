@@ -60,15 +60,12 @@ static void pm_lowmem_fill()
     }
 
     // IVT + BDA (0x0000 - 0x1000)
-    PT_0[0]   = 0;
     PT_0[0]  |= PAGE_PRESENT | PAGE_NO_EXECUTE;
     // MBR (used during core bootup) (0x7000 - 0x8000)
-    PT_0[7]   = 0x7000;
     PT_0[7]  |= PAGE_PRESENT | PAGE_WRITABLE /* Needed to be able to write boot code for the cores*/ | PAGE_NO_EXECUTE;
     // EBDA + ROM
     for (int i = 0; i < 128; ++i)
     {
-        PT_0[80 + i]  = 0x80000 + (0x1000 * i);
         PT_0[80 + i] |= PAGE_PRESENT | PAGE_NO_EXECUTE;
     }
 }

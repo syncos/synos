@@ -3,6 +3,7 @@
 #include <synos/arch/io.h>
 #include <string.h>
 #include "memory.h"
+#include "x64.h"
 #include "interrupts/interrupts.h"
 
 extern volatile uintptr_t __KERN_MEM_START[];
@@ -11,6 +12,9 @@ extern volatile uintptr_t __KERN_MEM_SIZE[];
 const uintptr_t _MemStart = (uintptr_t)__KERN_MEM_START;
 const uintptr_t _MemEnd   = (uintptr_t)__KERN_MEM_END;
 const uintptr_t _MemSize  = (uintptr_t)__KERN_MEM_SIZE;
+
+const size_t phys_page_size = 4096;
+const size_t phys_page_count = __UINTPTR_MAX__ / 4096;
 
 uint64_t  PML_4_Table[512] __attribute__((aligned(4096)));
 uint64_t* PML_4 = &PML_4_Table[0];
@@ -69,7 +73,7 @@ static void pm_lowmem_fill()
     }
 }
 
-int memc_init()
+int pga_init()
 {
     // Initialize memory controller
     memset(PML_4, 0, 8*512); // Clear to-be PML_4 table
@@ -98,7 +102,7 @@ extern uint8_t mb2;
 #ifdef MEM_MANUAL_PROBE
 static uint64_t mem_probe()
 {
-    panic("Manual probing currently not supported. Please use the multiboot/multiboot2 standard instead.");
+    panic("Manual probing currently not supported");
 
     IRQ_save();
     IRQ_kill();
@@ -124,6 +128,21 @@ static uint64_t mem_probe()
 
 struct MEMID* getMEMID(struct MEMID* mem)
 {
+    if (X64.mmap == NULL)
+    {
+        mem->enabled = false;
+        return mem;
+    }
+
+    mem->nEntries = X64.mmap->chain_length;
+    mem->totalSize = 0;
+
+    struct mem_regions *creg = X64.mmap;
+    for (uint32_t i = 0; i < mem->nEntries; ++i)
+    {
+        mem->totalSize += creg->size;
+        creg = creg->next;
+    }
 
     return mem;
 }

@@ -2,6 +2,7 @@
 #define _X64_H
 #include <inttypes.h>
 #include <elf/elf.h>
+#include <synos/arch/memory.h>
 
 enum LOAD_SYSTEMS
 {
@@ -24,6 +25,8 @@ struct BootInfo
         struct ELF64_Shdr *elf_sh;
         uint32_t elf_sh_length;
     }sections;
+
+    struct mem_regions *mmap;
 };
 
 extern struct BootInfo X64;

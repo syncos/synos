@@ -23,4 +23,7 @@ extern struct SYS_STATE System;
 
 void startup();
 void panic(char*);
+
+extern void* kmalloc(size_t bytes);
+extern void kfree(void* pointer);
 #endif

@@ -1,6 +1,6 @@
 KERNDIR=kernel
 KERNDIR_FULL=$(SOURCE_DIR)/kernel
-KERNOBJECTS=kernel/system.o kernel/log.o kernel/syscall.o
+KERNOBJECTS=kernel/system.o kernel/log.o kernel/syscall.o kernel/exception/arithex.o kernel/exception/gpf.o kernel/mm/mm.o kernel/mm/phys.o
 
 INITIMGOBJECTS += kernel/kernel.o
 

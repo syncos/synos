@@ -36,5 +36,45 @@ int mbootInit()
         X64.sections.elf_sh_length = 0;
     }
 
+    if (mbinf->flags & MULTIBOOT_INFO_MEM_MAP)
+    {
+        X64.mmap = kmalloc(sizeof(struct mem_regions));
+        X64.mmap->chain_length = 0;
+        struct mem_regions *creg = NULL;
+        for (multiboot_memory_map_t *ent = (multiboot_memory_map_t*)(uintptr_t)mbinf->mmap_addr; (uintptr_t)ent < mbinf->mmap_addr + mbinf->mmap_length; ent += ent->size)
+        {
+            if (creg == NULL)
+                creg = X64.mmap;
+            else
+            {
+                struct mem_regions *creg_new = kmalloc(sizeof(struct mem_regions));
+                creg->next = creg_new;
+                creg = creg_new;
+            }
+
+            creg->start = ent->addr;
+            creg->size = ent->len;
+            
+            creg->attrib = 0;
+            if (ent->type & MULTIBOOT_MEMORY_AVAILABLE)
+                creg->attrib |= MEM_REGION_AVAILABLE | MEM_REGION_MAPPED | MEM_REGION_READ;
+            if (ent->type & MULTIBOOT_MEMORY_RESERVED)
+                creg->attrib |= MEM_REGION_PRESERVE | MEM_REGION_PROTECTED | MEM_REGION_READ;
+            if (ent->type & MULTIBOOT_MEMORY_ACPI_RECLAIMABLE)
+                creg->attrib |= MEM_REGION_PROTECTED | MEM_REGION_READ | MEM_REGION_WRITE;
+            if (ent->type & MULTIBOOT_MEMORY_NVS)
+                creg->attrib |= MEM_REGION_PRESERVE | MEM_REGION_READ;
+            if (ent->type & MULTIBOOT_MEMORY_BADRAM)
+                creg->attrib |= MEM_REGION_BAD;
+
+            ++X64.mmap->chain_length;
+        }
+    }
+    else
+    {
+        X64.mmap = NULL;
+    }
+    
+
     return 0;
 }

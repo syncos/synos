@@ -1,4 +1,5 @@
 #include <synos/synos.h>
+#include <synos/mm.h>
 #include <synos/arch/interrupt.h>
 #include <synos/syscall.h>
 #include <synos/arch/io.h>
@@ -41,7 +42,7 @@ void startup()
     pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
 
     // Initialize memory controller
-    memc_init();
+    mm_init();
 
     // Initialize interrupts
     interrupt_init();

@@ -25,17 +25,10 @@ uint64_t PT_0 [512] __attribute__((aligned(4096)));
 
 void* kmalloc(size_t bytes)
 {
-    #ifdef MEMSTACK_ENABLE
     if (!System.MMU_enabled)
     {
         return memstck_malloc(bytes);
     }
-    #else
-    if (!System.MMU_enabled)
-    {
-        return NULL;
-    }
-    #endif
     return NULL;
 }
 void kfree(void* pointer)
@@ -96,7 +89,6 @@ static void kern_mem_map()
         PT_0[((uintptr_t)__KERN_CODE_START / virt_page_size) + offset] |= PAGE_PRESENT | PAGE_WRITABLE | PAGE_NO_EXECUTE;
     }
 
-    #ifdef MEMSTACK_ENABLE
     // Map kernel memory stack
     extern uintptr_t MemStack;
     uintptr_t stack_pages = (MemStack - (uintptr_t)__KERN_MEM_END) / virt_page_size;
@@ -109,7 +101,6 @@ static void kern_mem_map()
         PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset]  = (uintptr_t)__KERN_DATA_END + (4096 * offset);
         PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset] |= PAGE_PRESENT | PAGE_WRITABLE | PAGE_NO_EXECUTE;
     }
-    #endif
 }
 #endif
 

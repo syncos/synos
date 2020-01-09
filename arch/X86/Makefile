@@ -18,9 +18,6 @@ ARCHOBJECTS += $(X86DIR)/multiboot.o
 ARCHOBJECTS += $(X86DIR)/boot/multiboot.o
 endif
 endif
-ifeq ($(ENABLE_MEMSTACK), TRUE)
-DEFINE_VALS += -DMEMSTACK_ENABLE
-endif
 ifdef SYSCALL_INT
 DEFINE_VALS += -DSYSCALL_INT=$(SYSCALL_INT)
 endif

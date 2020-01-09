@@ -5,26 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-bool MemStack_init = false;
-uintptr_t MemStack;
-
-#ifdef MEMSTACK_ENABLE
-void* memstck_malloc(size_t bytes)
-{
-    if (!MemStack_init)
-    {
-        MemStack = _MemEnd + 64; // Padding just in case
-        MemStack_init = true;
-    }
-    void* pointer = (void*)MemStack;
-
-    MemStack += bytes + 1;
-    ((char*)pointer)[bytes] = 0;
-
-    return pointer;
-}
-#endif
-
 struct StackFrame
 {
     struct StackFrame* rbp;

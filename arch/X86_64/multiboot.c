@@ -41,7 +41,7 @@ int mbootInit()
     {
         X64.mmap = kmalloc(sizeof(struct mem_regions));
         X64.mmap->chain_length = 0;
-        X64.mmap->page_alloc_start = 0;
+        X64.mmap->page_alloc_si = NULL;
         X64.mmap->next = NULL;
         struct mem_regions *creg = NULL;
         for (multiboot_memory_map_t *ent = (multiboot_memory_map_t*)(uintptr_t)mbinf->mmap_addr;
@@ -57,7 +57,7 @@ int mbootInit()
                 creg->next = creg_new;
                 creg = creg_new;
                 creg->chain_length = 0;
-                creg->page_alloc_start = 0;
+                creg->page_alloc_si = NULL;
                 creg->next = NULL;
             }
 

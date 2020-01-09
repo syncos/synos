@@ -3,137 +3,49 @@
 #include <synos/arch/memory.h>
 #include <string.h>
 
-block_t free_area[MAX_ORDER][MAX_ORDER_ENT];
-#define max_order_blocks free_area[MAX_ORDER-1]
+mregion_t *regions;
 
-mregion_t *current_region = NULL;
-
-static unsigned int region_max_order(mregion_t region)
+static mregion_t *findNextRegion(mregion_t *start)
 {
-    uintptr_t region_pages = region.size / phys_page_size;
-    for (unsigned int order = 1; ; ++order)
+    for (mregion_t *region = start; region != NULL; region = region->next)
     {
-        if (((uintptr_t)(1 << order)) > region_pages)
-            return --order;
-    }
-    return 1;
-}
-static unsigned int order_entries(unsigned int order)
-{
-    unsigned int count = 0;
-    for (unsigned int i = 0; i < MAX_ORDER_ENT; ++i)
-    {
-        if (free_area[order][i].present)
-            ++count;
-    }
-    return count;
-}
-static void free_area_insert(unsigned int order, block_t block)
-{
-    for (unsigned int i = 0; i < MAX_ORDER_ENT; ++i)
-    {
-        if (!free_area[order][i].present)
+        if ((region->attrib & (MEM_REGION_AVAILABLE | MEM_REGION_READ | MEM_REGION_WRITE)) == (MEM_REGION_AVAILABLE | MEM_REGION_READ | MEM_REGION_WRITE)
+            && (region->attrib & (MEM_REGION_BAD | MEM_REGION_PRESERVE | MEM_REGION_PROTECTED)) == 0
+            && region->size >= phys_page_size)
         {
-            free_area[order][i] = block;
-            return;
+            return region;
         }
     }
-}
-static int findNextRegion()
-{
-    for (mregion_t *reg = current_region->next; reg->next != NULL; reg = reg->next)
-    {
-        if ((reg->attrib & (MEM_REGION_AVAILABLE | MEM_REGION_READ | MEM_REGION_WRITE)) == (MEM_REGION_AVAILABLE | MEM_REGION_READ | MEM_REGION_WRITE)
-            && (reg->attrib & (MEM_REGION_BAD | MEM_REGION_PRESERVE | MEM_REGION_PROTECTED)) == 0
-            && reg->size >= phys_page_size)
-        {
-            current_region = reg;
-            return 0;
-        }
-    }
-    // TODO: fix a handler when we're out of physical memory regions
-    return 1;
+    return NULL;
 }
 
-#define good_reg(reg) ((reg->attrib & MEM_REGION_READ) && (reg->attrib & MEM_REGION_WRITE) && (reg->attrib & MEM_REGION_AVAILABLE) && !(reg->attrib & MEM_REGION_BAD))
-static void _getMOB(mregion_t *region, block_t *block)
-{
-    block->order = MAX_ORDER;
-
-    if (region->page_alloc_start + (phys_page_size * MAX_ORDER_COUNT) >= region->size || !good_reg(region))
-    {
-        block->present = false;
-        return;
-    }
-
-    block->present = true;
-
-    block->page_start.addr = (region->start + region->page_alloc_start) & ~(phys_page_size - 1);
-    block->page_end.addr = (region->start + region->page_alloc_start + (phys_page_size * MAX_ORDER_COUNT)) & ~(phys_page_size - 1);
-
-    block->page_start.start = (void*)block->page_start.addr;
-    block->page_end.start = (void*)block->page_end.addr;
-
-    region->page_alloc_start += (phys_page_size * MAX_ORDER_COUNT);
-}
-static void getMOB()
-{
-    for (unsigned int i = 0; i < MAX_ORDER_ENT; ++i)
-    {
-        if (max_order_blocks[i].present)
-            continue;
-        _gm:
-        _getMOB(current_region, &max_order_blocks[i]);
-        if (!max_order_blocks[i].present)
-        {
-            if (findNextRegion() != 0) // No more regions to allocate (once the current pool of physical memory is empty we're out)
-                return;
-            goto _gm;
-        }
-    }
-}
-
+#define TOTAL_PAGE_TABLE_SIZE (((System.memid.totalSize / phys_page_size) * bits_per_page) / 8)
 int ppage_init()
 {
-    current_region = get_regions();
-
-    memset(&max_order_blocks, 0, sizeof(max_order_blocks));
-    for (int i = MAX_ORDER - 1; i >= 0; --i)
+    regions = findNextRegion(get_regions());
+    regup:
+    if (regions == NULL)
+        panic("No available memory to allocate initial memory tables!");
+    if (regions->size < TOTAL_PAGE_TABLE_SIZE || regions->start < LM_SIZE)
     {
-        for (int t = 0; t < MAX_ORDER_ENT; ++t)
-        {
-            free_area[i][t].order = i;
-            free_area[i][t].present = false;
-            free_area[i][t].use_blocks = false;
-        }
+        regions = findNextRegion(regions->next);
+        goto regup;
     }
 
-    getMOB();
+    size_t pages = regions->size / phys_page_size;
+    size_t page_tbl_size = (pages * bits_per_page) / 8;
+    if (page_tbl_size % 8 != 0)
+        ++page_tbl_size;
+    void *regst = memstck_malloc(page_tbl_size);
+    void *regsb = memstck_malloc(mm_sb_size);
+    if (regst == NULL || regsb == NULL)
+        panic("No heap to allocate memory to!");
+    region_map(regions, pages, regsb, regst);
+
+    uintptr_t addr = page_alloc(regions);
+    pages_alloc(regions, 2);
+    page_free(regions, addr);
+    pages_alloc(regions, 3);
 
     return 0;
-}
-
-page_t getPhysPage(size_t index)
-{
-    page_t pgs;
-    pgs.addr = phys_page_size * index;
-    pgs.start = (void*)pgs.addr;
-    return pgs;
-}
-
-
-static void block_split(unsigned int order)
-{
-    if (order <= 0)
-        return;
-    
-    block_t nb0;
-    block_t nb1;
-
-    
-}
-
-page_t alloc_page(unsigned int gfp_mask)
-{
-
 }

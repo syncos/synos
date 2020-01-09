@@ -5,6 +5,7 @@
 #include "memory.h"
 #include "x64.h"
 #include "multiboot2.h"
+#include <synos/mm.h>
 
 extern uint32_t mbm;
 extern uint32_t mbp;
@@ -42,7 +43,7 @@ int mboot2Init()
             {
                 X64.mmap = kmalloc(sizeof(struct mem_regions));
                 X64.mmap->chain_length = 0;
-                X64.mmap->page_alloc_start = 0;
+                X64.mmap->page_alloc_si = NULL;
                 X64.mmap->next = NULL;
                 struct mem_regions *creg = NULL;
                 for (multiboot2_memory_map_t *mmap = ((struct multiboot2_tag_mmap*)tag)->entries;
@@ -57,7 +58,7 @@ int mboot2Init()
                         creg->next = creg_new;
                         creg = creg_new;
                         creg->chain_length = 0;
-                        creg->page_alloc_start = 0;
+                        creg->page_alloc_si = NULL;
                         creg->next = NULL;
                     }
 

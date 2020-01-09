@@ -9,8 +9,25 @@
 #define MAX_ORDER_ENT 10
 #endif
 
+#define LM_SIZE 0x100000 
+
 #define MAX_ORDER_COUNT (1 << MAX_ORDER)
 #define BLOCK_ORDER_SIZE(order) (phys_page_size * (1 << order))
+
+extern volatile uintptr_t __BOOT_HEADER_START[];
+extern volatile uintptr_t __BOOT_HEADER_END[];
+
+extern volatile uintptr_t __KERN_MEM_START[];
+extern volatile uintptr_t __KERN_MEM_END[];
+extern volatile uintptr_t __KERN_MEM_SIZE[];
+
+extern volatile uintptr_t __KERN_CODE_START[];
+extern volatile uintptr_t __KERN_CODE_END[];
+extern volatile uintptr_t __KERN_CODE_SIZE[];
+
+extern volatile uintptr_t __KERN_DATA_START[];
+extern volatile uintptr_t __KERN_DATA_END[];
+extern volatile uintptr_t __KERN_DATA_SIZE[];
 
 struct block;
 typedef struct page
@@ -53,7 +70,8 @@ typedef struct mem_regions
     uintptr_t size;
     uint8_t attrib;
 
-    uint64_t page_alloc_start;
+    bool mem_full;
+    void *page_alloc_si;
 
     uint32_t chain_length;
     struct mem_regions *next;
@@ -101,4 +119,20 @@ uintptr_t __get_free_pages(unsigned int gfp_mask, unsigned int order);
 // Frees 
 void free_page(const page_t *page);
 void free_pages(unsigned int order, const page_t* pages);
+
+extern void* memstck_malloc(size_t bytes);
+
+// Page allocator implementation
+extern const size_t mm_sb_size;
+extern const size_t bits_per_page;
+
+extern void region_map(mregion_t *region, size_t pages, void *sb, void *pageent);
+
+extern uintptr_t page_alloc(mregion_t *region);
+extern uintptr_t pages_alloc(mregion_t *region, unsigned int order);
+extern uintptr_t pages_reserve(mregion_t *region, unsigned int order, uint64_t offset);
+
+extern void page_free(mregion_t *region, uintptr_t phaddr);
+extern void pages_free(mregion_t *region, uintptr_t phaddr, unsigned int order);
+
 #endif

@@ -4,8 +4,8 @@
 
 int mm_init()
 {
-    pga_init();
     ppage_init();
+    pga_init();
 
     return 0;
 }

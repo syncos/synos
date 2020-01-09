@@ -1,6 +1,7 @@
 #include "x64.h"
 #include "multiboot.h"
 #include <synos/synos.h>
+#include <synos/mm.h>
 #include <inttypes.h>
 #include <elf/elf.h>
 
@@ -40,6 +41,8 @@ int mbootInit()
     {
         X64.mmap = kmalloc(sizeof(struct mem_regions));
         X64.mmap->chain_length = 0;
+        X64.mmap->page_alloc_start = 0;
+        X64.mmap->next = NULL;
         struct mem_regions *creg = NULL;
         for (multiboot_memory_map_t *ent = (multiboot_memory_map_t*)(uintptr_t)mbinf->mmap_addr;
             (uintptr_t)ent < (uintptr_t)mbinf->mmap_addr + (uintptr_t)mbinf->mmap_length;
@@ -53,6 +56,9 @@ int mbootInit()
                 struct mem_regions *creg_new = kmalloc(sizeof(struct mem_regions));
                 creg->next = creg_new;
                 creg = creg_new;
+                creg->chain_length = 0;
+                creg->page_alloc_start = 0;
+                creg->next = NULL;
             }
 
             creg->start = ent->addr;

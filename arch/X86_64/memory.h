@@ -24,6 +24,21 @@
 #define PAGE_GLOBAL        (1 << 8)
 #define PAGE_NO_EXECUTE    ((uint64_t)1 << 63)
 
+extern volatile uintptr_t __BOOT_HEADER_START[];
+extern volatile uintptr_t __BOOT_HEADER_END[];
+
+extern volatile uintptr_t __KERN_MEM_START[];
+extern volatile uintptr_t __KERN_MEM_END[];
+extern volatile uintptr_t __KERN_MEM_SIZE[];
+
+extern volatile uintptr_t __KERN_CODE_START[];
+extern volatile uintptr_t __KERN_CODE_END[];
+extern volatile uintptr_t __KERN_CODE_SIZE[];
+
+extern volatile uintptr_t __KERN_DATA_START[];
+extern volatile uintptr_t __KERN_DATA_END[];
+extern volatile uintptr_t __KERN_DATA_SIZE[];
+
 struct GDT_entry
 {
     uint16_t limit_low;

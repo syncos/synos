@@ -1,4 +1,5 @@
 #include <synos/synos.h>
+#include <synos/mm.h>
 #include <inttypes.h>
 #include <synos/arch/io.h>
 #include <string.h>
@@ -6,15 +7,13 @@
 #include "x64.h"
 #include "interrupts/interrupts.h"
 
-extern volatile uintptr_t __KERN_MEM_START[];
-extern volatile uintptr_t __KERN_MEM_END[];
-extern volatile uintptr_t __KERN_MEM_SIZE[];
 const uintptr_t _MemStart = (uintptr_t)__KERN_MEM_START;
 const uintptr_t _MemEnd   = (uintptr_t)__KERN_MEM_END;
 const uintptr_t _MemSize  = (uintptr_t)__KERN_MEM_SIZE;
 
 const size_t phys_page_size = 4096;
 const size_t phys_page_count = __UINTPTR_MAX__ / 4096;
+const size_t virt_page_size = 4096;
 
 uint64_t  PML_4_Table[512] __attribute__((aligned(4096)));
 uint64_t* PML_4 = &PML_4_Table[0];
@@ -62,13 +61,57 @@ static void pm_lowmem_fill()
     // IVT + BDA (0x0000 - 0x1000)
     PT_0[0]  |= PAGE_PRESENT | PAGE_NO_EXECUTE;
     // MBR (used during core bootup) (0x7000 - 0x8000)
-    PT_0[7]  |= PAGE_PRESENT | PAGE_WRITABLE /* Needed to be able to write boot code for the cores*/ | PAGE_NO_EXECUTE;
+    PT_0[7]  |= PAGE_PRESENT | PAGE_WRITABLE /* Needed to be able to write boot code for the cores */ | PAGE_NO_EXECUTE;
     // EBDA + ROM
     for (int i = 0; i < 128; ++i)
     {
         PT_0[80 + i] |= PAGE_PRESENT | PAGE_NO_EXECUTE;
     }
 }
+
+#ifdef NOTINC
+static void kern_mem_map()
+{
+    // Map kernel code segment
+    uintptr_t code_pages = (uintptr_t)__KERN_CODE_SIZE / virt_page_size;
+    if ((uintptr_t)__KERN_CODE_SIZE % virt_page_size != 0)
+        ++code_pages;
+
+    for (unsigned int offset = 0; offset < code_pages; ++offset)
+    {
+        PT_0[(0x100000 / virt_page_size) + offset]  = 0;
+        PT_0[(0x100000 / virt_page_size) + offset]  = 0x100000 + (4096 * offset);
+        PT_0[(0x100000 / virt_page_size) + offset] |= PAGE_PRESENT;
+    }
+
+    // Map kernel data segment
+    uintptr_t data_pages = (uintptr_t)__KERN_DATA_SIZE / virt_page_size;
+    if ((uintptr_t)__KERN_DATA_SIZE % virt_page_size)
+        ++data_pages;
+
+    for (unsigned int offset = 0; offset < data_pages; ++offset)
+    {
+        PT_0[((uintptr_t)__KERN_CODE_START / virt_page_size) + offset]  = 0;
+        PT_0[((uintptr_t)__KERN_CODE_START / virt_page_size) + offset]  = (uintptr_t)__KERN_CODE_START + (4096 * offset);
+        PT_0[((uintptr_t)__KERN_CODE_START / virt_page_size) + offset] |= PAGE_PRESENT | PAGE_WRITABLE | PAGE_NO_EXECUTE;
+    }
+
+    #ifdef MEMSTACK_ENABLE
+    // Map kernel memory stack
+    extern uintptr_t MemStack;
+    uintptr_t stack_pages = (MemStack - (uintptr_t)__KERN_MEM_END) / virt_page_size;
+    if ((MemStack - (uintptr_t)__KERN_MEM_END) % virt_page_size != 0)
+        ++stack_pages;
+    
+    for (unsigned int offset = 0; offset < stack_pages; ++offset)
+    {
+        PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset]  = 0;
+        PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset]  = (uintptr_t)__KERN_DATA_END + (4096 * offset);
+        PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset] |= PAGE_PRESENT | PAGE_WRITABLE | PAGE_NO_EXECUTE;
+    }
+    #endif
+}
+#endif
 
 int pga_init()
 {
@@ -92,36 +135,14 @@ int pga_init()
     return 0;
 }
 
+struct mem_regions *get_regions()
+{
+    return X64.mmap;
+}
+
 extern uint32_t mbp;
 extern uint32_t mbm;
 extern uint8_t mb2;
-
-#ifdef MEM_MANUAL_PROBE
-static uint64_t mem_probe()
-{
-    panic("Manual probing currently not supported");
-
-    IRQ_save();
-    IRQ_kill();
-
-    register uintptr_t *mem;
-    uint64_t mem_count, a;
-    //uint16_t memkb;
-    uint64_t cr0;
-
-    mem_count = 0;
-    //memkb = 0;
-
-    // Save a copy of cr0
-    asm volatile ("movq %0, cr0" : "=r"(cr0));
-    // Invalidate the cache
-    asm volatile ("wbinvd");
-
-    IRQ_restore();
-
-    return mem_count;
-}
-#endif
 
 struct MEMID* getMEMID(struct MEMID* mem)
 {

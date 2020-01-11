@@ -9,7 +9,7 @@ MODULES=startM
 INITIMGOBJECTS=
 
 .PHONY: all
-all: initimg
+all: $(KERNEL_OUT)
 
 include arch/Makefile
 include kernel/Makefile
@@ -61,12 +61,12 @@ endif
 
 .PHONY: startM
 startM:
-	@echo -e "$(SECTIONC)[build]$(INFOC) Compiling synos for target $(ARCH) using $(LOAD_SYSTEM)...$(NC)"
+	@echo -e "$(SECTIONC)[build]$(INFOC) Compiling synos for target $(ARCH)...$(NC)"
 
-.PHONY: initimg
-initimg: $(MODULES)
-	@echo -e "$(SECTIONC)[initimg] $(LINKC)Linking object files -> $(INITIMG_PREFIX)/synos$(NC)"
-	@$(LINK) -T $(IMG_LINK) $(INITIMGOBJECTS) -o $(INITIMG_PREFIX)/synos $(LINK_FLAGS)
+$(KERNEL_OUT): $(MODULES)
+	@echo -e "$(SECTIONC)[initimg] $(LINKC)Linking object files -> $(KERNEL_OUT)$(NC)"
+	@$(LINK) -T $(IMG_LINK) $(INITIMGOBJECTS) -o $(KERNEL_OUT) $(LINK_FLAGS)
+	@echo -e "$(SECTIONC)[build]$(INFOC) Build done!$(NC)"
 
 .PHONY: clean
 clean:

@@ -18,6 +18,7 @@ extern uint8_t phys_page_bmp[];
 struct MEMID* getMEMID(struct MEMID*);
 
 int pga_init();
+void mem_page_protect();
 struct mem_regions *get_regions();
 
 #endif

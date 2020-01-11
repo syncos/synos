@@ -45,6 +45,7 @@ int mboot2Init()
                 X64.mmap->chain_length = 0;
                 X64.mmap->page_alloc_si = NULL;
                 X64.mmap->next = NULL;
+                X64.mmap->lock = 0;
                 struct mem_regions *creg = NULL;
                 for (multiboot2_memory_map_t *mmap = ((struct multiboot2_tag_mmap*)tag)->entries;
                     (uintptr_t)mmap < ((uintptr_t)tag + tag->size);
@@ -60,6 +61,7 @@ int mboot2Init()
                         creg->chain_length = 0;
                         creg->page_alloc_si = NULL;
                         creg->next = NULL;
+                        creg->lock = 0;
                     }
 
                     creg->start = mmap->addr;

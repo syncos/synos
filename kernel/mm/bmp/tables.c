@@ -1,12 +1,14 @@
 #include <synos/mm.h>
 #include "bmp.h"
 #include <string.h>
+#include <spinlock.h>
 
 const size_t mm_sb_size = sizeof(bmp_map_t);
 const size_t bits_per_page = 1;
 
 void region_map(mregion_t *region, size_t pages, void *sb, void *pageent)
 {
+    spinlock_lock(&region->lock);
     region->page_alloc_si = sb;
 
     bmp_map_t *bmap = (bmp_map_t *)sb;
@@ -19,6 +21,7 @@ void region_map(mregion_t *region, size_t pages, void *sb, void *pageent)
         ++stsize;
     
     memset(pageent, 0, stsize);
+    spinlock_unlock(&region->lock);
 }
 
 void outofmem(mregion_t *region)

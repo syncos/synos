@@ -21,7 +21,8 @@ ifeq ($(APIC_SUPPORT), TRUE)
 DEFINE_VALS += -DAPIC_ENABLE
 endif
 
-X86_64: $(ARCHOBJECTS)
+X86_64: $(SOURCE_DIR)/arch/arch.o
+$(SOURCE_DIR)/arch/arch.o: $(ARCHOBJECTS)
 	@echo -e "$(SECTIONC)[arch] $(LINKC)Linking arch_x86_64 object files -> arch/arch.o$(NC)"
 	@$(LINK) $(LINK_ARCH) -r $(ARCHOBJECTS) -o $(SOURCE_DIR)/arch/arch.o
 
@@ -42,7 +43,7 @@ grub:
 	@echo -e "$(SECTIONC)[install]$(INFOC) Installing synos along with GRUB to iso file $(INSTALL_DRIVE)...$(NC)"
 	@mkdir -p $(ROOT_DIR)/boot/grub
 	@cp conf/GRUB2.cfg.default $(ROOT_DIR)/boot/grub/grub.cfg
-	@cp $(INITIMG_PREFIX)/synos $(ROOT_DIR)/boot/synos
+	@cp $(KERNEL_OUT) $(ROOT_DIR)/boot/synos
 	@grub-mkrescue -o synos.iso $(ROOT_DIR)
 	@rm -rf $(ROOT_DIR)
 	@echo -e "$(SECTIONC)[install]$(INFOC) $(INSTALL_DRIVE) created!$(NC)"

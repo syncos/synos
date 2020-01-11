@@ -23,6 +23,9 @@ void startup()
 
     if (arch_init() != 0) panic("Arch initialization error");
 
+    // Initialize memory controller
+    mm_init();
+
     pr_log(INFO, "Starting version %d");//, VERSION);
     printf("Starting version ");
     printf(VERSION);
@@ -40,9 +43,6 @@ void startup()
     // Get memory info
     getMEMID(&System.memid);
     pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
-
-    // Initialize memory controller
-    mm_init();
 
     // Initialize interrupts
     interrupt_init();

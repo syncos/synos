@@ -9,10 +9,7 @@
 #define MAX_ORDER_ENT 10
 #endif
 
-#define LM_SIZE 0x100000 
-
-#define MAX_ORDER_COUNT (1 << MAX_ORDER)
-#define BLOCK_ORDER_SIZE(order) (phys_page_size * (1 << order))
+#define LM_SIZE 0x100000
 
 extern volatile uintptr_t __BOOT_HEADER_START[];
 extern volatile uintptr_t __BOOT_HEADER_END[];
@@ -75,12 +72,10 @@ typedef struct mem_regions
 
     uint32_t chain_length;
     struct mem_regions *next;
+    int lock;
 }mregion_t;
 
 extern struct arch_page_size PS;
-
-int mm_init();
-int ppage_init();
 
 page_t getPhysPage(size_t index);
 
@@ -104,6 +99,7 @@ page_t getPhysPage(size_t index);
 #define GFP_HIGHUSER    (__GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS | __GFP_HIGHMEM)
 #define GFP_KSWAPD      GFP_USER
 
+int mm_init();
 // Allocates a single physical page (does NOT map the page into virtual memory, only returns the physical address)
 page_t alloc_page(unsigned int gfp_mask);
 // Same as alloc_page, but allocates pow(2, order) pages and returns the block struct
@@ -122,9 +118,11 @@ void free_pages(unsigned int order, const page_t* pages);
 
 extern void* memstck_malloc(size_t bytes);
 
-// Page allocator implementation
+// Physical page allocator definition
 extern const size_t mm_sb_size;
 extern const size_t bits_per_page;
+
+int ppage_init();
 
 extern void region_map(mregion_t *region, size_t pages, void *sb, void *pageent);
 
@@ -135,4 +133,6 @@ extern uintptr_t pages_reserve(mregion_t *region, unsigned int order, uint64_t o
 extern void page_free(mregion_t *region, uintptr_t phaddr);
 extern void pages_free(mregion_t *region, uintptr_t phaddr, unsigned int order);
 
+// Virtual page allocator definition
+int vpage_init(); 
 #endif

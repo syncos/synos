@@ -13,7 +13,8 @@ include mutils/stdlib/Makefile
 include mutils/elf/Makefile
 
 .PHONY: mutils
-mutils: $(MUTILSOBJECTS)
+mutils: mutils/mutils.o
+mutils/mutils.o: $(MUTILSOBJECTS)
 	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking mutils object files -> mutils/mutils.o$(NC)"
 	@$(LINK) $(LINK_ARCH) -r $(MUTILSOBJECTS) -o mutils/mutils.o
 

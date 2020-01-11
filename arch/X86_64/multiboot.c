@@ -43,6 +43,7 @@ int mbootInit()
         X64.mmap->chain_length = 0;
         X64.mmap->page_alloc_si = NULL;
         X64.mmap->next = NULL;
+        X64.mmap->lock = 0;
         struct mem_regions *creg = NULL;
         for (multiboot_memory_map_t *ent = (multiboot_memory_map_t*)(uintptr_t)mbinf->mmap_addr;
             (uintptr_t)ent < (uintptr_t)mbinf->mmap_addr + (uintptr_t)mbinf->mmap_length;
@@ -59,6 +60,7 @@ int mbootInit()
                 creg->chain_length = 0;
                 creg->page_alloc_si = NULL;
                 creg->next = NULL;
+                creg->lock = 0;
             }
 
             creg->start = ent->addr;

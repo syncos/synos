@@ -7,7 +7,8 @@ INITIMGOBJECTS += kernel/kernel.o
 include kernel/mm/Makefile
 
 .PHONY: kernel
-kernel: $(KERNOBJECTS)
+kernel: kernel/kernel.o
+kernel/kernel.o: $(KERNOBJECTS)
 	@echo -e "$(SECTIONC)[kernel] $(LINKC)Linking kernel object files -> kernel/kernel.o$(NC)"
 	@$(LINK) $(LINK_ARCH) -r $(KERNOBJECTS) -o kernel/kernel.o
 

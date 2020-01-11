@@ -23,23 +23,6 @@ uint64_t PDP_0[512] __attribute__((aligned(4096)));
 uint64_t PD_0 [512] __attribute__((aligned(4096)));
 uint64_t PT_0 [512] __attribute__((aligned(4096)));
 
-void* kmalloc(size_t bytes)
-{
-    if (!System.MMU_enabled)
-    {
-        return memstck_malloc(bytes);
-    }
-    return NULL;
-}
-void kfree(void* pointer)
-{
-    if (!System.MMU_enabled)
-    {
-        return;
-    }
-    return;
-}
-
 static void pm_lowmem_fill()
 {
     // Protect low-memory
@@ -121,7 +104,7 @@ int pga_init()
     PD_0[0]   = (uint64_t)&PT_0[0];
     PD_0[0]  |= PAGE_PRESENT | PAGE_WRITABLE;
 
-    pm_lowmem_fill(); // Set page map for low mem
+    //pm_lowmem_fill(); // Set page map for low mem
 
     return 0;
 }

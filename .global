@@ -2,13 +2,14 @@ VERSION="0.1"
 VERSION_NAME="PRIMITIVE"
 VERSION_DOMAIN="ALPHA"
 
+KERNEL_OUT=./synos
+
 # Paths
 SOURCE_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 ROOT_DIR=rootdir
 IMG_LINK=
 INSTALL_DRIVE=synos.iso # Default option
 INSTALL_DIR=/boot
-INITIMG_PREFIX=.
 
 # Color codes (for print)
 RED=\033[1;31m

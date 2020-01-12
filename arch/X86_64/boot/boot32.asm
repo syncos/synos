@@ -12,8 +12,8 @@ BITS 32
 
 _start:
     mov esp, stack_top
-    mov [mbm], eax ; Multiboot/Multiboot2 magic   (if present)
-    mov [mbp], ebx ; Multiboot/Multiboot2 pointer (if present)
+    mov [mbm], eax ; Multiboot magic   (if present)
+    mov [mbp], ebx ; Multiboot pointer (if present)
 
     call _CPUID_enabled32
     call _ISX64_32
@@ -191,7 +191,6 @@ x dd 0
 y dd 0
 
 ; Strings
-str_no_mb2   db 'Panic: system not booted with multiboot2! ', 0x0A, 'System halted', 0x00
 str_no_cpuid db 'Panic: no CPUID detected on system! ', 0x0A, 'System halted', 0x00
 str_no_x64   db 'Panic: x86-64 architecture not detected, wrong architecture selected! ', 0x0A, 'System halted', 0x00 
 

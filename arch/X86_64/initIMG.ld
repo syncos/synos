@@ -7,7 +7,7 @@ SECTIONS
     PROVIDE (__BOOT_HEADER_START = .);
     .boot BLOCK(4) : ALIGN(4)
     {
-        *(.multiboot_header)  /* Used if multiboot or multiboot2 is used*/
+        *(.multiboot_header)  /* Used if multiboot is used*/
     }
     PROVIDE (__BOOT_HEADER_END = .);
     . = 0x7C00;

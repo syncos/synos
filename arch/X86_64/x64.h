@@ -7,7 +7,6 @@
 enum LOAD_SYSTEMS
 {
     MULTIBOOT,
-    MULTIBOOT2
 };
 extern enum LOAD_SYSTEMS load_sys;
 

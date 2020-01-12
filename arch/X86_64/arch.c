@@ -37,9 +37,7 @@ void tab_search()
 }
 
 #include "multiboot.h"
-#include "multiboot2.h"
 extern int mbootInit();
-extern int mboot2Init();
 static void load_sys_detect()
 {
     extern uint32_t mbm;
@@ -48,11 +46,8 @@ static void load_sys_detect()
         case MULTIBOOT_BOOTLOADER_MAGIC:
             mbootInit();
             return;
-        case MULTIBOOT2_BOOTLOADER_MAGIC:
-            mboot2Init();
-            return;
         default:
-            panic("System booted with invalid load system. Please make sure you boot with either multiboot or multiboot2!");
+            panic("System booted with invalid load system. Please make sure you boot with multiboot");
             return;
     }
 }

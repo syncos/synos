@@ -9,15 +9,6 @@ ARCHOBJECTS += $(X86DIR)/cpuid.o
 ifeq ($(PRINTF_FALLBACK), TRUE)
 DEFINE_VALS += -DPRINTF_FALLBACK
 endif
-ifeq ($(LOAD_SYSTEM), MULTIBOOT2)
-ARCHOBJECTS += $(X86DIR)/multiboot2.o
-ARCHOBJECTS += $(X86DIR)/boot/multiboot2.o
-else
-ifeq ($(LOAD_SYSTEM), MULTIBOOT)
-ARCHOBJECTS += $(X86DIR)/multiboot.o
-ARCHOBJECTS += $(X86DIR)/boot/multiboot.o
-endif
-endif
 ifdef SYSCALL_INT
 DEFINE_VALS += -DSYSCALL_INT=$(SYSCALL_INT)
 endif

@@ -9,7 +9,7 @@
 
 #define ORDER(ord) (1 << ord)
 #define MAX_ORDER_COUNT (1 << MAX_ORDER)
-#define BLOCK_ORDER_SIZE(order) (phys_page_size * (1 << order))
+#define BLOCK_ORDER_SIZE(order) (page_size * (1 << order))
 
 typedef struct bpa_map
 {

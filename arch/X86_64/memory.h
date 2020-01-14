@@ -68,7 +68,7 @@ struct TSS
     uint16_t resv5;
 }__attribute__((packed));
 
-extern struct GDT_entry* gdt; // The "WIP" gdt (not the actual one thats loaded)
+extern struct GDT_entry* GDT;
 extern struct TSS *proc_tss;
 
 extern uint64_t* PML_4;

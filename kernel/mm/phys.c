@@ -12,7 +12,7 @@ static mregion_t *findNextRegion(mregion_t *start)
     {
         if ((region->attrib & (MEM_REGION_AVAILABLE | MEM_REGION_READ | MEM_REGION_WRITE)) == (MEM_REGION_AVAILABLE | MEM_REGION_READ | MEM_REGION_WRITE)
             && (region->attrib & (MEM_REGION_BAD | MEM_REGION_PRESERVE | MEM_REGION_PROTECTED)) == 0
-            && region->size >= phys_page_size)
+            && region->size >= page_size)
         {
             return region;
         }
@@ -28,7 +28,7 @@ static void regions_map()
             continue;
     }
 }
-#define TOTAL_PAGE_TABLE_SIZE (((System.memid.totalSize / phys_page_size) * bits_per_page) / 8)
+#define TOTAL_PAGE_TABLE_SIZE (((System.memid.totalSize / page_size) * bits_per_page) / 8)
 int ppage_init()
 {
     regions = findNextRegion(get_regions());
@@ -42,7 +42,7 @@ int ppage_init()
         goto regup;
     }
 
-    size_t pages = alloc_region->size / phys_page_size;
+    size_t pages = alloc_region->size / page_size;
     size_t page_tbl_size = ((pages * bits_per_page) + 7) / 8;
     void *regst = memstck_malloc(page_tbl_size);
     void *regsb = memstck_malloc(mm_sb_size);
@@ -50,7 +50,8 @@ int ppage_init()
         panic("No heap to allocate memory to!");
     region_map(alloc_region, pages, regsb, regst);
 
-    pages_reserve(alloc_region, 7, 5);
+    uintptr_t page_addr = page_alloc(alloc_region);
+    //void *maddr = vpage_map(page_addr, 0);
 
     return 0;
 }

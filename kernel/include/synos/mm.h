@@ -116,6 +116,7 @@ uintptr_t __get_free_pages(unsigned int gfp_mask, unsigned int order);
 void free_page(const page_t *page);
 void free_pages(unsigned int order, const page_t* pages);
 
+extern void  memstck_disable();
 extern void* memstck_malloc(size_t bytes);
 
 // Physical page allocator definition
@@ -135,4 +136,20 @@ extern void pages_free(mregion_t *region, uintptr_t phaddr, unsigned int order);
 
 // Virtual page allocator definition
 int vpage_init(); 
+
+#define VPAGE_NOT_PRESENT 1
+#define VPAGE_NOT_WRITABLE 2
+#define VPAGE_USER_ACCESS 4
+#define VPAGE_NO_CACHE 8
+#define VPAGE_NO_EXECUTE 16
+
+extern void *vpage_map(uintptr_t paddress, unsigned int flags);
+extern void *vpages_map(uintptr_t paddress, unsigned int order, unsigned int flags);
+extern void *vpage_smap(uintptr_t paddress, void *vaddress, unsigned int flags);
+extern void *vpages_smap(uintptr_t paddress, void *vaddress, unsigned int order, unsigned int flags);
+extern void *vpages_reserve(void *vaddress, unsigned int order);
+
+extern uintptr_t vpage_unmap(void *vaddress);
+extern uintptr_t vpages_unmap(void *vaddress, unsigned int order);
+
 #endif

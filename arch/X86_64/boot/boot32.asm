@@ -194,7 +194,7 @@ y dd 0
 str_no_cpuid db 'Panic: no CPUID detected on system! ', 0x0A, 'System halted', 0x00
 str_no_x64   db 'Panic: x86-64 architecture not detected, wrong architecture selected! ', 0x0A, 'System halted', 0x00 
 
-; Temp. GDT
+; GDT
 GDT:                           ; Global Descriptor Table (64-bit).
     .Null: equ $ - GDT         ; The null descriptor.
     dw 0xFFFF                    ; Limit (low).
@@ -217,6 +217,30 @@ GDT:                           ; Global Descriptor Table (64-bit).
     db 10010010b                 ; Access (read/write).
     db 00000000b                 ; Granularity.
     db 0                         ; Base (high).
+
+    .PCode:
+    dw 0
+    dw 0
+    db 0
+    db 11111110b
+    db 10101111b
+    db 0
+    .PData:
+    dw 0
+    dw 0
+    db 0
+    db 11110010b
+    db 0
+    db 0
+    
+    .TSS:
+    dw 0
+    dw 0
+    db 0
+    db 0
+    db 0
+    db 0
+
     .Pointer:                    ; The GDT-pointer.
     dw $ - GDT - 1             ; Limit.
     dq GDT                     ; Base.

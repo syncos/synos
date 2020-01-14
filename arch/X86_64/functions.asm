@@ -63,7 +63,7 @@ RFLAGS:
     pop rax
     ret
 
-global gdt_switch
-gdt_switch:
-    lgdt [rdi]
+global gdtr_store
+gdtr_store:
+    sgdt [rdi]
     ret

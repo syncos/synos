@@ -11,8 +11,7 @@ const uintptr_t _MemStart = (uintptr_t)__KERN_MEM_START;
 const uintptr_t _MemEnd   = (uintptr_t)__KERN_MEM_END;
 const uintptr_t _MemSize  = (uintptr_t)__KERN_MEM_SIZE;
 
-const size_t phys_page_size = 4096;
-const size_t phys_page_count = __UINTPTR_MAX__ / 4096;
+const size_t page_size = 4096;
 const size_t virt_page_size = 4096;
 
 uint64_t  PML_4_Table[512] __attribute__((aligned(4096)));
@@ -45,7 +44,11 @@ static void pm_lowmem_fill()
     }
 }
 
-#ifdef NOTINC
+void mem_v_alloc()
+{
+    
+}
+
 static void kern_mem_map()
 {
     // Map kernel code segment
@@ -85,7 +88,6 @@ static void kern_mem_map()
         PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset] |= PAGE_PRESENT | PAGE_WRITABLE | PAGE_NO_EXECUTE;
     }
 }
-#endif
 
 int pga_init()
 {
@@ -104,9 +106,16 @@ int pga_init()
     PD_0[0]   = (uint64_t)&PT_0[0];
     PD_0[0]  |= PAGE_PRESENT | PAGE_WRITABLE;
 
-    //pm_lowmem_fill(); // Set page map for low mem
-
     return 0;
+}
+void pga_enable()
+{
+    asm volatile ("mov cr3, rax" :: "r" (PML_4));
+}
+
+void pga_map(uintptr_t vaddress, uintptr_t paddress, size_t length, unsigned int flags)
+{
+    unsigned int pml4_idx = (vaddress >> 39) & 511;
 }
 
 struct mem_regions *get_regions()

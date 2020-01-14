@@ -11,7 +11,7 @@ uintptr_t page_alloc(mregion_t *region)
     if (map->pages_free[0] > 0)
     {
         block_set(region, 0, map->next_free_page[0]);
-        uintptr_t phys_addr = (phys_page_size * map->next_free_page[0]) + region->start;
+        uintptr_t phys_addr = (page_size * map->next_free_page[0]) + region->start;
 
         if (map->pages_free[0] != 1)
             map->next_free_page[0] = find_next_free_page(region, 0, ++map->next_free_page[0]);

@@ -11,14 +11,18 @@ struct MEMID
     uintptr_t totalSize;
 };
 
-extern const size_t phys_page_size;
-extern const size_t phys_page_count;
-extern uint8_t phys_page_bmp[];
+extern const size_t page_size;
 
 struct MEMID* getMEMID(struct MEMID*);
 
 int pga_init();
-void mem_page_protect();
+void pga_enable();
+void pga_map(uintptr_t vaddress, uintptr_t paddress, size_t length, unsigned int flags);
+bool pga_ispresent(void *vaddress);
+
+void mem_v_alloc();
+void mem_p_alloc();
+
 struct mem_regions *get_regions();
 
 #endif

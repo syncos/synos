@@ -126,3 +126,26 @@ void zblock_split(mregion_t *region, unsigned int order, size_t offset)
         goto pos;
     return;
 }
+void block_merge(mregion_t *region, unsigned int order, size_t offset)
+{
+    if (order >= MAX_ORDER - 1)
+        return;
+    
+    bpa_map_t *map = region->page_alloc_si;
+    offset &= ~(1UL);
+
+    block_set(region, order, offset);
+    block_set(region, order, offset + 1);
+    block_clear(region, order+1, offset/2);
+
+    map->pages_free[order] -= 2;
+    ++map->pages_free[order+1];
+
+    if (map->next_free_page[order] == offset || map->next_free_page[order] == offset + 1)
+        map->next_free_page[order] = find_next_free_page(region, order, offset + 2);
+    if (map->next_free_page[order+1] > offset/2)
+        map->next_free_page[order+1] = offset/2;
+    
+    if (!block_check(region, order+1, (offset/2) + 1))
+        block_merge(region, order+1, offset/2);
+}

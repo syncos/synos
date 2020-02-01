@@ -124,6 +124,8 @@ int ppage_init()
         if (map_reg == alloc_region)
             continue;
         size_t pages = map_reg->size / page_size;
+        if (pages == 0)
+            continue;
         size_t page_tbl_size = ((pages * bits_per_page) + 7) / 8;
         size_t pages_tbl_p = (page_tbl_size + (page_size - 1)) / page_size;
         size_t sb_p = (mm_sb_size + (page_size - 1)) / page_size;

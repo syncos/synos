@@ -22,6 +22,7 @@ typedef struct bpa_map
 
 void block_split(mregion_t *region, unsigned int order);
 void zblock_split(mregion_t *region, unsigned int order, size_t offset);
+void block_merge(mregion_t *region, unsigned int order, size_t offset);
 void out_of_mem(mregion_t *region);
 
 static inline bool block_check(mregion_t *region, unsigned int order, size_t offset)

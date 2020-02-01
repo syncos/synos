@@ -31,6 +31,10 @@ void region_map(mregion_t *region, size_t pages, void *sb, void *pageent)
     bpa_map_t *map = sb;
     map->pages = pages;
     map->free_area_size = ((pages * BITS_PER_PAGE) + (8 - 1)) / 8;
+    region->pages_total = pages;
+    region->pages_free = pages;
+    region->mem_full = false;
+
     memset(pageent, 0, map->free_area_size);
     memset(map->pages_free, 0, sizeof(size_t)*MAX_ORDER);
     memset(map->next_free_page, 0, sizeof(size_t)*MAX_ORDER);

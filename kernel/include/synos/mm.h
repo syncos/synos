@@ -26,31 +26,6 @@ extern volatile uintptr_t __KERN_DATA_START[];
 extern volatile uintptr_t __KERN_DATA_END[];
 extern volatile uintptr_t __KERN_DATA_SIZE[];
 
-struct block;
-typedef struct page
-{
-    uintptr_t addr;
-    void* start;
-}page_t;
-typedef struct block
-{
-    unsigned int order;
-    bool present;
-
-    bool use_blocks;
-    struct block *child0;
-    struct block *child1;
-
-    page_t page_start;
-    page_t page_end;
-}block_t;
-
-typedef struct
-{
-    block_t blocks[MAX_ORDER_ENT];
-    
-}free_area_t;
-
 enum mem_regions_attributes
 {
     MEM_REGION_READ         = (1 << 0),
@@ -67,6 +42,8 @@ typedef struct mem_regions
     uintptr_t size;
     uint8_t attrib;
 
+    uintptr_t pages_total;
+    uintptr_t pages_free;
     bool mem_full;
     void *page_alloc_si;
 
@@ -75,9 +52,21 @@ typedef struct mem_regions
     int lock;
 }mregion_t;
 
-extern struct arch_page_size PS;
+typedef struct __attribute__((__packed__)) mframe
+{
+    bool present;
+    void *frame;
+    unsigned int order;
+    size_t pointer;
+}mframe_t;
+typedef struct __attribute__((__packed__)) mstack
+{
+    bool present;
+    void *address;
+    size_t length;
+}mstack_t;
 
-page_t getPhysPage(size_t index);
+extern struct arch_page_size PS;
 
 #define __GFP_DMA 1
 #define __GFP_HIGHMEM 2
@@ -100,21 +89,22 @@ page_t getPhysPage(size_t index);
 #define GFP_KSWAPD      GFP_USER
 
 int mm_init();
+unsigned int log_order(size_t pages);
 // Allocates a single physical page (does NOT map the page into virtual memory, only returns the physical address)
-page_t alloc_page(unsigned int gfp_mask);
+uintptr_t alloc_page(unsigned int gfp_mask);
 // Same as alloc_page, but allocates pow(2, order) pages and returns the block struct
-block_t alloc_pages(unsigned int gfp_mask, unsigned int order);
+uintptr_t alloc_pages(unsigned int gfp_mask, unsigned int order);
 
 // Allocate a single frame, zero it, and map it to virtual memory and return the virtual address
-uintptr_t get_free_page(unsigned int gfp_mask);
+void *get_free_page(unsigned int gfp_mask);
 // Same as get_free_page, but does not zero the page's value
-uintptr_t __get_free_page(unsigned int gfp_mask);
+void *__get_free_page(unsigned int gfp_mask);
 // Allocate pow(2, order) pages and map them into virtual memory and return the virtual address
-uintptr_t __get_free_pages(unsigned int gfp_mask, unsigned int order);
+void *__get_free_pages(unsigned int gfp_mask, unsigned int order);
 
 // Frees 
-void free_page(const page_t *page);
-void free_pages(unsigned int order, const page_t* pages);
+void free_page(uintptr_t page);
+void free_pages(unsigned int order, uintptr_t pages);
 
 extern void  memstck_disable();
 extern void* memstck_malloc(size_t bytes);
@@ -143,13 +133,13 @@ int vpage_init();
 #define VPAGE_NO_CACHE 8
 #define VPAGE_NO_EXECUTE 16
 
-extern void *vpage_map(uintptr_t paddress, unsigned int flags);
-extern void *vpages_map(uintptr_t paddress, unsigned int order, unsigned int flags);
-extern void *vpage_smap(uintptr_t paddress, void *vaddress, unsigned int flags);
-extern void *vpages_smap(uintptr_t paddress, void *vaddress, unsigned int order, unsigned int flags);
-extern void *vpages_reserve(void *vaddress, unsigned int order);
+void *vpage_map(uintptr_t paddress, unsigned int flags);
+void *vpages_map(uintptr_t paddress, unsigned int order, unsigned int flags);
+void *vpage_smap(uintptr_t paddress, void *vaddress, unsigned int flags);
+void *vpages_smap(uintptr_t paddress, void *vaddress, unsigned int order, unsigned int flags);
+void *vpages_reserve(void *vaddress, unsigned int order);
 
-extern uintptr_t vpage_unmap(void *vaddress);
-extern uintptr_t vpages_unmap(void *vaddress, unsigned int order);
+void vpage_unmap(void *vaddress);
+void vpages_unmap(void *vaddress, unsigned int order);
 
 #endif

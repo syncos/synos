@@ -43,7 +43,7 @@ bool log_enable = false;
 
 int log_init()
 {
-    log_entries = (struct Log_Entry*)malloc(sizeof(struct Log_Entry)*log_entries_size);
+    log_entries = (struct Log_Entry*)kmalloc(sizeof(struct Log_Entry)*log_entries_size);
     if (log_entries == NULL) return 0;
     log_enable = true;
     

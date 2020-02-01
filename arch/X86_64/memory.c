@@ -14,108 +14,149 @@ const uintptr_t _MemSize  = (uintptr_t)__KERN_MEM_SIZE;
 const size_t page_size = 4096;
 const size_t virt_page_size = 4096;
 
-uint64_t  PML_4_Table[512] __attribute__((aligned(4096)));
-uint64_t* PML_4 = &PML_4_Table[0];
-
-// Initial lower tables
-uint64_t PDP_0[512] __attribute__((aligned(4096)));
-uint64_t PD_0 [512] __attribute__((aligned(4096)));
-uint64_t PT_0 [512] __attribute__((aligned(4096)));
-
-static void pm_lowmem_fill()
-{
-    // Protect low-memory
-
-    // Start by filling the first 256 entries
-    for (int i = 0; i < 256; ++i)
-    {
-        PT_0[i]  = 0x1000 * i;
-        PT_0[i] |= PAGE_PRESENT | PAGE_WRITABLE;
-    }
-
-    // IVT + BDA (0x0000 - 0x1000)
-    PT_0[0]  |= PAGE_PRESENT | PAGE_NO_EXECUTE;
-    // MBR (used during core bootup) (0x7000 - 0x8000)
-    PT_0[7]  |= PAGE_PRESENT | PAGE_WRITABLE /* Needed to be able to write boot code for the cores */ | PAGE_NO_EXECUTE;
-    // EBDA + ROM
-    for (int i = 0; i < 128; ++i)
-    {
-        PT_0[80 + i] |= PAGE_PRESENT | PAGE_NO_EXECUTE;
-    }
-}
-
-void mem_v_alloc()
-{
-    
-}
-
-static void kern_mem_map()
-{
-    // Map kernel code segment
-    uintptr_t code_pages = (uintptr_t)__KERN_CODE_SIZE / virt_page_size;
-    if ((uintptr_t)__KERN_CODE_SIZE % virt_page_size != 0)
-        ++code_pages;
-
-    for (unsigned int offset = 0; offset < code_pages; ++offset)
-    {
-        PT_0[(0x100000 / virt_page_size) + offset]  = 0;
-        PT_0[(0x100000 / virt_page_size) + offset]  = 0x100000 + (4096 * offset);
-        PT_0[(0x100000 / virt_page_size) + offset] |= PAGE_PRESENT;
-    }
-
-    // Map kernel data segment
-    uintptr_t data_pages = (uintptr_t)__KERN_DATA_SIZE / virt_page_size;
-    if ((uintptr_t)__KERN_DATA_SIZE % virt_page_size)
-        ++data_pages;
-
-    for (unsigned int offset = 0; offset < data_pages; ++offset)
-    {
-        PT_0[((uintptr_t)__KERN_CODE_START / virt_page_size) + offset]  = 0;
-        PT_0[((uintptr_t)__KERN_CODE_START / virt_page_size) + offset]  = (uintptr_t)__KERN_CODE_START + (4096 * offset);
-        PT_0[((uintptr_t)__KERN_CODE_START / virt_page_size) + offset] |= PAGE_PRESENT | PAGE_WRITABLE | PAGE_NO_EXECUTE;
-    }
-
-    // Map kernel memory stack
-    extern uintptr_t MemStack;
-    uintptr_t stack_pages = (MemStack - (uintptr_t)__KERN_MEM_END) / virt_page_size;
-    if ((MemStack - (uintptr_t)__KERN_MEM_END) % virt_page_size != 0)
-        ++stack_pages;
-    
-    for (unsigned int offset = 0; offset < stack_pages; ++offset)
-    {
-        PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset]  = 0;
-        PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset]  = (uintptr_t)__KERN_DATA_END + (4096 * offset);
-        PT_0[((uintptr_t)__KERN_DATA_END / virt_page_size) + offset] |= PAGE_PRESENT | PAGE_WRITABLE | PAGE_NO_EXECUTE;
-    }
-}
+uintptr_t PML4;
+extern void PML4_T();
 
 int pga_init()
 {
-    // Initialize memory controller
-    memset(PML_4, 0, 8*512); // Clear to-be PML_4 table
+    PML4 = (uintptr_t)PML4_T;
 
-    // Link PDP_0 to PML_4
-    PML_4[0]  = (uint64_t)&PDP_0[0];
-    PML_4[0] |= PAGE_PRESENT | PAGE_WRITABLE;
-
-    // Link PD_0 to PDP_0
-    PDP_0[0]  = (uint64_t)&PD_0[0];
-    PDP_0[0] |= PAGE_PRESENT | PAGE_WRITABLE;
-
-    // Link PT_0 to PD_0
-    PD_0[0]   = (uint64_t)&PT_0[0];
-    PD_0[0]  |= PAGE_PRESENT | PAGE_WRITABLE;
+    // Map the PML4 table to itself, this way we can access all page tables with only the physical address of PML4 mapped to memory
+    uint64_t entry = PML4;
+    entry |= 0b11;
+    *(uint64_t*)(PML4 + (8 * 511)) = entry;
 
     return 0;
 }
-void pga_enable()
+
+static uintptr_t get_table_address(void *address, int level)
 {
-    asm volatile ("mov cr3, rax" :: "r" (PML_4));
+    uintptr_t table_address = ((uintptr_t)address >> (9*level));
+    table_address &= ~(7UL);
+    for (int i = 0; i < level; ++i)
+        table_address |= (511UL << (39-(9*i)));
+    if ((table_address >> 47) & 1U)
+        table_address |= (0xFFFFUL << 48);
+    else
+        table_address &= ~(0xFFFFUL << 48);
+    return table_address;
 }
 
-void pga_map(uintptr_t vaddress, uintptr_t paddress, size_t length, unsigned int flags)
+bool page_ispresent(void *vaddress, int level)
 {
-    unsigned int pml4_idx = (vaddress >> 39) & 511;
+    if (level <= 0 || level > 4)
+        return false;
+    
+    if (level < 4)
+        if (!page_ispresent(vaddress, level + 1))
+            return false;
+    
+    uintptr_t table_address = get_table_address(vaddress, level);
+    if (*((uint64_t*)table_address) & 1U)
+        return true;
+    return false;
+}
+uint64_t page_info(void *vaddress)
+{
+    if (!page_ispresent(vaddress, 1))
+        return 0;
+    // We utilize the 511th entry of the PML4 that is mapped to the PML4 table itself to get the information
+    uintptr_t pt_address = ((uintptr_t)vaddress >> 9);
+    pt_address &= ~(3UL);
+    pt_address |= (511UL << 39);
+
+    return *((uint64_t*)pt_address);
+}
+uintptr_t pga_getPhysAddr(void *vaddress)
+{
+    uint64_t pinfo = page_info(vaddress);
+
+    pinfo &= ~(0xFFFUL); // Remove everything else except the physical address
+    pinfo &= ~(0xFFFUL << 52);
+
+    return pinfo;
+}
+bool pga_ispresent(void *vaddress)
+{
+    if (page_ispresent(vaddress, 1))
+        return true;
+    return false;
+}
+
+static bool page_table_alloc(int level, void *offset)
+{
+    if (level <= 0 || level > 4)
+        return false;
+    if (level < 4 && !page_ispresent(offset, level + 1))
+        page_table_alloc(level + 1, offset);
+
+    uint64_t entry = (uint64_t)alloc_page(GFP_KERNEL);
+    entry |= 0b11;
+    
+    uintptr_t table_address = get_table_address(offset, level);
+    
+    *((uint64_t*)table_address) = entry;
+    return true;
+}
+void pga_map(void *vaddress, uintptr_t paddress, unsigned int order, unsigned int flags)
+{
+    uint64_t entry = 0;
+    if (!(flags & VPAGE_NOT_PRESENT))
+        entry |= 0b1;
+    if (!(flags & VPAGE_NOT_WRITABLE))
+        entry |= 0b10;
+    if (flags & VPAGE_USER_ACCESS)
+        entry |= 0b100;
+    if (flags & VPAGE_NO_CACHE)
+        entry |= 0b1000;
+    if (flags & VPAGE_NO_EXECUTE)
+        entry |= (1UL << 63);
+    for (size_t i = 0; i < (1UL << order); ++i)
+    {
+        if (!page_ispresent(vaddress + (virt_page_size * i), 2))
+            page_table_alloc(2, vaddress + (virt_page_size * i));
+        
+        entry = (((paddress + (page_size * i)) & ~((0xFFFUL << 52) | 0xFFFUL))) + (entry & ((0xFFFUL << 52) | 0xFFFUL));
+        uint64_t table_address = get_table_address(vaddress + (virt_page_size * i), 1);
+
+        *((uint64_t*)table_address) = entry;
+    }
+}
+void pga_unmap(void *vaddress, unsigned int order)
+{
+    for (size_t i = 0; i < (1UL << order); ++i)
+    {
+        if (!page_ispresent(vaddress + (virt_page_size * i), 1))
+            continue;
+        
+        uint64_t table_address = get_table_address(vaddress + (virt_page_size * i), 1);
+
+        *((uint64_t*)table_address) = 0;
+    }
+}
+
+void mem_p_protect(struct mem_regions *region)
+{
+    if (region->start < 0x10000)
+    {
+        // Region is part of low-mem
+        uintptr_t res_size = 0x10000 - region->start;
+        if (res_size > region->size)
+            res_size = region->size;
+        size_t pages = (res_size + (page_size - 1)) / page_size;
+        pages_reserve(region, log_order(pages), region->start / page_size);
+    }
+    if (region->start < _MemEnd && region->start + region->size > _MemStart)
+    {
+        uintptr_t start = _MemStart;
+        if (region->start > _MemStart)
+            start = region->start;
+        uintptr_t res_size = 0x100000 - (start - _MemStart);
+        if (region->size - (start - region->start) < res_size)
+            res_size = region->size - (start - region->start);
+        size_t pages = (res_size + (page_size - 1)) / page_size;
+        pages_reserve(region, log_order(pages), (start - region->start) / page_size);
+    }
 }
 
 struct mem_regions *get_regions()

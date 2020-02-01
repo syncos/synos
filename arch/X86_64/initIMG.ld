@@ -47,8 +47,7 @@ SECTIONS
         PROVIDE (__KERN_DATA_END = .);
         PROVIDE (__KERN_DATA_SIZE = __KERN_DATA_START - __KERN_DATA_END);
 	}
-    . = ALIGN(4K);
     PROVIDE (__KERN_MEM_END = .);
-
     PROVIDE (__KERN_MEM_SIZE = __KERN_MEM_END - __KERN_MEM_START);
+    . = 0x1FFFFF;
 }

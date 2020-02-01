@@ -71,7 +71,8 @@ struct TSS
 extern struct GDT_entry* GDT;
 extern struct TSS *proc_tss;
 
-extern uint64_t* PML_4;
+bool page_ispresent(void *vaddress, int level);
+uint64_t page_info(void *vaddress);
 
 void initGDT();
 void initTSS();

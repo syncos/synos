@@ -12,17 +12,19 @@ struct MEMID
 };
 
 extern const size_t page_size;
+extern const size_t virt_page_size;
 
 struct MEMID* getMEMID(struct MEMID*);
 
 int pga_init();
-void pga_enable();
-void pga_map(uintptr_t vaddress, uintptr_t paddress, size_t length, unsigned int flags);
+void pga_map(void *vaddress, uintptr_t paddress, unsigned int order, unsigned int flags);
+void pga_unmap(void *vaddress, unsigned int order);
+uintptr_t pga_getPhysAddr(void *vaddress);
 bool pga_ispresent(void *vaddress);
 
-void mem_v_alloc();
-void mem_p_alloc();
+struct mem_regions;
 
+void mem_p_protect(struct mem_regions *region);
 struct mem_regions *get_regions();
 
 #endif

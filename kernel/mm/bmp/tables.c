@@ -10,6 +10,7 @@ void region_map(mregion_t *region, size_t pages, void *sb, void *pageent)
 {
     spinlock_lock(&region->lock);
     region->page_alloc_si = sb;
+    region->mem_full = false;
 
     bmp_map_t *bmap = (bmp_map_t *)sb;
     bmap->pages = pages;

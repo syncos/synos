@@ -76,13 +76,17 @@ _64INIT:
     or eax, 0b11 ; Present + Writable
     mov [PDP_T], eax
 
-    ; Map whole PD table with 2 MB pages creating 1 GB of allocated space
-    xor ecx, ecx ; Use ecx a counter
+    ; Map PT table to PD
+    mov eax, PT_T
+    or eax, 0b11 ; Present + Writable
+    mov [PD_T], eax
+
+    xor ecx, ecx
     .loop:
-        mov eax, 0x200000
+        mov eax, 0x1000
         mul ecx ; eax now hold the physical address
-        or eax, 0b10000011 ; present + writable + huge
-        mov [PD_T + ecx * 8], eax
+        or eax, 0b11 ; present + writable
+        mov [PT_T + ecx * 8], eax
 
         inc ecx
         cmp ecx, 512

@@ -15,16 +15,16 @@ void startup()
     if (interrupt_enabled()) interrupt_disable();
     System.interrupt_enabled = false;
 
+    if (arch_init() != 0) panic("Arch initialization error");
+
+    // Initialize memory controller
+    mm_init();
+
     // Set up logging and printf (if enabled)
     log_init();
     #ifdef PRINTF_FALLBACK
     printf_init(); // Initialize printf fallback function if enabled
     #endif
-
-    if (arch_init() != 0) panic("Arch initialization error");
-
-    // Initialize memory controller
-    mm_init();
 
     pr_log(INFO, "Starting version %d");//, VERSION);
     printf("Starting version ");
@@ -52,7 +52,7 @@ void startup()
 
     interrupt_enable();
 
-    panic("System reached end of startup function, something has gone wrong.");
+    panic("System reached end of startup function!");
 }
 void panic(char* text)
 {

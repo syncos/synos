@@ -11,3 +11,4 @@ extern mbm
 extern PML4_T
 extern PDP_T
 extern PD_T
+extern PT_T

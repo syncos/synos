@@ -24,20 +24,24 @@ void block_split(mregion_t *region, unsigned int order);
 void zblock_split(mregion_t *region, unsigned int order, size_t offset);
 void out_of_mem(mregion_t *region);
 
+static inline bool block_check(mregion_t *region, unsigned int order, size_t offset)
+{
+    bpa_map_t *map = region->page_alloc_si;
+    return (((char*)map->free_area[order])[offset/8] >> (offset%8)) & 1U;
+}
 static inline void block_set(mregion_t *region, unsigned int order, size_t offset)
 {
     bpa_map_t *map = region->page_alloc_si;
+    if (!block_check(region, order, offset))
+        --region->pages_free;
     ((char*)map->free_area[order])[offset/8] |= (1 << (offset%8));
 }
 static inline void block_clear(mregion_t *region, unsigned int order, size_t offset)
 {
     bpa_map_t *map = region->page_alloc_si;
+    if (block_check(region, order, offset))
+        ++region->pages_free;
     ((char*)map->free_area[order])[offset/8] &= ~(1 << (order%8));
-}
-static inline bool block_check(mregion_t *region, unsigned int order, size_t offset)
-{
-    bpa_map_t *map = region->page_alloc_si;
-    return (((char*)map->free_area[order])[offset/8] >> (offset%8)) & 1U;
 }
 static inline void blocks_set(mregion_t *region, unsigned int order, size_t offset_start, size_t length)
 {

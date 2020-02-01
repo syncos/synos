@@ -24,3 +24,6 @@ PDP_T:
 global PD_T
 PD_T:
     resb 4096
+global PT_T
+PT_T:
+    resb 4096

@@ -59,7 +59,7 @@ uintptr_t pages_reserve(mregion_t *region, unsigned int order, uint64_t offset)
     {
         page_set(region, i);
     }
-    if (offset == ((bmp_map_t *)region->page_alloc_si)->pointer_offset)
+    if (((bmp_map_t *)region->page_alloc_si)->pointer_offset >= offset && ((bmp_map_t *)region->page_alloc_si)->pointer_offset < offset + ORDER(order))
         ((bmp_map_t *)region->page_alloc_si)->pointer_offset = next_free_page(region, offset + ORDER(order));
     spinlock_unlock(&region->lock);
     return (page_size * offset) + region->start;

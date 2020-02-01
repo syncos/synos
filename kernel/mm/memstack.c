@@ -14,6 +14,13 @@ void* memstck_malloc(size_t bytes)
         MemStack = _MemEnd + 64; // Padding just in case
         MemStack_init = true;
     }
+    if (MemStack >= 0x200000)
+    {
+        MemStack_enable = false;
+        return NULL;
+    }
+    if (MemStack + bytes >= 0x200000)
+        return NULL;
     void* pointer = (void*)MemStack;
 
     MemStack += bytes + 1;

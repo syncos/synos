@@ -124,8 +124,10 @@ int ppage_init()
         if (map_reg == alloc_region)
             continue;
         size_t pages = map_reg->size / page_size;
-        if (pages == 0)
+        if (pages == 0) {
+            map_reg->mem_full = true;
             continue;
+        }
         size_t page_tbl_size = ((pages * bits_per_page) + 7) / 8;
         size_t pages_tbl_p = (page_tbl_size + (page_size - 1)) / page_size;
         size_t sb_p = (mm_sb_size + (page_size - 1)) / page_size;
@@ -138,10 +140,8 @@ int ppage_init()
 
         region_map(map_reg, pages, regsb, regst);
         mem_p_protect(map_reg);
-        if (next_region->start > map_reg->start)
-            next_region = map_reg;
     }
-    next_region = findFreeRegion(next_region);
+    next_region = findFreeRegion(regions);
 
     return 0;
 }

@@ -42,27 +42,37 @@ static inline void block_clear(mregion_t *region, unsigned int order, size_t off
     bpa_map_t *map = region->page_alloc_si;
     if (block_check(region, order, offset))
         ++region->pages_free;
-    ((char*)map->free_area[order])[offset/8] &= ~(1 << (order%8));
+    ((char*)map->free_area[order])[offset/8] &= ~(1 << (offset%8));
 }
 static inline void blocks_set(mregion_t *region, unsigned int order, size_t offset_start, size_t length)
 {
     for (size_t i = offset_start; i < offset_start + length; ++i)
         block_set(region, order, i);
 }
+static inline void blocks_clear(mregion_t *region, unsigned int order, size_t offset_start, size_t length)
+{
+    for (size_t i = offset_start; i < offset_start + length; ++i)
+        block_clear(region, order, i);
+}
 static inline size_t free_area_length(mregion_t *region, unsigned int order)
 {
     size_t length = ((bpa_map_t *)region->page_alloc_si)->pages;
     for (unsigned int i = 0; i < order; ++i)
-        length = (length + 1) / 2;
+        length = length / 2;
     return length;
 }
 static inline unsigned int order_max(mregion_t *region)
 {
-    signed long order;
-    for (order = MAX_ORDER - 1; order >= 0; --order)
-        if (free_area_length(region, order) != 0)
-            return (unsigned int)order;
-    return 0;
+    unsigned int order;
+    size_t length = ((bpa_map_t *)region->page_alloc_si)->pages;
+    for (order = 0; order < MAX_ORDER; ++order) 
+    {
+        if (length % 2)
+            return order;
+        length /= 2;
+    }
+
+    return MAX_ORDER - 1;
 }
 static inline size_t find_next_free_page(mregion_t *region, unsigned int order, size_t start)
 {

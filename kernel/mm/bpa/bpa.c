@@ -9,19 +9,15 @@ const size_t bits_per_page = BITS_PER_PAGE;
 static void _free_area_map(mregion_t *region)
 {
     size_t start_addr = region->start;
+    bpa_map_t *map = region->page_alloc_si;
     unsigned int order = order_max(region);
-    for (size_t i = 0; i < free_area_length(region, order); ++i)
-    {
-        if (start_addr >= region->start + region->size || (region->start + region->size) - start_addr < BLOCK_ORDER_SIZE(order))
-        {
-            blocks_set(region, order, i, free_area_length(region, order) - i);
-            return;
-        }
-        start_addr += BLOCK_ORDER_SIZE(order);
-        ++((bpa_map_t*)region->page_alloc_si)->pages_free[order];
+    map->pages_free[order] = free_area_length(region, order);
+    blocks_clear(region, order, 0, map->pages_free[order]);
+    if (order != MAX_ORDER - 1) {
+        size_t pc = map->pages_free[order] & ~(1UL);
+        for (size_t offset = 0; offset < pc; offset += 2)
+            block_merge(region, order, offset);
     }
-    for (signed long i = order - 1; i >= 0; --i)
-        blocks_set(region, (unsigned int)i, 0, free_area_length(region, (unsigned int)i));
 }
 
 void region_map(mregion_t *region, size_t pages, void *sb, void *pageent)
@@ -30,12 +26,12 @@ void region_map(mregion_t *region, size_t pages, void *sb, void *pageent)
     region->page_alloc_si = sb;
     bpa_map_t *map = sb;
     map->pages = pages;
-    map->free_area_size = ((pages * BITS_PER_PAGE) + (8 - 1)) / 8;
+    map->free_area_size = ((pages * BITS_PER_PAGE) + 7) / 8;
     region->pages_total = pages;
     region->pages_free = pages;
     region->mem_full = false;
 
-    memset(pageent, 0, map->free_area_size);
+    memset(pageent, 0xFF, map->free_area_size);
     memset(map->pages_free, 0, sizeof(size_t)*MAX_ORDER);
     memset(map->next_free_page, 0, sizeof(size_t)*MAX_ORDER);
     map->free_area[0] = pageent;
@@ -69,7 +65,7 @@ void block_split(mregion_t *region, unsigned int order)
         block_clear(region, order-1, map->next_free_page[order]*2);
         block_clear(region, order-1, map->next_free_page[order]*2+1);
 
-        if (map->next_free_page[order-1] > map->next_free_page[order]*2)
+        if (map->next_free_page[order-1] > map->next_free_page[order]*2 || map->pages_free[order-1] == 0)
             map->next_free_page[order-1] = map->next_free_page[order]*2;
         map->pages_free[order-1] += 2;
         
@@ -143,9 +139,14 @@ void block_merge(mregion_t *region, unsigned int order, size_t offset)
 
     if (map->next_free_page[order] == offset || map->next_free_page[order] == offset + 1)
         map->next_free_page[order] = find_next_free_page(region, order, offset + 2);
-    if (map->next_free_page[order+1] > offset/2)
+    if (map->next_free_page[order+1] > offset/2 || map->pages_free[order+1] == 1)
         map->next_free_page[order+1] = offset/2;
     
-    if (!block_check(region, order+1, (offset/2) + 1))
-        block_merge(region, order+1, offset/2);
+    if ((offset/2) % 2 == 0) {
+        if (!block_check(region, order+1, (offset/2) + 1))
+            block_merge(region, order+1, offset/2);
+    }
+    else
+        if (!block_check(region, order+1, (offset/2) - 1))
+            block_merge(region, order+1, offset/2);
 }

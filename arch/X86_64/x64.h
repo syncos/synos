@@ -29,5 +29,5 @@ struct BootInfo
 };
 
 extern struct BootInfo X64;
-
+extern const size_t mboot_info_size;
 #endif

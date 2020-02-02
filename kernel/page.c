@@ -102,8 +102,10 @@ static mregion_t *findFreeRegion(mregion_t *start)
         outOfMem = true;
         return r;
     }
-    if (r->mem_full)
+    if (r->mem_full) {
+        start = start->next;
         goto search;
+    }
     return r;
 }
 static mregion_t *findRegion(uintptr_t paddress, mregion_t *start)
@@ -121,7 +123,7 @@ uintptr_t alloc_page(unsigned int gfp_mask)
     start:
     if (outOfMem)
         return 0;
-    if (next_region->pages_free == 0) {
+    if (next_region->mem_full) {
         next_region = findFreeRegion(next_region->next);
         goto start;
     }
@@ -253,15 +255,11 @@ static inline bool block_check(mregion_t *region, unsigned int order, size_t off
 static inline void block_set(mregion_t *region, unsigned int order, size_t offset)
 {
     bpa_map_t *map = region->page_alloc_si;
-    if (!block_check(region, order, offset))
-        --region->pages_free;
     ((char*)map->free_area[order])[offset/8] |= (1 << (offset%8));
 }
 static inline void block_clear(mregion_t *region, unsigned int order, size_t offset)
 {
     bpa_map_t *map = region->page_alloc_si;
-    if (block_check(region, order, offset))
-        ++region->pages_free;
     ((char*)map->free_area[order])[offset/8] &= ~(1 << (offset%8));
 }
 static inline void blocks_set(mregion_t *region, unsigned int order, size_t offset_start, size_t length)
@@ -416,10 +414,10 @@ void zblock_split(mregion_t *region, unsigned int order, size_t offset)
             map->next_free_page[order-1] = map->next_free_page[order]*2;
         map->pages_free[order-1] += 2;
 
-        if (map->pages_free[order] != 1)
-            map->next_free_page[order] = find_next_free_page(region, order, ++map->next_free_page[order]);
-        else
+        if (map->pages_free[order] == 1)
             map->next_free_page[order] = 0;
+        else if (offset == map->next_free_page[order])
+            map->next_free_page[order] = find_next_free_page(region, order, offset+1);
         --map->pages_free[order];
 
         return;
@@ -479,6 +477,9 @@ uintptr_t pages_alloc(mregion_t *region, unsigned int order)
             map->next_free_page[order] = 0;
         --map->pages_free[order];
 
+        if (region->pages_free <= (1UL << order))
+            out_of_mem(region);
+        region->pages_free -= (1UL << order);
         spinlock_unlock(&region->lock);
         return phys_addr;
     }
@@ -513,6 +514,9 @@ uintptr_t pages_reserve(mregion_t *region, unsigned int order, uint64_t offset)
         --map->pages_free[order];
         if (map->next_free_page[order] == offset)
             map->next_free_page[order] = find_next_free_page(region, order, offset+1);
+        if (region->pages_free <= (1UL << order))
+            out_of_mem(region);
+        region->pages_free -= (1 << order);
         spinlock_unlock(&region->lock);
         return (BLOCK_ORDER_SIZE(order) * offset) + region->start;
     }
@@ -531,10 +535,15 @@ uintptr_t pages_reserve(mregion_t *region, unsigned int order, uint64_t offset)
         zblock_split(region, i, p_offset);
         p_offset *= 2;
     }
-    block_set(region, order, offset);
-    --map->pages_free[order];
-    if (map->next_free_page[order] == offset)
-        map->next_free_page[order] = find_next_free_page(region, order, offset+1);
+    if (!block_check(region, order, offset)) {
+        block_set(region, order, offset);
+        --map->pages_free[order];
+        if (map->next_free_page[order] == offset)
+            map->next_free_page[order] = find_next_free_page(region, order, offset+1);
+    }
+    if (region->pages_free <= (1UL << order))
+        out_of_mem(region);
+    region->pages_free -= (1 << order);
 
     spinlock_unlock(&region->lock);
     return (BLOCK_ORDER_SIZE(order) * offset) + region->start;
@@ -549,6 +558,10 @@ void pages_free(mregion_t *region, uintptr_t phaddr, unsigned int order)
     if (!block_check(region, order, offset))
         return;
     block_clear(region, order, offset);
+
+    if (region->pages_free == 0)
+        region->mem_full = true;
+    region->pages_free += (1 << order);
 
     bpa_map_t *map = region->page_alloc_si;
     ++map->pages_free[order];

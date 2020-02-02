@@ -8,6 +8,7 @@
 struct multiboot_info *mbinf;
 extern uint32_t mbm;
 extern uint32_t mbp;
+const size_t mboot_info_size = 116;
 
 extern void tab_search();
 

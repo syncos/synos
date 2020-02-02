@@ -10,6 +10,7 @@
 const uintptr_t _MemStart = (uintptr_t)__KERN_MEM_START;
 const uintptr_t _MemEnd   = (uintptr_t)__KERN_MEM_END;
 const uintptr_t _MemSize  = (uintptr_t)__KERN_MEM_SIZE;
+extern uint32_t mbp;
 
 const size_t page_size = 4096;
 const size_t virt_page_size = 4096;
@@ -137,21 +138,21 @@ void pga_unmap(void *vaddress, unsigned int order)
 
 void mem_p_protect(struct mem_regions *region)
 {
-    if (region->start < 0x10000)
+    if (region->start < 0x200000)
     {
-        // Region is part of low-mem
-        uintptr_t res_size = 0x10000 - region->start;
+        // Region is part of 0x000000 - 0x200000
+        uintptr_t res_size = 0x200000 - region->start;
         if (res_size > region->size)
             res_size = region->size;
         size_t pages = (res_size + (page_size - 1)) / page_size;
         pages_reserve(region, log_order(pages), region->start / page_size);
     }
-    if (region->start < _MemEnd && region->start + region->size > _MemStart)
+    if (region->start < mbp + mboot_info_size && region->start + region->size > mbp)
     {
-        uintptr_t start = _MemStart;
-        if (region->start > _MemStart)
+        uintptr_t start = mbp;
+        if (region->start >mbp)
             start = region->start;
-        uintptr_t res_size = 0x100000 - (start - _MemStart);
+        uintptr_t res_size = mboot_info_size - (start - mbp);
         if (region->size - (start - region->start) < res_size)
             res_size = region->size - (start - region->start);
         size_t pages = (res_size + (page_size - 1)) / page_size;

@@ -12,6 +12,10 @@ size_t kframes_p;
 size_t kframes_alloc_l;
 size_t kframes_f;
 
+bool MemStack_init = false;
+bool MemStack_enable = true;
+uintptr_t MemStack;
+
 int mm_init()
 {
     vpage_init();
@@ -136,4 +140,33 @@ void kfree(void* pointer)
         return;
     }
     return;
+}
+
+void* memstck_malloc(size_t bytes)
+{
+    if (!MemStack_enable)
+        return NULL;
+    if (!MemStack_init)
+    {
+        MemStack = _MemEnd + 64; // Padding just in case
+        MemStack_init = true;
+    }
+    if (MemStack >= 0x200000)
+    {
+        MemStack_enable = false;
+        return NULL;
+    }
+    if (MemStack + bytes >= 0x200000)
+        return NULL;
+    void* pointer = (void*)MemStack;
+
+    MemStack += bytes + 1;
+    ((char*)pointer)[bytes] = 0;
+
+    return pointer;
+}
+
+void memstck_disable()
+{
+    MemStack_enable = false;
 }

@@ -2,12 +2,12 @@
 #define K_MM_H
 #include <synos/arch/memory.h>
 
-#ifndef MAX_ORDER
 #define MAX_ORDER 10
-#endif
-#ifndef MAX_ORDER_ENT
-#define MAX_ORDER_ENT 10
-#endif
+#define BITS_PER_PAGE 2
+
+#define ORDER(ord) (1 << ord)
+#define MAX_ORDER_COUNT (1 << MAX_ORDER)
+#define BLOCK_ORDER_SIZE(order) (page_size * (1 << order))
 
 #define LM_SIZE 0x100000
 
@@ -65,6 +65,15 @@ typedef struct __attribute__((__packed__)) mstack
     void *address;
     size_t length;
 }mstack_t;
+
+typedef struct bpa_map
+{
+    size_t pages;
+    size_t free_area_size;
+    void *free_area[MAX_ORDER];
+    size_t pages_free[MAX_ORDER];
+    size_t next_free_page[MAX_ORDER];
+}bpa_map_t;
 
 extern struct arch_page_size PS;
 

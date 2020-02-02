@@ -1,10 +1,8 @@
 KERNDIR=kernel
 KERNDIR_FULL=$(SOURCE_DIR)/kernel
-KERNOBJECTS=kernel/system.o kernel/log.o kernel/syscall.o kernel/exception/arithex.o kernel/exception/gpf.o
+KERNOBJECTS=kernel/system.o kernel/log.o kernel/syscall.o kernel/mm.o kernel/page.o kernel/exception/arithex.o kernel/exception/gpf.o
 
 INITIMGOBJECTS += kernel/kernel.o
-
-include kernel/mm/Makefile
 
 .PHONY: kernel
 kernel: kernel/kernel.o

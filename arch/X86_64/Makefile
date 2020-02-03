@@ -27,16 +27,16 @@ $(SOURCE_DIR)/arch/arch.o: $(ARCHOBJECTS)
 	@$(LINK) $(LINK_ARCH) -r $(ARCHOBJECTS) -o $(SOURCE_DIR)/arch/arch.o
 
 $(X64DIR)/boot/%.o: $(X64DIR)/boot/%.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
 	@$(ASM) $(ASM_FLAGS) -i $(X64DIR)/boot/ $< -o $@
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
 
 $(X64DIR)/%.o: $(X64DIR)/%.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
 	@$(ASM) $(ASM_FLAGS) $< -o $@
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
 
 $(X64DIR)/%.o: $(X64DIR)/%.c
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $@$(NC)"
 	@$(CC) $(CC_FLAGS) $< -o $@
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $@$(NC)"
 
 .PHONY: grub
 grub:

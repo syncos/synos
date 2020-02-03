@@ -5,5 +5,5 @@ script:
   - sudo apt-get update
   - sudo apt-get install nasm grub2 xorriso mtools
   - cp conf/X86_64.config .config
-  - make all BUILD_TYPE=RELEASE
+  - make all TARGET=RELEASE
   - make grub

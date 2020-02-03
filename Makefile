@@ -19,15 +19,15 @@ include mutils/Makefile
 # Add modules
 MODULES += kernel arch mutils drivers
 
-ifeq ($(BUILD_TYPE), DEBUG)
+ifeq ($(TARGET), DEBUG)
 DEBUG=TRUE
 OPTIMIZE=FALSE
-DEFINE_VALS += -DBUILD_TYPE=\"DEBUG\"
+DEFINE_VALS += -DTARGET=\"DEBUG\"
 endif
-ifeq ($(BUILD_TYPE), RELEASE)
+ifeq ($(TARGET), RELEASE)
 DEBUG=FALSE
 OPTIMIZE=TRUE
-DEFINE_VALS += -DBUILD_TYPE=\"RELEASE\"
+DEFINE_VALS += -DTARGET=\"RELEASE\"
 endif
 ifeq ($(ASSEMBLY), TRUE)
 CC_FLAGS += -S

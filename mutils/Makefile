@@ -19,5 +19,5 @@ mutils/mutils.o: $(MUTILSOBJECTS)
 	@$(LINK) $(LINK_ARCH) -r $(MUTILSOBJECTS) -o mutils/mutils.o
 
 $(MUTDIR)/%.o: $(MUTDIR)/%.c
-	@echo -e "$(SECTIONC)[mutils] $(COMPILEC)Compiling C object $@$(NC)"
 	@$(CC) $(CC_FLAGS) $< -o $@
+	@echo -e "$(SECTIONC)[mutils] $(COMPILEC)Compiling C object $@$(NC)"

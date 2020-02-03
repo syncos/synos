@@ -18,16 +18,16 @@ X86: $(ARCHOBJECTS)
 	@$(LINK) $(LINK_ARCH) -r $(ARCHOBJECTS) -o $(SOURCE_DIR)/arch/arch.o
 
 $(X86DIR)/boot/%.o: $(X86DIR)/boot/%.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
 	@$(ASM) $(ASM_FLAGS) -i $(X86DIR)/boot/ $< -o $@
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
 
 $(X86DIR)/%.o: $(X86DIR)/%.asm
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
 	@$(ASM) $(ASM_FLAGS) $< -o $@
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
 
 $(X86DIR)/%.o: $(X86DIR)/%.c
-	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $@$(NC)"
 	@$(CC) $(CC_FLAGS) $< -o $@
+	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $@$(NC)"
 
 .PHONY: grub
 grub:

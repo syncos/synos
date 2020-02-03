@@ -13,7 +13,7 @@ With the default config for X86_64 (`cp conf/X86_64.config .config`), the binari
 
 To compile the selected targets in `.config`, run:
 
-    make all -j5
+    make
 # Running
 Currently, the only automated way to install synos is to install synos to an iso file along with grub:
 

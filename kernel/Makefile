@@ -11,5 +11,5 @@ kernel/kernel.o: $(KERNOBJECTS)
 	@$(LINK) $(LINK_ARCH) -r $(KERNOBJECTS) -o kernel/kernel.o
 
 kernel/%.o: kernel/%.c
-	@echo -e "$(SECTIONC)[kernel] $(COMPILEC)Compiling C object $@$(NC)"
 	@$(CC) $(CC_FLAGS) $< -o $@
+	@echo -e "$(SECTIONC)[kernel] $(COMPILEC)Compiling C object $@$(NC)"

@@ -1,6 +1,7 @@
 #ifndef ARCH_CPU_H
 #define ARCH_CPU_H
 #include <inttypes.h>
+#include <stdbool.h>
 
 enum Manufacturer
 {

@@ -4,6 +4,7 @@
 #include <synos/arch/cpu.h>
 #include <synos/arch/memory.h>
 #include <synos/log.h>
+#include <stdbool.h>
 
 #ifndef VERSION
 #define VERSION "NaN"

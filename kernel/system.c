@@ -4,6 +4,7 @@
 #include <synos/syscall.h>
 #include <synos/arch/io.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 struct SYS_STATE System;

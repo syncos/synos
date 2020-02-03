@@ -49,11 +49,6 @@ typedef uint64_t uint_fast64_t;
 typedef unsigned long uintptr_t;
 typedef signed long intptr_t;
 
-// Added by synos
-typedef char bool;
-#define true 1
-#define false 0
-
 // Register wide typedef
 typedef unsigned long uintreg_t;
 

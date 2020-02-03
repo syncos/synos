@@ -2,6 +2,7 @@
 #define X64_MEMORY_H
 #include <inttypes.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #define GDT_LEN (1 + 2 + 2 + 1) // Null entry + ring 0 code and data + ring 3 code and data + tss entry
 

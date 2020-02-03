@@ -11,7 +11,6 @@
  * @see http://libc11.org/stdlib/
  */
 
-#include <stdnoreturn.h> /* for _Noreturn */
 #include <stddef.h>
 #include <synos/synos.h>
 

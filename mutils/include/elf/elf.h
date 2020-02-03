@@ -2,6 +2,7 @@
 #define _ELF_H
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef uint16_t ELF32_uint16_t, ELF64_uint16_t;
 typedef uint32_t ELF32_uint32_t, ELF32_uintptr_t, ELF64_uint32_t;

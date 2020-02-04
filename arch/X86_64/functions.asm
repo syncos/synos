@@ -67,3 +67,9 @@ global gdtr_store
 gdtr_store:
     sgdt [rdi]
     ret
+
+global TLB_flush
+TLB_flush:
+    mov rax, cr3
+    mov cr3, rax
+    ret

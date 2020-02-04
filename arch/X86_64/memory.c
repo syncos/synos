@@ -17,6 +17,7 @@ const size_t virt_page_size = 4096;
 
 uintptr_t PML4;
 extern void PML4_T();
+extern void TLB_flush();
 
 int pga_init()
 {
@@ -26,6 +27,7 @@ int pga_init()
     uint64_t entry = PML4;
     entry |= 0b11;
     *(uint64_t*)(PML4 + (8 * 511)) = entry;
+    TLB_flush();
 
     return 0;
 }
@@ -97,6 +99,7 @@ static bool page_table_alloc(int level, void *offset)
     uintptr_t table_address = get_table_address(offset, level);
     
     *((uint64_t*)table_address) = entry;
+    TLB_flush();
     return true;
 }
 void pga_map(void *vaddress, uintptr_t paddress, unsigned int order, unsigned int flags)
@@ -122,6 +125,7 @@ void pga_map(void *vaddress, uintptr_t paddress, unsigned int order, unsigned in
 
         *((uint64_t*)table_address) = entry;
     }
+    TLB_flush();
 }
 void pga_unmap(void *vaddress, unsigned int order)
 {
@@ -134,6 +138,7 @@ void pga_unmap(void *vaddress, unsigned int order)
 
         *((uint64_t*)table_address) = 0;
     }
+    TLB_flush();
 }
 
 void mem_p_protect(struct mem_regions *region)

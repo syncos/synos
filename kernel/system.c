@@ -18,6 +18,12 @@ void startup()
 
     if (arch_init() != 0) panic("Arch initialization error");
 
+    // Get cpuid struct
+    getCPUINFO(&System.cpuinfo);
+
+    // Get memory info
+    getMEMID(&System.memid);
+
     // Initialize memory controller
     mm_init();
 
@@ -35,14 +41,10 @@ void startup()
     printf("-");
     printf(VERSION_DOMAIN);
     printf("\n");
-    // Get cpuid struct
-    getCPUINFO(&System.cpuinfo);
     if (System.cpuinfo.enabled == 0)
         panic("CPUID not supported on target system!");
     if (System.cpuinfo.vendor == UNKNOWN)
         pr_log(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");
-    // Get memory info
-    getMEMID(&System.memid);
     pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
 
     // Initialize interrupts

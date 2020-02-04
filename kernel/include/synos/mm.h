@@ -106,6 +106,8 @@ uintptr_t alloc_pages(unsigned int gfp_mask, unsigned int order);
 
 // Allocate a single frame, zero it, and map it to virtual memory and return the virtual address
 void *get_free_page(unsigned int gfp_mask);
+// Allocate pow(2, order) pages, zero them, and map them to virtual memory and return the virtual address
+void *get_free_pages(unsigned int gfp_mask, unsigned int order);
 // Same as get_free_page, but does not zero the page's value
 void *__get_free_page(unsigned int gfp_mask);
 // Allocate pow(2, order) pages and map them into virtual memory and return the virtual address
@@ -114,6 +116,10 @@ void *__get_free_pages(unsigned int gfp_mask, unsigned int order);
 // Frees 
 void free_page(uintptr_t page);
 void free_pages(unsigned int order, uintptr_t pages);
+
+// Return virtual and physical frame
+void return_free_page (void *address);
+void return_free_pages(void *address, unsigned int order);
 
 extern void  memstck_disable();
 extern void* memstck_malloc(size_t bytes);

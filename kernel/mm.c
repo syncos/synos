@@ -20,7 +20,7 @@ int mm_init()
 {
     vpage_init();
     ppage_init();
-    
+
     alloc_stack        = get_free_page(GFP_KERNEL);
     alloc_stack_l      = 1;
     alloc_stack_f      = 0;
@@ -55,6 +55,16 @@ void *get_free_page(unsigned int gfp_mask)
     void *mem = __get_free_page(gfp_mask);
     memset(mem, 0, virt_page_size);
     return mem;
+}
+void return_free_page(void *address)
+{
+    free_page(pga_getPhysAddr(address));
+    vpage_unmap(address);
+}
+void return_free_pages(void *address, unsigned int order)
+{
+    free_pages(order, pga_getPhysAddr(address));
+    vpages_unmap(address, order);
 }
 
 void* kmalloc(size_t bytes)
@@ -132,7 +142,7 @@ void* kmalloc(size_t bytes)
     frame->pointer += bytes;
 
     return address;
-}
+}    
 void kfree(void* pointer)
 {
     if (!System.MMU_enabled)

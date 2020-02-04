@@ -15,17 +15,22 @@ int mm_init()
     vpage_init();
     ppage_init();
 
+    // Allocate first page for the heap
     heap_start      = __get_free_page(GFP_KERNEL);
+    // The header is at the start of the page
     header_start    = heap_start;
+    // First pointer shortly thereafter
     pointer_start   = heap_start + sizeof(mheader_t);
 
     if (!heap_start)
         panic("No more memory to allocate the kernel heap to!");
 
+    // Set the header values
     header_start->size     = virt_page_size;
     header_start->size_max = header_start->size;
-    header_start->next     = NULL;
+    header_start->next     = NULL; // Currently only page(s)
 
+    // Start with a pointer to all space left of the frame
     pointer_start->size    = header_start->size;
     pointer_start->next    = NULL;
 
@@ -35,6 +40,7 @@ int mm_init()
     return 0;
 }
 
+// Checks all pointers for the one with the greatest size
 static inline size_t findSize_max(mheader_t *header)
 {
     size_t max = 0;
@@ -43,6 +49,7 @@ static inline size_t findSize_max(mheader_t *header)
             max = p->size;
     return max;
 }
+// Find pointers that aren't allocated neighboring eachother and merge them
 static inline void pointers_merge(mpointer_t *pointer_s)
 {
     for (mpointer_t *p = pointer_s; p->next != NULL;)
@@ -63,13 +70,14 @@ void* kmalloc(size_t bytes)
         return NULL;
     if (!System.MMU_enabled)
     {
+        // MM has not been initalized (yet), instead use the hacky memstck_malloc (primarily used by the arch_init function)
         return memstck_malloc(bytes);
     }
 
     mheader_t *h;
     mheader_t *hl = NULL;
     mpointer_t *p;
-    // Find a heap fragment that can allocate at least [bytes] bytes
+    // Find a header that can allocate at least [bytes] bytes
     for (h = header_start; h != NULL; h = h->next)
     {
         if (h->size_max >= bytes)
@@ -77,7 +85,8 @@ void* kmalloc(size_t bytes)
         hl = h;
     }
     if (!h) {
-        // No heap found
+        // No header found
+        // Allocate a new header
         size_t pages = (bytes + sizeof(mheader_t) + sizeof(mpointer_t) + (virt_page_size-1)) / virt_page_size;
         unsigned int order = log_order(pages);
         pages = ORDER(order);
@@ -87,6 +96,7 @@ void* kmalloc(size_t bytes)
             return NULL;
         h = hl->next;
 
+        // Set values
         h->size = pages * virt_page_size;
         h->size_max = h->size;
         h->next = NULL;
@@ -96,6 +106,7 @@ void* kmalloc(size_t bytes)
         p->next = NULL;
     }
 
+    // Find a good pointer
     for (p = (void*)((size_t)h + sizeof(mheader_t)); p != NULL; p = p->next)
         if (p->size >= bytes)
             break;
@@ -110,7 +121,7 @@ void* kmalloc(size_t bytes)
         newp->size = p->size - bytes - sizeof(mpointer_t);
         p->next = newp;
     }
-    p->size = 0;
+    p->size = 0; // Set to 0, this way we can identify which pointers are allocated and which aren't
     h->size_max = findSize_max(h);
 
     return address;
@@ -140,6 +151,7 @@ void kfree(void* address)
     // Wipe the memory
     memset(address, 0, p->size);
 
+    // Merge pointers
     pointers_merge((void*)((uintptr_t)h + sizeof(mheader_t)));
     h->size_max = findSize_max(h);
 

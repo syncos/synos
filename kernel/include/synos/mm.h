@@ -52,19 +52,17 @@ typedef struct mem_regions
     int lock;
 }mregion_t;
 
-typedef struct __attribute__((__packed__)) mframe
+typedef struct __attribute__((__packed__)) mheader
 {
-    bool present;
-    void *frame;
-    unsigned int order;
-    size_t pointer;
-}mframe_t;
-typedef struct __attribute__((__packed__)) mstack
+    size_t size;
+    size_t size_max;
+    struct mheader *next;
+}mheader_t;
+typedef struct __attribute__((__packed__)) mpointer
 {
-    bool present;
-    void *address;
-    size_t length;
-}mstack_t;
+    size_t size; // 0 = allocated
+    struct mpointer *next;
+}mpointer_t;
 
 typedef struct bpa_map
 {

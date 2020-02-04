@@ -26,5 +26,5 @@ void startup();
 void panic(char*);
 
 extern void* kmalloc(size_t bytes);
-extern void kfree(void* pointer);
+extern void kfree(void* address);
 #endif

@@ -50,6 +50,8 @@ void *vpages_map(uintptr_t paddress, unsigned int order, unsigned int flags)
                 goto nav;
         }
         pga_map((void*)start, paddress, order, flags);
+        if (start == (uintptr_t)next_free_vpage)
+            next_free_vpage = fnfp(next_free_vpage + BLOCK_ORDER_SIZE(order));
         return (void*)start;
         nav:
         continue;

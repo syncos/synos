@@ -2,15 +2,9 @@
 #include <synos/mm.h>
 #include <string.h>
 
-mstack_t* alloc_stack;
-size_t alloc_stack_l;
-size_t alloc_stack_f;
-size_t alloc_stack_p;
-
-mframe_t* kframes;
-size_t kframes_p;
-size_t kframes_alloc_l;
-size_t kframes_f;
+void *heap_start;
+mheader_t *header_start;
+mpointer_t *pointer_start;
 
 bool MemStack_init = false;
 bool MemStack_enable = true;
@@ -21,134 +15,134 @@ int mm_init()
     vpage_init();
     ppage_init();
 
-    alloc_stack        = get_free_page(GFP_KERNEL);
-    alloc_stack_l      = 1;
-    alloc_stack_f      = 0;
-    alloc_stack_p      = 0;
+    heap_start      = __get_free_page(GFP_KERNEL);
+    header_start    = heap_start;
+    pointer_start   = heap_start + sizeof(mheader_t);
 
-    kframes            = get_free_page(GFP_KERNEL);
-    kframes_p          = 0;
-    kframes_alloc_l    = 1;
-    kframes_f          = 0;
+    if (!heap_start)
+        panic("No more memory to allocate the kernel heap to!");
+
+    header_start->size     = virt_page_size;
+    header_start->size_max = header_start->size;
+    header_start->next     = NULL;
+
+    pointer_start->size    = header_start->size;
+    pointer_start->next    = NULL;
 
     System.MMU_enabled = true;
     memstck_disable();
 
     return 0;
 }
-void *__get_free_page(unsigned int gfp_mask)
+
+static inline size_t findSize_max(mheader_t *header)
 {
-    uintptr_t page_address = alloc_page(gfp_mask);
-    if (!page_address)
-        return NULL;
-    return vpage_map(page_address, 0);
+    size_t max = 0;
+    for (mpointer_t *p = (void*)((uintptr_t)header + sizeof(mheader_t)); p != NULL; p = p->next)
+        if (p->size > max)
+            max = p->size;
+    return max;
 }
-void *__get_free_pages(unsigned int gfp_mask, unsigned int order)
+static inline void pointers_merge(mpointer_t *pointer_s)
 {
-    uintptr_t pages_address = alloc_pages(gfp_mask, order);
-    if (!pages_address)
-        return NULL;
-    return vpages_map(pages_address, order, 0);
-}
-void *get_free_page(unsigned int gfp_mask)
-{
-    void *mem = __get_free_page(gfp_mask);
-    memset(mem, 0, virt_page_size);
-    return mem;
-}
-void return_free_page(void *address)
-{
-    free_page(pga_getPhysAddr(address));
-    vpage_unmap(address);
-}
-void return_free_pages(void *address, unsigned int order)
-{
-    free_pages(order, pga_getPhysAddr(address));
-    vpages_unmap(address, order);
+    for (mpointer_t *p = pointer_s; p->next != NULL;)
+    {
+        if (p->size > 0 && p->next->size > 0) {
+            p->size += p->next->size;
+            p->next = p->next->next;
+        }
+        else {
+            p = p->next;
+        }
+    }
 }
 
 void* kmalloc(size_t bytes)
 {
+    if (!bytes)
+        return NULL;
     if (!System.MMU_enabled)
     {
         return memstck_malloc(bytes);
     }
 
-    mframe_t *frame;
-    for (size_t i = kframes_f; i <= kframes_p; ++i)
+    mheader_t *h;
+    mheader_t *hl = NULL;
+    mpointer_t *p;
+    // Find a heap fragment that can allocate at least [bytes] bytes
+    for (h = header_start; h != NULL; h = h->next)
     {
-        if (i == kframes_p) {
-            if (kframes_p >= (virt_page_size * kframes_alloc_l) / sizeof(mframe_t)) {
-                // Resize the kframes array
-                unsigned int oldorder = log_order(kframes_alloc_l);
-                unsigned int neworder = log_order(++kframes_alloc_l);
-                kframes_alloc_l = (1UL << neworder);
-
-                mframe_t* new_kframes = __get_free_pages(GFP_KERNEL, neworder);
-                memcpy(new_kframes, kframes, sizeof(mframe_t)*kframes_p);
-                
-                free_pages(oldorder, pga_getPhysAddr(kframes));
-                vpages_unmap(kframes, oldorder);
-
-                kframes = new_kframes;
-            }
-            kframes[i].present = true;
-            kframes[i].order = log_order((bytes + (virt_page_size - 1)) / virt_page_size);
-            kframes[i].frame = __get_free_pages(GFP_KERNEL, kframes[i].order);
-            memset(kframes[i].frame, 0, (1UL << kframes[i].order)*virt_page_size);
-            kframes[i].pointer = 0;
-
-            ++kframes_p;
-            frame = &kframes[i];
+        if (h->size_max >= bytes)
             break;
-        }
-        if (kframes[i].present && (virt_page_size * (1UL << kframes[i].order)) - kframes[i].pointer >= bytes) {
-            frame = &kframes[i];
-            break;
-        }
+        hl = h;
+    }
+    if (!h) {
+        // No heap found
+        size_t pages = (bytes + sizeof(mheader_t) + sizeof(mpointer_t) + (virt_page_size-1)) / virt_page_size;
+        unsigned int order = log_order(pages);
+        pages = ORDER(order);
+
+        hl->next = __get_free_pages(GFP_KERNEL, order);
+        if (!hl->next)
+            return NULL;
+        h = hl->next;
+
+        h->size = pages * virt_page_size;
+        h->size_max = h->size;
+        h->next = NULL;
+        p = (void*)((size_t)h + sizeof(mheader_t));
+
+        p->size = h->size;
+        p->next = NULL;
     }
 
-    if (alloc_stack_p >= (virt_page_size * alloc_stack_l) / sizeof(mstack_t)) {
-        // Resize the alloc_stack array
-        unsigned int oldorder = log_order(alloc_stack_l);
-        unsigned int neworder = log_order(++alloc_stack_l);
-        alloc_stack_l = (1UL << neworder);
-
-        mstack_t* new_alloc_stack = __get_free_pages(GFP_KERNEL, neworder);
-        memset(new_alloc_stack, 0, (1UL << neworder)*virt_page_size);
-        memcpy(new_alloc_stack, alloc_stack, sizeof(mstack_t)*alloc_stack_p);
-                
-        free_pages(oldorder, pga_getPhysAddr(alloc_stack));
-        vpages_unmap(alloc_stack, oldorder);
-
-        alloc_stack = new_alloc_stack;
-    }
-
-    void *address = frame->frame + frame->pointer;
-
-    alloc_stack[alloc_stack_f].present = true;
-    alloc_stack[alloc_stack_f].address = address;
-    alloc_stack[alloc_stack_f].length = bytes;
-    ++alloc_stack_p;
-
-    for (size_t i = alloc_stack_f+1; i < (virt_page_size * alloc_stack_l) / sizeof(mstack_t); ++i)
-    {
-        if (!alloc_stack[i].present) {
-            alloc_stack_f = i;
+    for (p = (void*)((size_t)h + sizeof(mheader_t)); p != NULL; p = p->next)
+        if (p->size >= bytes)
             break;
-        }
-    }
+    
+    // The pointer we will use is now in p
+    void *address = p + sizeof(mpointer_t);
 
-    frame->pointer += bytes;
+    if (p->size - bytes > sizeof(mpointer_t)) {
+        // The size of the selected segment is greater than the bytes requested and the remainder is large enough to fit another pointer and one byte
+        mpointer_t *newp = address + bytes;
+        newp->next = p->next;
+        newp->size = p->size - bytes - sizeof(mpointer_t);
+        p->next = newp;
+    }
+    p->size = 0;
+    h->size_max = findSize_max(h);
 
     return address;
 }    
-void kfree(void* pointer)
+void kfree(void* address)
 {
     if (!System.MMU_enabled)
-    {
         return;
-    }
+
+    // First, find the heap where the address points to
+    mheader_t *h;
+    mpointer_t *p;
+    for (h = header_start; h != NULL; h = h->next)
+        if ((uintptr_t)address > (uintptr_t)h && (uintptr_t)address < (uintptr_t)h + h->size)
+            break;
+    if (!h)
+        return;
+    // We've found the header, now find the pointer
+    for (p = (void*)((uintptr_t)h + sizeof(mheader_t)); p != NULL; p = p->next)
+        if (p + sizeof(mpointer_t) == address)
+            break;
+    if (!p)
+        return;
+    
+    // Free
+    p->size = (uintptr_t)p->next - (uintptr_t)address;
+    // Wipe the memory
+    memset(address, 0, p->size);
+
+    pointers_merge((void*)((uintptr_t)h + sizeof(mheader_t)));
+    h->size_max = findSize_max(h);
+
     return;
 }
 
@@ -179,4 +173,35 @@ void* memstck_malloc(size_t bytes)
 void memstck_disable()
 {
     MemStack_enable = false;
+}
+
+void *__get_free_page(unsigned int gfp_mask)
+{
+    uintptr_t page_address = alloc_page(gfp_mask);
+    if (!page_address)
+        return NULL;
+    return vpage_map(page_address, 0);
+}
+void *__get_free_pages(unsigned int gfp_mask, unsigned int order)
+{
+    uintptr_t pages_address = alloc_pages(gfp_mask, order);
+    if (!pages_address)
+        return NULL;
+    return vpages_map(pages_address, order, 0);
+}
+void *get_free_page(unsigned int gfp_mask)
+{
+    void *mem = __get_free_page(gfp_mask);
+    memset(mem, 0, virt_page_size);
+    return mem;
+}
+void return_free_page(void *address)
+{
+    free_page(pga_getPhysAddr(address));
+    vpage_unmap(address);
+}
+void return_free_pages(void *address, unsigned int order)
+{
+    free_pages(order, pga_getPhysAddr(address));
+    vpages_unmap(address, order);
 }

@@ -27,11 +27,11 @@ int mm_init()
 
     // Set the header values
     header_start->size     = virt_page_size;
-    header_start->size_max = header_start->size;
+    header_start->size_max = header_start->size - sizeof(mheader_t) - sizeof(mpointer_t);
     header_start->next     = NULL; // Currently only page(s)
 
     // Start with a pointer to all space left of the frame
-    pointer_start->size    = header_start->size;
+    pointer_start->size    = header_start->size_max;
     pointer_start->next    = NULL;
 
     System.MMU_enabled = true;
@@ -98,7 +98,7 @@ void* kmalloc(size_t bytes)
 
         // Set values
         h->size = pages * virt_page_size;
-        h->size_max = h->size;
+        h->size_max = h->size - sizeof(mheader_t) - sizeof(mpointer_t);
         h->next = NULL;
         p = (void*)((size_t)h + sizeof(mheader_t));
 
@@ -116,7 +116,7 @@ void* kmalloc(size_t bytes)
 
     if (p->size - bytes > sizeof(mpointer_t)) {
         // The size of the selected segment is greater than the bytes requested and the remainder is large enough to fit another pointer and one byte
-        mpointer_t *newp = address + bytes;
+        mpointer_t *newp = (void*)((uintptr_t)address + bytes);
         newp->next = p->next;
         newp->size = p->size - bytes - sizeof(mpointer_t);
         p->next = newp;

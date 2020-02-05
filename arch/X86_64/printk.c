@@ -66,9 +66,11 @@ static void setCursorPos(uint32_t x, uint32_t y)
 }
 static void scroll()
 {
-    for (int64_t line = height-2; line >= 0; --line)
-        for (uint32_t p = 0; p < width; ++p)
-            display_buffer[(line*width)+p] = display_buffer[((line-1)*width)+p];
+    for (uint32_t i = 0; i < height-1; ++i)
+        for (uint32_t t = 0; t < width; ++t)
+            display_buffer[(i*width)+t] = display_buffer[((i+1)*width)+t];
+    for (uint32_t i = 0; i < width; ++i)
+        display_buffer[((height-1)*width)+i] = CharEntry(0);
     setCursorPos(getCursorPosX(), getCursorPosY()-1);
 }
 static void clear_screen()
@@ -115,7 +117,7 @@ void arch_print(const char* str, size_t length)
                 break;
         }
         scrollRep:
-        if (cursor_pos > width*height) {
+        if (cursor_pos >= width*height) {
             scroll();
             goto scrollRep;
         }

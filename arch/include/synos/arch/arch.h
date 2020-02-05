@@ -20,4 +20,7 @@ extern struct Stacktrace* TraceStack();
 extern void PrintStackTrace();
 extern int arch_init();
 
+extern int arch_printk_init();
+extern void arch_print(const char*, size_t);
+
 #endif

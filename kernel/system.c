@@ -3,7 +3,6 @@
 #include <synos/arch/interrupt.h>
 #include <synos/syscall.h>
 #include <synos/arch/io.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -16,10 +15,7 @@ void startup()
     if (interrupt_enabled()) interrupt_disable();
     System.interrupt_enabled = false;
 
-    if (arch_init() != 0) panic("Arch initialization error");
-
-    // Get cpuid struct
-    getCPUINFO(&System.cpuinfo);
+    arch_init();
 
     // Get memory info
     getMEMID(&System.memid);
@@ -28,24 +24,16 @@ void startup()
     mm_init();
 
     // Set up logging and printf (if enabled)
-    log_init();
-    #ifdef PRINTF_FALLBACK
-    printf_init(); // Initialize printf fallback function if enabled
-    #endif
+    printk_init();
 
-    pr_log(INFO, "Starting version %d");//, VERSION);
-    printf("Starting version ");
-    printf(VERSION);
-    printf(" ");
-    printf(VERSION_NAME);
-    printf("-");
-    printf(VERSION_DOMAIN);
-    printf("\n");
-    if (System.cpuinfo.enabled == 0)
+    printk(INFO, "Starting version %s %s-%s", VERSION, VERSION_NAME, VERSION_DOMAIN);
+    // Get cpuid struct
+    getCPUINFO(&System.cpuinfo);
+    if (System.cpuinfo.enabled == false)
         panic("CPUID not supported on target system!");
     if (System.cpuinfo.vendor == UNKNOWN)
-        pr_log(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");
-    pr_log(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
+        printk(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");
+    printk(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
 
     // Initialize interrupts
     interrupt_init();
@@ -59,28 +47,22 @@ void startup()
 }
 void panic(char* text)
 {
-    // This is only a temporary solution. As soon as a working vga driver is working, it should be redirected there
-    pr_log(INFO, "Panic encountered! Error message: %d", text);
-
-    printf("The system kernel has encountered a panic!\n");
-    printf("Error message: ");
-    printf(text);
-    printf("\n");
+    printk(FATAL, "The system kernel has encountered a panic!\n");
+    printk(FATAL, "Error message: %s", text);
 
     PrintStackTrace();
 
-    printf("\n");
-    printf("System suspended");
+    printk(WARNING, "System suspended");
 
-    pr_log(INFO, "Suspending all processes...");
+    printk(INFO, "Suspending all processes...");
     // Suspend all processes except essential drivers
 
-    pr_log(INFO, "Shutting down cores...");
+    printk(INFO, "Shutting down cores...");
     // Shut down all cores except core 0
-    pr_log(INFO, "All cores except core 0 disabled.");
+    printk(INFO, "All cores except core 0 disabled.");
 
     // Disable process sheduler
-    pr_log(INFO, "Process scheduler disabled, core passed to kernel.");
+    printk(INFO, "Process scheduler disabled, core passed to kernel.");
 
     // Shut down systems and halt
     halt();

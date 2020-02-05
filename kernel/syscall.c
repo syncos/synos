@@ -1,5 +1,4 @@
 #include <synos/syscall.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
@@ -65,5 +64,5 @@ void* syscall_resolve_function(uint32_t id)
 
 void syscall_c()
 {
-    printf("Syscall!");
+    
 }

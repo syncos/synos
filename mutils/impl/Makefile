@@ -3,7 +3,7 @@ STDIODIR_FULL=$(MUTDIR_FULL)/impl
 
 MUTILSOBJECTS += $(MUTDIR)/impl.o
 
-IMPLOBJECTS=$(IMPLDIR)/stdio.o $(IMPLDIR)/spinlock.o
+IMPLOBJECTS=$(IMPLDIR)/spinlock.o $(IMPLDIR)/array.o
 
 $(MUTDIR)/impl.o: $(IMPLOBJECTS)
 	@echo -e "$(SECTIONC)[mutils] $(LINKC)Linking impl object files -> $(MUTDIR)/impl.o$(NC)"

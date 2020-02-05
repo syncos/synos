@@ -93,6 +93,33 @@ int mbootInit()
     {
         X64.mmap = NULL;
     }
+
+    if (mbinf->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO)
+    {
+        switch (mbinf->framebuffer_type) 
+        {
+            case MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT:
+                X64.framebuffer.type = EGA_TEXT;
+                break;
+            case MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED:
+                X64.framebuffer.type = INDEXED_COLOR;
+                break;
+            case MULTIBOOT_FRAMEBUFFER_TYPE_RGB:
+                X64.framebuffer.type = DIRECT_RGB;
+                break;
+            default:
+                X64.framebuffer.type = FRAMEBUFFER_TYPE_LENGTH;
+                break;
+        }
+
+        X64.framebuffer.address = mbinf->framebuffer_addr;
+        X64.framebuffer.width   = mbinf->framebuffer_width;
+        X64.framebuffer.height  = mbinf->framebuffer_height;
+    }
+    else
+    {
+        X64.framebuffer.type = FRAMEBUFFER_TYPE_LENGTH;
+    }
     
 
     return 0;

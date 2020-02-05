@@ -10,6 +10,15 @@ enum LOAD_SYSTEMS
 };
 extern enum LOAD_SYSTEMS load_sys;
 
+enum FRAMEBUFFER_TYPE
+{
+    EGA_TEXT,
+    INDEXED_COLOR,
+    DIRECT_RGB,
+
+    FRAMEBUFFER_TYPE_LENGTH
+};
+
 struct BootInfo
 {
     struct 
@@ -24,6 +33,14 @@ struct BootInfo
         struct ELF64_Shdr *elf_sh;
         uint32_t elf_sh_length;
     }sections;
+    struct
+    {
+        enum FRAMEBUFFER_TYPE type;
+        uintptr_t address;
+
+        uint32_t width;
+        uint32_t height;
+    }framebuffer;
 
     struct mem_regions *mmap;
 };

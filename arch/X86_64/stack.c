@@ -1,8 +1,8 @@
+#include <synos/synos.h>
 #include <synos/arch/arch.h>
 #include "memory.h"
 #include "x64.h"
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -43,7 +43,7 @@ static const char* TraceName(uintptr_t address)
 }
 void PrintStackTrace()
 {
-    printf("Stack trace (most recent call first):\n");
+    printk(FATAL, "Stack trace (most recent call first):");
 
     struct StackFrame *stk = NULL;
     asm volatile ("movq %0, rbp" : "=r"(stk));
@@ -52,10 +52,7 @@ void PrintStackTrace()
     {
         if (stk == NULL)
             break;
-        printf(hex_str(stk->rip));
-        printf(" ");
-        printf(TraceName(stk->rip));
-        printf("\n");
+        printk(FATAL, "0x%X %s", stk->rip, TraceName(stk->rip));
         stk = stk->rbp;
     }
 }

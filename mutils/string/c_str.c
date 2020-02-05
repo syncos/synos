@@ -1,24 +1,34 @@
 #include <string.h>
+#include <synos/synos.h>
 
-const char* c_str(size_t in)
+char* c_str(size_t in)
 {
-    char* out = "          ";
-    size_t len = strlen(out);
-    for (size_t i = 0; i < len; i++) out[i] = 0;
-
-    if (in == 0)
+    string_t *out = newString();
+    char c;
+    while (in > 0)
     {
-        out[0] = '0';
-        return out;
-    }
-    size_t i;
-    for (i = 0; in > 0; i++)
-    {
-        out[i] = (in % 10) + '0';
-
+        c = (in % 10) + '0';
+        out->append(out, &c, 1);
         in -= in % 10;
         in /= 10;
     }
-    reverse(out);
-    return out;
+    char* str = out->str;
+    kfree(out);
+    reverse(str);
+    return str;
+}
+
+char* toLower(char* str)
+{
+    size_t len = strlen(str);
+    for (size_t i = 0; i < len; ++i)
+    {
+        switch (str[i])
+        {
+            case 'A' ... 'Z':
+                str[i] += 32;
+                break;
+        }
+    }
+    return str;
 }

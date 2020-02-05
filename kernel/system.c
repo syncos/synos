@@ -47,12 +47,10 @@ void startup()
 }
 void panic(char* text)
 {
-    printk(FATAL, "The system kernel has encountered a panic!\n");
+    printk(FATAL, "The system kernel has encountered a panic!");
     printk(FATAL, "Error message: %s", text);
 
     PrintStackTrace();
-
-    printk(WARNING, "System suspended");
 
     printk(INFO, "Suspending all processes...");
     // Suspend all processes except essential drivers
@@ -63,6 +61,8 @@ void panic(char* text)
 
     // Disable process sheduler
     printk(INFO, "Process scheduler disabled, core passed to kernel.");
+
+    printk(WARNING, "System suspended");
 
     // Shut down systems and halt
     halt();

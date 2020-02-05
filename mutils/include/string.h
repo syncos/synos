@@ -138,9 +138,21 @@ char* strtok(char* restrict s1, const char* restrict s2);
 size_t strxfrm(char* restrict s1, const char* restrict s2, size_t n);
 
 int tostring(size_t in, char* out);
-const char* c_str(size_t in);
+char* c_str(size_t in);
 int reverse(char* format);
-const char* hex_str(uint64_t in);
+char* hex_str(uint64_t in);
+char* toLower(char*);
+
+typedef struct string
+{
+    char* str;
+    size_t length;
+    size_t alloc_length;
+
+    void (*append)(struct string *, const char*, size_t);
+}string_t;
+
+string_t *newString();
 
 #ifdef __cplusplus
 } /* extern "C" */

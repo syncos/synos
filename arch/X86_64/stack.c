@@ -52,7 +52,7 @@ void PrintStackTrace()
     {
         if (stk == NULL)
             break;
-        printk(FATAL, "0x%X %s", stk->rip, TraceName(stk->rip));
+        printk(FATAL, "     0x%X    %s", stk->rip, TraceName(stk->rip));
         stk = stk->rbp;
     }
 }

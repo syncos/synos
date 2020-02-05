@@ -112,7 +112,7 @@ void* kmalloc(size_t bytes)
             break;
     
     // The pointer we will use is now in p
-    void *address = p + sizeof(mpointer_t);
+    void *address = (void*)((uintptr_t)p + sizeof(mpointer_t));
 
     if (p->size - bytes > sizeof(mpointer_t)) {
         // The size of the selected segment is greater than the bytes requested and the remainder is large enough to fit another pointer and one byte

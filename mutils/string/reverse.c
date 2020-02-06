@@ -3,6 +3,8 @@
 int reverse(char* format)
 {
     size_t len = strlen(format);
+    if (len < 2)
+        return 0;
     size_t swN = len / 2;
     if (len % 2 != 0) swN++;
      
@@ -13,5 +15,5 @@ int reverse(char* format)
         format[len - 1 - i] = format[len - 1 - i] ^ format[i];
     }
     
-    return 1;
+    return 0;
 }

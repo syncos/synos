@@ -103,10 +103,10 @@ _64INIT:
     or eax, 1 << 5
     mov cr4, eax
 
-    ; Set the long mode (64-bit mode) bit in EFER MSR (Model Specific Register)
+    ; Set the long mode (64-bit mode) and the NXE bit in EFER MSR (Model Specific Register)
     mov ecx, 0xC0000080
     rdmsr
-    or eax, 1 << 8
+    or eax, 1 << 8 | 1 << 11
     wrmsr
 
     ; Enable paging in cr0

@@ -5,6 +5,11 @@ char* hex_str(uint64_t in)
 {
     string_t *out = newString();
 
+    if (in == 0) {
+        out->append(out, "0", 1);
+        goto end;
+    }
+
     char c;
     while (in > 0)
     {
@@ -16,6 +21,8 @@ char* hex_str(uint64_t in)
         out->append(out, &c, 1);
         in = in >> 4;
     }
+
+    end:;
     char* str = out->str;
     kfree(out);
     reverse(str);

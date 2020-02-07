@@ -2,6 +2,7 @@
 #define ARCH_H
 #include <inttypes.h>
 #include <stddef.h>
+#include <synos/time.h>
 
 extern const uintptr_t _MemStart;
 extern const uintptr_t _MemEnd;
@@ -22,5 +23,10 @@ extern int arch_init();
 
 extern int arch_printk_init();
 extern void arch_print(const char*, size_t);
+
+extern void* arch_memcpy(void* s1, const void* s2, size_t n);
+extern void* arch_memset(void* s, int c, size_t n);
+
+extern time_size_t arch_gettime();
 
 #endif

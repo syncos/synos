@@ -1,5 +1,4 @@
 X64DIR=$(ARCHDIR)/X86_64
-include $(X64DIR)/.config
 
 DEFINE_VALS += -D_X86_64_
 
@@ -10,9 +9,6 @@ include $(X64DIR)/interrupts/Makefile
 
 ifdef SYSCALL_INT
 DEFINE_VALS += -DSYSCALL_INT=$(SYSCALL_INT)
-endif
-ifeq ($(MEMORY_ALLOW_MANUAL_PROBE), TRUE)
-DEFINE_VALS += -DMEM_MANUAL_PROBE
 endif
 ifeq ($(APIC_SUPPORT), TRUE)
 DEFINE_VALS += -DAPIC_ENABLE

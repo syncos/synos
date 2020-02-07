@@ -73,3 +73,20 @@ TLB_flush:
     mov rax, cr3
     mov cr3, rax
     ret
+
+global arch_memcpy
+arch_memcpy:
+    push rdi
+    mov rcx, rdx
+    rep movsb
+    pop rax
+    ret
+
+global arch_memset
+arch_memset:
+    push rdi
+    mov rcx, rdx
+    mov ax, si
+    rep stosb
+    pop rax
+    ret

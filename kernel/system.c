@@ -12,7 +12,7 @@ void startup()
 {
     // Initialize arch
     // Set interrupt_enabled bool to false
-    if (interrupt_enabled()) interrupt_disable();
+    interrupt_disable();
     System.interrupt_enabled = false;
 
     arch_init();
@@ -35,7 +35,7 @@ void startup()
         printk(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");
     printk(INFO, "Detected memory: %u sections, %u MiB total", System.memid.nEntries, System.memid.totalSize / 1048576);
     for (mregion_t *regs = get_regions(); regs != NULL; regs = regs->next)
-        printk(INFO, "\t0x%X-0x%X %u KiB", regs->start, regs->start + regs->size - 1, regs->size / 1024);
+        printk(DEBUG, "\t0x%X-0x%X %u KiB", regs->start, regs->start + regs->size - 1, regs->size / 1024);
 
     // Initialize interrupts
     interrupt_init();
@@ -54,21 +54,17 @@ void panic(char* text)
     printk(FATAL, "The system kernel has encountered a panic!");
     printk(FATAL, "Error message: %s", text);
 
-    #ifdef DEBUG
     PrintStackTrace();
-    #else
-    printk(INFO, "\tStack trace not shown (debugging disabled)");
-    #endif
 
-    printk(INFO, "Suspending all processes...");
+    printk(DEBUG, "Suspending all processes...");
     // Suspend all processes except essential drivers
 
-    printk(INFO, "Shutting down cores...");
+    printk(DEBUG, "Shutting down cores...");
     // Shut down all cores except core 0
-    printk(INFO, "All cores except core 0 disabled.");
+    printk(DEBUG, "All cores except core 0 disabled.");
 
     // Disable process sheduler
-    printk(INFO, "Process scheduler disabled, core passed to kernel.");
+    printk(DEBUG, "Process scheduler disabled, core passed to kernel.");
 
     printk(WARNING, "System suspended");
 

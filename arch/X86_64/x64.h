@@ -47,4 +47,7 @@ struct BootInfo
 
 extern struct BootInfo X64;
 extern const size_t mboot_info_size;
+
+extern void nmi_enable();
+extern void nmi_disable();
 #endif

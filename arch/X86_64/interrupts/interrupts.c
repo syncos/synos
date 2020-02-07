@@ -4,6 +4,7 @@
 #include "interrupts.h"
 #include "../memory.h"
 #include "exceptions.h"
+#include "../x64.h"
 
 struct IDT_Entry IDT[256];
 struct IDT_Desc IDTR;
@@ -82,6 +83,7 @@ void idt_map()
 }
 int interrupt_init()
 {
+    nmi_disable();
     // Check that the current syscall isn't in conflict with the IRQs
     if (IRQ_start <= syscall_isr && syscall_isr < (IRQ_start+16))
         panic("Syscall ISR in conflict with IRQ values");

@@ -33,7 +33,8 @@ enum Log_Level
     CRITICAL,
     ERROR,
     WARNING,
-    INFO
+    INFO,
+    DEBUG,
 };
 struct LogEnt
 {

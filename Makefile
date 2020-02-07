@@ -39,7 +39,7 @@ CC_FLAGS += -gdwarf
 CXX_FLAGS += -gdwarf
 ASM_FLAGS += -g -F dwarf
 LINK_FLAGS += -g
-DEFINE_VALS += -DDEBUG
+DEFINE_VALS += -DKDEBUG
 endif
 ifeq ($(OPTIMIZE), TRUE)
 CC_FLAGS += -Og
@@ -57,6 +57,9 @@ DEFINE_VALS += -D_32BIT_
 endif
 ifeq ($(MULTICORE), TRUE)
 DEFINE_VALS += -DMULTICORE
+endif
+ifdef LOGLEVEL
+DEFINE_VALS += -DLOGLEVEL=$(LOGLEVEL)
 endif
 
 .PHONY: startM

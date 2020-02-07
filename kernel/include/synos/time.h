@@ -6,16 +6,19 @@ typedef uint64_t time_size_t;
 
 typedef struct time
 {
-    time_size_t unix_t;
-
+    // Rolls back to 0 after one second
     time_size_t microseconds;
     time_size_t milliseconds;
-    time_size_t seconds;
-    time_size_t minutes;
-    time_size_t hours;
-    time_size_t day;
-    time_size_t month;
-    time_size_t year;
+    // Seconds since 1971
+    time_size_t unix_t;
+
+    // DO NOT USE
+    uint8_t seconds;
+    uint8_t minutes;
+    uint8_t hours;
+    uint8_t day;
+    uint8_t month;
+    uint8_t year;
 }time_t;
 
 extern const time_t *time_start;

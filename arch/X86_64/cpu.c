@@ -30,6 +30,7 @@ struct CPUINFO* __attribute__((optimize("O0"))) getCPUINFO(struct CPUINFO* cpu)
     vendor[12] = 0;
     CPUID_manufacturer((char*)&vendor);
     memcpy(x64ID.vendor_string, (char*)&vendor, 12);
+    printk(DEBUG, "CPU vendor string: %s", x64ID.vendor_string);
 
     #define VENDORCMP(vnd) strcmp((char*)&vendor, vnd) == 0
          if (VENDORCMP(CPUID_VENDOR_OLDAMD))       {cpu->vendor = OLDAMD;       cpu->isVM = false;}

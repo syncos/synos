@@ -28,6 +28,6 @@ extern void* arch_memcpy(void* s1, const void* s2, size_t n);
 extern void* arch_memset(void* s, int c, size_t n);
 
 extern int arch_time_init();
-extern const time_size_t *arch_gettime();
+extern const time_t *arch_gettime(); // The values microseconds, milliseconds, and unix_t should be set
 
 #endif

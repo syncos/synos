@@ -17,5 +17,6 @@ const time_t *ktime()
 int ktime_init()
 {
     arch_time_init();
+    const time_t *c = arch_gettime();
     return 0;
 }

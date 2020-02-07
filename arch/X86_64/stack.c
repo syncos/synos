@@ -43,6 +43,7 @@ static const char* TraceName(uintptr_t address)
 }
 void PrintStackTrace()
 {
+    #ifdef KDEBUG
     printk(FATAL, "Stack trace (most recent call first):");
 
     struct StackFrame *stk = NULL;
@@ -55,4 +56,7 @@ void PrintStackTrace()
         printk(FATAL, "\t0x%X    %s", stk->rip, TraceName(stk->rip));
         stk = stk->rbp;
     }
+    #else
+    printk(DEBUG, "\tStack trace not shown (debugging disabled)");
+    #endif
 }

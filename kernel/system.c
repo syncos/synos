@@ -45,6 +45,8 @@ void startup()
 
     interrupt_enable();
 
+    ktime_init();
+
     panic("System reached end of startup function!");
 }
 void panic(char* text)

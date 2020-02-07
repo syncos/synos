@@ -27,6 +27,7 @@ extern void arch_print(const char*, size_t);
 extern void* arch_memcpy(void* s1, const void* s2, size_t n);
 extern void* arch_memset(void* s, int c, size_t n);
 
-extern time_size_t arch_gettime();
+extern int arch_time_init();
+extern const time_size_t *arch_gettime();
 
 #endif

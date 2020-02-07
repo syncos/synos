@@ -1,4 +1,5 @@
 #include <synos/time.h>
+#include <synos/arch/arch.h>
 
 time_t start;
 time_t t;
@@ -15,5 +16,6 @@ const time_t *ktime()
 }
 int ktime_init()
 {
-
+    arch_time_init();
+    return 0;
 }

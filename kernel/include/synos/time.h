@@ -18,6 +18,8 @@ typedef struct time
     time_size_t year;
 }time_t;
 
+extern const time_t *time_start;
+
 int ktime_init();
 const time_t *ktime();
 

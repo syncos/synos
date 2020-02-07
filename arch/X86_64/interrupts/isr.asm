@@ -169,8 +169,17 @@ irq_7:
     EOI 7
     iretq
 global irq_8
+extern microsecs
+extern ms_update
 irq_8:
     SOI 8
+    mov rax, [microsecs]
+    inc rax
+    cmp rax, 1000000
+    jl .set
+    .set:
+    mov [microsecs], rax
+    call ms_update
     EOI 8
     iretq
 global irq_9

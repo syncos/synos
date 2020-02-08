@@ -72,13 +72,6 @@ struct CPUINFO* __attribute__((optimize("O0"))) getCPUINFO(struct CPUINFO* cpu)
 
     return cpu;
 }
-void halt()
-{
-    while (1)
-    {
-        asm ("hlt");
-    }
-}
 
 void readMSR(uint32_t msr, uint32_t *lo, uint32_t *hi)
 {

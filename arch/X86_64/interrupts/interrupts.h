@@ -40,6 +40,8 @@ extern struct IDT_Desc IDTR;
 
 void idt_set(uint8_t index, uintptr_t address, uint8_t attributes);
 
+void serial_init();
+
 enum IRQ_CONTROLLERS IC_Controller();
 int IC_Configure(enum IRQ_CONTROLLERS controller);
 void IRQ_save();

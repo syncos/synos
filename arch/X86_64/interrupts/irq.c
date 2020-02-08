@@ -24,8 +24,8 @@ enum IRQ_CONTROLLERS ic_control;
 enum IRQ_CONTROLLERS IC_Controller()
 {
     #ifdef APIC_ENABLE
-    if (x64ID.APIC)
-        return APIC;
+    //if (x64ID.APIC)
+        //return APIC; // APIC not fully implemented
     #endif
     return PIC;
 }
@@ -37,7 +37,7 @@ int IC_Configure(enum IRQ_CONTROLLERS controller)
         case PIC: return PIC_Configure(IRQ_start, IRQ_start+8);
 
         #ifdef APIC_ENABLE
-        case APIC: return APIC_Configure(IRQ_start);
+        case APIC: return APIC_Configure(IRQ_start); 
         #endif
         default: panic("Invalid irq controller type");
     }

@@ -9,6 +9,8 @@
 #define CMOS_REG_PORT 0x70
 #define CMOS_RW_PORT  0x71
 
+#define CMOS_IRQ_RATE 3
+
 #define CMOS_TIME_SECONDS 0x00
 #define CMOS_TIME_MINUTES 0x02
 #define CMOS_TIME_HOURS   0x04
@@ -43,16 +45,27 @@ static void rtc_irq_init()
         inEn = true;
     interrupt_disable();
 
+    // Enable IRQ 8
     uint8_t prev;
-    prev = cmos_read(CMOS_STATUS_A);
-    cmos_write(CMOS_STATUS_A, (prev & 0xF0) | 3); // Generates a pulse of 8192 hz or 122.0703125 uS
+    outb(CMOS_REG_PORT, 0x8B);
+    prev = inb(CMOS_RW_PORT);
 
-    prev = cmos_read(CMOS_STATUS_B);
-    cmos_write(CMOS_STATUS_B, prev | 0x40); // Enable IRQ 8
+    outb(CMOS_REG_PORT, 0x8B);
+    outb(CMOS_RW_PORT, prev | 0x40);
+
+    // Set rate
+    outb(CMOS_REG_PORT, 0x8A);
+    prev = inb(CMOS_RW_PORT);
+
+    outb(CMOS_REG_PORT, 0x8A);
+    outb(CMOS_RW_PORT, (prev & 0xF0) | CMOS_IRQ_RATE);
 
     irqCount = 0;
     if (inEn)
-        interrupt_enable();   
+        interrupt_enable();
+    
+    outb(CMOS_REG_PORT, 0x0C | nmi_state);
+    inb(CMOS_RW_PORT);
 }
 
 int arch_time_init()
@@ -64,12 +77,13 @@ int arch_time_init()
     memset(&ctime, 0, sizeof(time_t));
     
     // Then read the initial values
+    while (cmos_read(CMOS_STATUS_A) & 0x80);
     ctime.seconds = cmos_read(CMOS_TIME_SECONDS);
     ctime.minutes = cmos_read(CMOS_TIME_MINUTES);
     ctime.hours   = cmos_read(CMOS_TIME_HOURS);
     ctime.day     = cmos_read(CMOS_TIME_DAY);
     ctime.month   = cmos_read(CMOS_TIME_MONTH);
-    ctime.year    = cmos_read(CMOS_TIME_YEAR);
+    ctime.year    = (uint32_t)cmos_read(CMOS_TIME_YEAR);
     ctime.year += CMOS_TIME_YEAR_OFFSET; // Add the offset
 
     if (ctime.hours & (1 << 7)) {
@@ -98,6 +112,7 @@ const time_t *arch_gettime()
 
 void ms_update()
 {
+    printk(DEBUG, "Timer!");
     if (irqCount >= 1024) {
         ctime.microseconds += 72;
         irqCount = 0;

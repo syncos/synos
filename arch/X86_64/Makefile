@@ -3,7 +3,7 @@ X64DIR=$(ARCHDIR)/X86_64
 DEFINE_VALS += -D_X86_64_
 
 IMG_LINK+=$(X64DIR)/initIMG.ld
-ARCHOBJECTS += $(X64DIR)/boot/boot.o $(X64DIR)/cmos.o $(X64DIR)/boot/boot32.o $(X64DIR)/boot/initVar.o $(X64DIR)/ports.o $(X64DIR)/cpu.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/stack.o $(X64DIR)/gdt.o $(X64DIR)/arch.o $(X64DIR)/tss.o $(X64DIR)/multiboot.o $(X64DIR)/boot/multiboot.o $(X64DIR)/boot/init16.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/init64.o $(X64DIR)/init.o $(X64DIR)/printk.o
+ARCHOBJECTS += $(X64DIR)/boot/boot.o $(X64DIR)/cmos.o $(X64DIR)/boot/boot32.o $(X64DIR)/boot/initVar.o $(X64DIR)/cpu.o $(X64DIR)/functions.o $(X64DIR)/memory.o $(X64DIR)/stack.o $(X64DIR)/gdt.o $(X64DIR)/arch.o $(X64DIR)/tss.o $(X64DIR)/multiboot.o $(X64DIR)/boot/multiboot.o $(X64DIR)/boot/init16.o $(X64DIR)/boot/init32.o $(X64DIR)/boot/init64.o $(X64DIR)/init.o $(X64DIR)/printk.o
 
 include $(X64DIR)/interrupts/Makefile
 

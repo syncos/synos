@@ -79,8 +79,8 @@ static uint16_t _pic_isr()
 #define PIC_EOI_CODE 0x20
 
 #define IRQ_RET asm ("iretq")
-#define ISR_MASTER(isr) (isr & 0xFF00)
-#define ISR_SLAVE(isr) (isr & 0xFF)
+#define ISR_MASTER(isr) (isr & 0xFF)
+#define ISR_SLAVE(isr) (isr & 0xFF00)
 void PIC_SOI(uint8_t irq)
 {
 	if (irq != 7 && irq != 15) return;

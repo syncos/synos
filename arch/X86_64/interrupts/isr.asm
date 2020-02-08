@@ -104,7 +104,9 @@ global exc_12
 exc_12:
     iretq
 global exc_13
+extern gpf
 exc_13:
+    pop rax
     iretq
 global exc_14
 exc_14:
@@ -149,8 +151,10 @@ irq_3:
     EOI 3
     iretq
 global irq_4
+extern read_serial
 irq_4:
     SOI 4
+    call read_serial
     EOI 4
     iretq
 global irq_5

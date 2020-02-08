@@ -1,6 +1,7 @@
 #include <synos/synos.h>
 #include "../cpu.h"
 #include <synos/arch/interrupt.h>
+#include <synos/arch/io.h>
 #include "interrupts.h"
 #include "../memory.h"
 #include "exceptions.h"
@@ -93,6 +94,8 @@ int interrupt_init()
     idt_map();
     // Configure the irq controller
     IC_Configure(IC_Controller());
+
+    serial_init();
 
     IDTR.limit = 0x1000;
     IDTR.offset = (uint64_t)&IDT;

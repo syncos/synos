@@ -18,7 +18,7 @@ typedef struct time
     uint8_t hours;
     uint8_t day;
     uint8_t month;
-    uint8_t year;
+    uint16_t year;
 }time_t;
 
 extern const time_t *time_start;

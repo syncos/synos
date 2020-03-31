@@ -1,83 +1,56 @@
-#include <synos/arch/arch.h>
-#include <synos/arch/cpu.h>
-#include <synos/synos.h>
 #include "cpu.h"
+#include <slab.h>
+#include <synos.h>
 #include <string.h>
 
-enum ARCH arch = X86_64;
+struct X64_CPUID cpu;
 
-const int isLittleEndian = 1;
-const int isBigEndian = 0;
-
-struct X64_CPUID x64ID;
-
-#define pushaq() asm("push rax"); asm("push rcx"); asm("push rdx"); asm("push rbx"); asm("push rbp"); asm("push rsi"); asm("push rdi")
-#define popaq() asm("pop rdi"); asm("pop rsi"); asm("pop rbp"); asm("pop rbx"); asm("pop rdx"); asm("pop rcx"); asm("pop rax")
-
-extern uint64_t CPUID_enabled();
-struct CPUINFO* __attribute__((optimize("O0"))) getCPUINFO(struct CPUINFO* cpu) 
+int cpuinfo()
 {
-    if (!CPUID_enabled())
-    {
-        cpu->enabled = false;
-        return cpu;
-    }
-    cpu->enabled = true;
-    cpu->asp = (void*)&x64ID;
+    asm volatile (
+        "push %0\n"
+        "mov eax, 0\n"
+        "cpuid\n"
+        "pop rdi\n"
+        "mov [rdi], ebx\n"
+        "mov [rdi+4], edx\n"
+        "mov [rdi+8], ecx"
+        :
+        : "r" (cpu.vendor_string)
+    );
 
-    // Get vendor
-    char vendor[13];
-    vendor[12] = 0;
-    CPUID_manufacturer((char*)&vendor);
-    memcpy(x64ID.vendor_string, (char*)&vendor, 12);
-    printk(DEBUG, "CPU vendor string: %s", x64ID.vendor_string);
+    cpu.vendor_string[12] = 0;
+    printk(DEBUG, "CPU vendor string: %s", cpu.vendor_string);
 
-    #define VENDORCMP(vnd) strcmp((char*)&vendor, vnd) == 0
-         if (VENDORCMP(CPUID_VENDOR_OLDAMD))       {cpu->vendor = OLDAMD;       cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_AMD))          {cpu->vendor = AMD;          cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_INTEL))        {cpu->vendor = INTEL;        cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_VIA))          {cpu->vendor = AMD;          cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_OLDTRANSMETA)) {cpu->vendor = OLDTRANSMETA; cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_TRANSMETA))    {cpu->vendor = TRANSMETA;    cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_CYRIX))        {cpu->vendor = CYRIX;        cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_CENTAUR))      {cpu->vendor = CENTAUR;      cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_NEXGEN))       {cpu->vendor = NEXGEN;       cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_UMC))          {cpu->vendor = UMC;          cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_SIS))          {cpu->vendor = SIS;          cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_NSC))          {cpu->vendor = NSC;          cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_RISE))         {cpu->vendor = RISE;         cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_VORTEX))       {cpu->vendor = VORTEX;       cpu->isVM = false;}
-    else if (VENDORCMP(CPUID_VENDOR_HYGON))        {cpu->vendor = HYGON;        cpu->isVM = false;}
+    #define VENDORCMP(vnd) strcmp(cpu.vendor_string, vnd) == 0
+         if (VENDORCMP(CPUID_VENDOR_OLDAMD))       {cpu.vendor = OLDAMD;       cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_AMD))          {cpu.vendor = AMD;          cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_INTEL))        {cpu.vendor = INTEL;        cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_VIA))          {cpu.vendor = AMD;          cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_OLDTRANSMETA)) {cpu.vendor = OLDTRANSMETA; cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_TRANSMETA))    {cpu.vendor = TRANSMETA;    cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_CYRIX))        {cpu.vendor = CYRIX;        cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_CENTAUR))      {cpu.vendor = CENTAUR;      cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_NEXGEN))       {cpu.vendor = NEXGEN;       cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_UMC))          {cpu.vendor = UMC;          cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_SIS))          {cpu.vendor = SIS;          cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_NSC))          {cpu.vendor = NSC;          cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_RISE))         {cpu.vendor = RISE;         cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_VORTEX))       {cpu.vendor = VORTEX;       cpu.isVM = 0;}
+    else if (VENDORCMP(CPUID_VENDOR_HYGON))        {cpu.vendor = HYGON;        cpu.isVM = 0;}
 
     // Virtual machines
-    else if (VENDORCMP(CPUID_VENDOR_VMWARE))       {cpu->vendor = VMWARE;       cpu->isVM = true;}
-    else if (VENDORCMP(CPUID_VENDOR_XENHVM))       {cpu->vendor = XENHVM;       cpu->isVM = true;}
-    else if (VENDORCMP(CPUID_VENDOR_MICROSOFT_HV)) {cpu->vendor = MICROSOFT_MV; cpu->isVM = true;}
-    else if (VENDORCMP(CPUID_VENDOR_PARALLELS))    {cpu->vendor = PARALLELS;    cpu->isVM = true;}
-    else if (VENDORCMP(CPUID_VENDOR_BHYVE))        {cpu->vendor = BHYVE;        cpu->isVM = true;}
-    else if (VENDORCMP(CPUID_VENDOR_KVM))          {cpu->vendor = KVM;          cpu->isVM = true;}
-    else if (VENDORCMP(CPUID_VENDOR_ACRN))         {cpu->vendor = ACRN;         cpu->isVM = true;}
+    else if (VENDORCMP(CPUID_VENDOR_VMWARE))       {cpu.vendor = VMWARE;       cpu.isVM = 1;}
+    else if (VENDORCMP(CPUID_VENDOR_XENHVM))       {cpu.vendor = XENHVM;       cpu.isVM = 1;}
+    else if (VENDORCMP(CPUID_VENDOR_MICROSOFT_HV)) {cpu.vendor = MICROSOFT_MV; cpu.isVM = 1;}
+    else if (VENDORCMP(CPUID_VENDOR_PARALLELS))    {cpu.vendor = PARALLELS;    cpu.isVM = 1;}
+    else if (VENDORCMP(CPUID_VENDOR_BHYVE))        {cpu.vendor = BHYVE;        cpu.isVM = 1;}
+    else if (VENDORCMP(CPUID_VENDOR_KVM))          {cpu.vendor = KVM;          cpu.isVM = 1;}
+    else if (VENDORCMP(CPUID_VENDOR_ACRN))         {cpu.vendor = ACRN;         cpu.isVM = 1;}
 
     // Else mark as unknown
     // The kernel should give a warning that the cpuid function was not able to detect vendor
-    else                                           {cpu->vendor = UNKNOWN;      cpu->isVM = false;}
+    else                                           {cpu.vendor = UNKNOWN;      cpu.isVM = 0; printk(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");}
 
-    uint32_t regInfo[3];
-    CPUID_Info((uint32_t*)&regInfo);
-
-    x64ID.FI_EDX = regInfo[1];
-    x64ID.FI_ECX = regInfo[2];
-
-    x64ID.APIC = (x64ID.FI_EDX & CPUID_FEAT_EDX_APIC) >> 9;
-
-    return cpu;
-}
-
-void readMSR(uint32_t msr, uint32_t *lo, uint32_t *hi)
-{
-    asm volatile("rdmsr" : "=a"(*lo), "=d"(*hi) : "c"(msr));
-}
-void writeMSR(uint32_t msr, uint32_t lo, uint32_t hi)
-{
-    asm volatile("wrmsr" : : "a"(lo), "d"(hi), "c"(msr));
+    return 1;
 }

@@ -1,0 +1,34 @@
+section .multiboot_header
+%DEFINE MULTIBOOT_MAGIC 0x1BADB002
+%DEFINE MULTIBOOT_FLAGS 0b111
+    dd MULTIBOOT_MAGIC
+    dd MULTIBOOT_FLAGS
+    dd -(MULTIBOOT_MAGIC + MULTIBOOT_FLAGS)
+
+    dd 0
+    dd 0
+    dd 0
+    dd 0
+    dd 0
+
+    dd 1
+    dd 0
+    dd 0
+    dd 0
+
+section .multiboot2_header
+%DEFINE MULTIBOOT2_MAGIC 0xE85250D6
+%DEFINE MUTLIBOOT2_ARCH 0
+%DEFINE MULTIBOOT2_LENGTH (mb2_end - mb2_start)
+%DEFINE MULTIBOOT2_CHECKSUM -(MULTIBOOT2_MAGIC + MUTLIBOOT2_ARCH + MULTIBOOT2_LENGTH)
+mb2_start:
+    dd MULTIBOOT2_MAGIC
+    dd MUTLIBOOT2_ARCH
+    dd MULTIBOOT2_LENGTH
+    dd MULTIBOOT2_CHECKSUM
+
+    dw 4
+    dw 0
+    dd 12
+    dd 0b11
+mb2_end:

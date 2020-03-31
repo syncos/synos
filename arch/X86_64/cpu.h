@@ -1,5 +1,7 @@
-#ifndef X64_CPUID_H
-#define X64_CPUID_H
+#ifndef X64_CPU_H
+#define X64_CPU_H
+#include <stdint.h>
+
 /* Vendor-strings. */
 #define CPUID_VENDOR_OLDAMD       "AMDisbetter!" /* early engineering samples of AMD K5 processor */
 #define CPUID_VENDOR_AMD          "AuthenticAMD"
@@ -26,11 +28,40 @@
 #define CPUID_VENDOR_KVM          "KVMKVMKVMKVM"
 #define CPUID_VENDOR_ACRN         "ACRNACRNACRN"
 
+enum Manufacturer
+{
+    OLDAMD,
+    AMD,
+    INTEL,
+    VIA,
+    OLDTRANSMETA,
+    TRANSMETA,
+    CYRIX,
+    CENTAUR,
+    NEXGEN,
+    UMC,
+    SIS,
+    NSC,
+    RISE,
+    VORTEX,
+    HYGON,
+
+    VMWARE,
+    XENHVM,
+    MICROSOFT_MV,
+    PARALLELS,
+    BHYVE,
+    KVM,
+    ACRN,
+
+    UNKNOWN
+};
+
 struct X64_CPUID
 {
-    char vendor_string[12];
-
-    uint8_t APIC;
+    char vendor_string[13];
+    enum Manufacturer vendor;
+    unsigned int isVM;
 
     uint32_t FI_EDX;
     uint32_t FI_ECX;
@@ -97,13 +128,11 @@ enum CPUID_FEAT
     CPUID_FEAT_EDX_PBE          = (1 << 31)
 };
 
-extern struct X64_CPUID x64ID;
+extern struct X64_CPUID cpu;
 
-extern char* CPUID_manufacturer(char* format);
-extern uint32_t* CPUID_Info(uint32_t* format);
-extern uint64_t  RFLAGS();
+int cpuinfo();
 
-extern void readMSR(uint32_t msr, uint32_t *lo, uint32_t *hi);
-extern void writeMSR(uint32_t msr, uint32_t lo, uint32_t hi);
+void readMSR(uint32_t msr, uint32_t *lo, uint32_t *hi);
+void writeMSR(uint32_t msr, uint32_t lo, uint32_t hi);
 
 #endif

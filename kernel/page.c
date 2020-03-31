@@ -1,426 +1,150 @@
-#include <synos/synos.h>
-#include <synos/mm.h>
-#include <synos/arch/memory.h>
+/*
+    Synos page allocator
+    Written by Jacob Paul
+*/
+#include <mm.h>
 #include <spinlock.h>
-#include <inttypes.h>
-#include <stddef.h>
 #include <string.h>
 
-const size_t mm_sb_size = sizeof(bpa_map_t);
-const size_t bits_per_page = BITS_PER_PAGE;
+// pages_free and max_alloc_order can be used by the kernel to know how many pages of physical memory are left
+// and how long the longest continuous fragment is (2^max_alloc_order pages)
+unsigned long pages_free = 0;
+m_region_t * pages_free_holder;
+unsigned int max_alloc_order = 0;
+m_region_t * max_alloc_order_holder;
+unsigned long pages_total = 0;
 
-void *next_free_vpage;
+// kvs functions use this variable to keep track of where the next free page(s) of memory is
+void * kvs_next;
 
-mregion_t *regions;
-mregion_t *next_region;
-bool outOfMem;
-
-static void *fnfp(void *nfp)
+// block_* functions are used by the physical frame allocator to do bit manipulation on the region bitmaps
+// See mm.h for info about regions
+#define block_set(region, order, offset) ((char*)region->bmap.free_area[(order)])[(offset)/8] |= (1 << ((offset)%8))
+#define block_clear(region, order, offset) ((char*)region->bmap.free_area[(order)])[(offset)/8] &= ~(1 << ((offset)%8))
+#define block_check(region, order, offset) ((((char*)region->bmap.free_area[(order)])[(offset)/8] >> ((offset)%8)) & 1U)
+static inline void blocks_set(m_region_t * region, unsigned int order, unsigned long offset, unsigned long length)
 {
-    for (void *addr = nfp; ; addr += virt_page_size)
-    {
-        if (!pga_ispresent(addr))
-            return addr;
-    }
-}
-
-int vpage_init()
-{
-    pga_init();
-    pga_map(0, 0, 0, VPAGE_NOT_WRITABLE | VPAGE_NO_EXECUTE);
-
-    next_free_vpage = fnfp((void*)0x100000);
-    return 0;
-}
-
-void *vpage_map(uintptr_t paddress, unsigned int flags)
-{
-    pga_map(next_free_vpage, paddress, 0, flags);
-    void *addr = next_free_vpage;
-    next_free_vpage = fnfp(next_free_vpage);
-    return addr;
-}
-void *vpages_map(uintptr_t paddress, unsigned int order, unsigned int flags)
-{
-    for (uintptr_t start = (uintptr_t)next_free_vpage; start < __UINTPTR_MAX__; start += virt_page_size) 
-    {
-        for (uintptr_t pgs = start; (pgs - start) / virt_page_size < (1UL << order); pgs += virt_page_size)
-        {
-            if (pga_ispresent((void*)pgs))
-                goto nav;
-        }
-        pga_map((void*)start, paddress, order, flags);
-        if (start == (uintptr_t)next_free_vpage)
-            next_free_vpage = fnfp(next_free_vpage + BLOCK_ORDER_SIZE(order));
-        return (void*)start;
-        nav:
-        continue;
-    }
-    return NULL;
-}
-void *vpage_smap(uintptr_t paddress, void *vaddress, unsigned int flags)
-{
-    pga_map(vaddress, paddress, 0, flags);
-    return vaddress;
-}
-void *vpages_smap(uintptr_t paddress, void *vaddress, unsigned int order, unsigned int flags)
-{
-    pga_map(vaddress, paddress, order, flags);
-    return vaddress;
-}
-void *vpages_reserve(void *vaddress, unsigned int order)
-{
-    pga_map(vaddress, 0, order, VPAGE_NOT_WRITABLE);
-    return vaddress;
-}
-
-void vpage_unmap(void *vaddress)
-{
-    pga_unmap(vaddress, 0);
-}
-void vpages_unmap(void *vaddress, unsigned int order)
-{
-    pga_unmap(vaddress, order);
-}
-
-static mregion_t *findNextRegion(mregion_t *start)
-{
-    for (mregion_t *region = start; region != NULL; region = region->next)
-    {
-        if ((region->attrib & (MEM_REGION_AVAILABLE | MEM_REGION_READ | MEM_REGION_WRITE)) == (MEM_REGION_AVAILABLE | MEM_REGION_READ | MEM_REGION_WRITE)
-            && (region->attrib & (MEM_REGION_BAD | MEM_REGION_PRESERVE | MEM_REGION_PROTECTED)) == 0
-            && region->size >= page_size)
-        {
-            return region;
-        }
-    }
-    return NULL;
-}
-static mregion_t *findFreeRegion(mregion_t *start)
-{
-    search:;
-    mregion_t *r = findNextRegion(start);
-    if (r == NULL) {
-        outOfMem = true;
-        return r;
-    }
-    if (r->mem_full) {
-        start = start->next;
-        goto search;
-    }
-    return r;
-}
-static mregion_t *findRegion(uintptr_t paddress, mregion_t *start)
-{
-    for (mregion_t *region = start; region != NULL; region = region->next)
-    {
-        if (region->start <= paddress && (region->start + region->size) > paddress)
-            return region;
-    }
-    return NULL;
-}
-
-uintptr_t alloc_page(unsigned int gfp_mask)
-{
-    start:
-    if (outOfMem)
-        return 0;
-    if (next_region->mem_full) {
-        next_region = findFreeRegion(next_region->next);
-        goto start;
-    }
-        
-    return page_alloc(next_region);
-}
-uintptr_t alloc_pages(unsigned int gfp_mask, unsigned int order)
-{
-    mregion_t *areg = next_region;
-    if (outOfMem)
-        return 0;
-    start:
-    if (outOfMem) {
-        outOfMem = false;
-        return 0;
-    }
-    uint64_t paddr = pages_alloc(areg, order);
-    if (!paddr) {
-        areg = findFreeRegion(areg->next);
-        goto start;
-    }
-    return paddr;
-}
-
-void free_page(uintptr_t page)
-{
-    mregion_t *reg = findRegion(page, regions);
-    if (!reg)
-        return;
-    page_free(reg, page);
-    if (reg->start < next_region->start)
-        next_region = reg;
-    if (outOfMem)
-        outOfMem = false;
-}
-void free_pages(unsigned int order, uintptr_t pages)
-{
-    mregion_t *reg = findRegion(pages, regions);
-    if (!reg)
-        return;
-    pages_free(reg, pages, order);
-    if (reg->start < next_region->start)
-        next_region = reg;
-    if (outOfMem)
-        outOfMem = false;
-}
-#define TOTAL_PAGE_TABLE_SIZE (((System.memid.totalSize / page_size) * bits_per_page) / 8)
-int ppage_init()
-{
-    outOfMem = false;
-    regions = get_regions();
-    mregion_t *alloc_region = findNextRegion(regions);
-    regup:
-    if (alloc_region == NULL)
-        panic("No available memory to allocate initial memory tables!");
-    if (alloc_region->size < TOTAL_PAGE_TABLE_SIZE || alloc_region->start < LM_SIZE)
-    {
-        alloc_region = findNextRegion(alloc_region->next);
-        goto regup;
-    }
-
-    size_t pages = alloc_region->size / page_size;
-    size_t page_tbl_size = ((pages * bits_per_page) + 7) / 8;
-    void *regst = kmalloc(page_tbl_size);
-    void *regsb = kmalloc(mm_sb_size);
-    if (regst == NULL || regsb == NULL)
-        panic("No heap to allocate memory to!");
-    region_map(alloc_region, pages, regsb, regst);
-    mem_p_protect(alloc_region);
-    next_region = alloc_region;
-
-    for (mregion_t *map_reg = regions; map_reg != NULL; map_reg = map_reg->next)
-    {
-        if (map_reg == alloc_region)
-            continue;
-        size_t pages = map_reg->size / page_size;
-        if (pages == 0) {
-            map_reg->mem_full = true;
-            continue;
-        }
-        size_t page_tbl_size = ((pages * bits_per_page) + 7) / 8;
-        size_t pages_tbl_p = (page_tbl_size + (page_size - 1)) / page_size;
-        size_t sb_p = (mm_sb_size + (page_size - 1)) / page_size;
-        
-        uintptr_t pa_sb = pages_alloc(alloc_region, log_order(sb_p));
-        uintptr_t pa_tbl = pages_alloc(alloc_region, log_order(pages_tbl_p));
-
-        void *regst = vpages_map(pa_tbl, log_order(pages_tbl_p), 0);
-        void *regsb = vpages_map(pa_sb, log_order(sb_p), 0);
-
-        region_map(map_reg, pages, regsb, regst);
-        mem_p_protect(map_reg);
-    }
-    next_region = findFreeRegion(regions);
-
-    return 0;
-}
-
-unsigned int log_order(size_t pages)
-{
-    unsigned int order = MAX_ORDER + 1;
-    for (unsigned int i = (sizeof(size_t)*8)-1; ; --i)
-    {
-        if ((pages >> i) & 1U && order != MAX_ORDER + 1)
-        {
-            ++order;
-            break;
-        }
-        if ((pages >> i) & 1U)
-            order = i;
-        if (i == 0)
-            break;
-    }
-    if (order == MAX_ORDER + 1)
-        return 0;
-    return order;
-}
-
-void block_split(mregion_t *region, unsigned int order);
-void zblock_split(mregion_t *region, unsigned int order, size_t offset);
-void block_merge(mregion_t *region, unsigned int order, size_t offset);
-void out_of_mem(mregion_t *region);
-
-static inline bool block_check(mregion_t *region, unsigned int order, size_t offset)
-{
-    bpa_map_t *map = region->page_alloc_si;
-    return (((char*)map->free_area[order])[offset/8] >> (offset%8)) & 1U;
-}
-static inline void block_set(mregion_t *region, unsigned int order, size_t offset)
-{
-    bpa_map_t *map = region->page_alloc_si;
-    ((char*)map->free_area[order])[offset/8] |= (1 << (offset%8));
-}
-static inline void block_clear(mregion_t *region, unsigned int order, size_t offset)
-{
-    bpa_map_t *map = region->page_alloc_si;
-    ((char*)map->free_area[order])[offset/8] &= ~(1 << (offset%8));
-}
-static inline void blocks_set(mregion_t *region, unsigned int order, size_t offset_start, size_t length)
-{
-    for (size_t i = offset_start; i < offset_start + length; ++i)
+    for (unsigned long i = offset; i < offset + length; ++i)
         block_set(region, order, i);
 }
-static inline void blocks_clear(mregion_t *region, unsigned int order, size_t offset_start, size_t length)
+static inline void blocks_clear(m_region_t * region, unsigned int order, unsigned long offset, unsigned long length)
 {
-    for (size_t i = offset_start; i < offset_start + length; ++i)
+    for (unsigned long i = offset; i < offset + length; ++i)
         block_clear(region, order, i);
 }
-static inline size_t free_area_length(size_t pages, unsigned int order)
+
+// Helper functions to the mregion_* functions
+static unsigned long _page_order_offset(unsigned long pages, unsigned int order_org, unsigned int order)
+{
+    if (order_org == order)
+        return pages;
+    if (order_org < order) {
+        return (pages >> (order - order_org));
+    }
+    return (pages << (order_org - order));
+}
+static inline unsigned long _free_area_length(unsigned long pages, unsigned int order)
 {
     for (unsigned int i = 0; i < order; ++i)
         pages /= 2;
     return pages;
 }
-static inline unsigned int order_max(size_t pages)
+static unsigned long _find_next_free_page(m_region_t * region, unsigned int order, unsigned long start)
+{
+    unsigned long fal = _free_area_length(region->pages_total, order);
+    for (unsigned long i = start; i < fal; ++i)
+        if (!block_check(region, order, i))
+            return i;
+    region->bmap.pages_free[order] = 0;
+    return 0;
+}
+static unsigned int _find_max_alloc_order(m_region_t * region)
+{
+    for (unsigned int i = MAX_ORDER; i > 0; --i)
+        if (region->bmap.pages_free[i])
+            return i;
+    return 0;
+}
+static unsigned int _order_max(unsigned long pages)
 {
     unsigned int order;
-    for (order = 0; order < MAX_ORDER; ++order) 
+    for (order = 0; order <= MAX_ORDER; ++order) 
     {
         if (pages % 2)
             return order;
         pages /= 2;
     }
-
-    return MAX_ORDER - 1;
-}
-static inline size_t find_next_free_page(mregion_t *region, unsigned int order, size_t start)
-{
-    bpa_map_t *map = region->page_alloc_si;
-    for (size_t i = start; i < free_area_length(map->pages, order); ++i)
-    {
-        if (!block_check(region, order, i))
-            return i;
-    }
-    map->pages_free[order] = 0;
-    return 0;
+    return MAX_ORDER;
 }
 
-static void _free_area_map(mregion_t *region)
+static void block_split(m_region_t * region, unsigned int order)
 {
-    size_t start_addr = region->start;
-    bpa_map_t *map = region->page_alloc_si;
-    size_t p = map->pages;
-
-    ord:;
-    unsigned int order = order_max(p);
-    if (order != MAX_ORDER - 1)
-    {
-        if (free_area_length(map->pages, order+1) == 0) {
-            map->pages_free[order] = free_area_length(p, order);
-            blocks_clear(region, order, 0, map->pages_free[order]);
-            return;
-        }
-        map->next_free_page[order] = free_area_length(p, order)-1;
-        block_clear(region, order, map->next_free_page[order]);
-        ++map->pages_free[order];
-        p -= (1 << order);
-        goto ord;
-    }
-    map->pages_free[order] = free_area_length(p, order);
-    blocks_clear(region, order, 0, map->pages_free[order]);
-}
-
-void region_map(mregion_t *region, size_t pages, void *sb, void *pageent)
-{
-    spinlock_lock(&region->lock);
-    region->page_alloc_si = sb;
-    bpa_map_t *map = sb;
-    map->pages = pages;
-    map->free_area_size = ((pages * BITS_PER_PAGE) + 7) / 8;
-    region->pages_total = pages;
-    region->pages_free = pages;
-    region->mem_full = false;
-
-    memset(pageent, 0xFF, map->free_area_size);
-    memset(map->pages_free, 0, sizeof(size_t)*MAX_ORDER);
-    memset(map->next_free_page, 0, sizeof(size_t)*MAX_ORDER);
-    map->free_area[0] = pageent;
-
-    void *last_pos = pageent;
-    size_t last_size = (pages + (8 - 1)) / 8;
-    for (int i = 1; i < MAX_ORDER; ++i)
-    {
-        last_pos += last_size;
-        map->free_area[i] = last_pos;
-        last_size = (last_size + 1) / 2;
-    }
-    _free_area_map(region);
-    spinlock_unlock(&region->lock);
-}
-
-void out_of_mem(mregion_t *region)
-{
-    region->mem_full = true;
-}
-
-void block_split(mregion_t *region, unsigned int order)
-{
-    if (order == 0 || order >= MAX_ORDER)
+    if (order == 0 || order > MAX_ORDER)
         return;
-    bpa_map_t *map = region->page_alloc_si;
-    ord_check:
-    if (map->pages_free[order] > 0)
-    {
-        block_set(region, order, map->next_free_page[order]);
-        block_clear(region, order-1, map->next_free_page[order]*2);
-        block_clear(region, order-1, map->next_free_page[order]*2+1);
+    if (region->bmap.pages_free[order] > 0) {
+        ord_check:
+        block_set(region, order, region->bmap.next_free_page[order]);
+        block_clear(region, order-1, region->bmap.next_free_page[order]*2);
+        block_clear(region, order-1, region->bmap.next_free_page[order]*2+1);
 
-        if (map->next_free_page[order-1] > map->next_free_page[order]*2 || map->pages_free[order-1] == 0)
-            map->next_free_page[order-1] = map->next_free_page[order]*2;
-        map->pages_free[order-1] += 2;
-        
-        if (map->pages_free[order] != 1)
-            map->next_free_page[order] = find_next_free_page(region, order, ++map->next_free_page[order]);
-        else
-            map->next_free_page[order] = 0;
-        --map->pages_free[order];
+        if (region->bmap.next_free_page[order-1] > region->bmap.next_free_page[order]*2 || region->bmap.pages_free[order-1] == 0)
+            region->bmap.next_free_page[order-1] = region->bmap.next_free_page[order]*2;
+        region->bmap.pages_free[order-1] += 2;
+
+        if (region->bmap.pages_free[order] != 1) {
+            region->bmap.next_free_page[order] = _find_next_free_page(region, order, region->bmap.next_free_page[order]);
+        }
+        else {
+            region->bmap.next_free_page[order] = 0;
+            if (region->alloc_order_max == order) {
+                region->alloc_order_max = _find_max_alloc_order(region);
+                if (region->alloc_order_max > max_alloc_order || max_alloc_order_holder == region) {
+                    max_alloc_order = region->alloc_order_max;
+                    max_alloc_order_holder = region;
+                }
+            }
+        }
+        --region->bmap.pages_free[order];
 
         return;
     }
     if (order == MAX_ORDER - 1)
-    {
-        out_of_mem(region);
         return;
-    }
     block_split(region, order+1);
-    if (map->pages_free[order] == 0)
-    {
-        out_of_mem(region);
+    if (region->bmap.pages_free[order] == 0)
         return;
-    }
     goto ord_check;
 }
-void zblock_split(mregion_t *region, unsigned int order, size_t offset)
+static void zblock_split(m_region_t * region, unsigned int order, unsigned long offset)
 {
-    if (order == 0 || order >= MAX_ORDER)
+    if (order == 0 || order > MAX_ORDER)
         return;
-    
-    bpa_map_t *map = region->page_alloc_si;
-    if (!block_check(region, order, offset))
-    {
+    if (!block_check(region, order, offset)) {
         pos:
         block_set(region, order, offset);
         block_clear(region, order-1, offset*2);
         block_clear(region, order-1, offset*2+1);
 
-        if (map->next_free_page[order-1] > map->next_free_page[order]*2)
-            map->next_free_page[order-1] = map->next_free_page[order]*2;
-        map->pages_free[order-1] += 2;
+        if (region->bmap.next_free_page[order-1] > region->bmap.next_free_page[order]*2 || region->bmap.pages_free[order-1] == 0)
+            region->bmap.next_free_page[order-1] = region->bmap.next_free_page[order]*2;
+        region->bmap.pages_free[order-1] += 2;
 
-        if (map->pages_free[order] == 1)
-            map->next_free_page[order] = 0;
-        else if (offset == map->next_free_page[order])
-            map->next_free_page[order] = find_next_free_page(region, order, offset+1);
-        --map->pages_free[order];
+        if (region->bmap.pages_free[order] != 1) {
+            region->bmap.next_free_page[order] = _find_next_free_page(region, order, region->bmap.next_free_page[order]);
+            if (region->bmap.pages_free[order])
+                --region->bmap.pages_free[order];
+        }
+        else {
+            region->bmap.next_free_page[order] = 0;
+            region->bmap.pages_free[order] = 0;
+            if (region->alloc_order_max == order) {
+                region->alloc_order_max = _find_max_alloc_order(region);
+                if (region->alloc_order_max > max_alloc_order || max_alloc_order_holder == region) {
+                    max_alloc_order = region->alloc_order_max;
+                    max_alloc_order_holder = region;
+                }
+            }
+        }
 
         return;
     }
@@ -431,25 +155,23 @@ void zblock_split(mregion_t *region, unsigned int order, size_t offset)
         goto pos;
     return;
 }
-void block_merge(mregion_t *region, unsigned int order, size_t offset)
+static void block_merge(m_region_t * region, unsigned int order, unsigned long offset)
 {
-    if (order >= MAX_ORDER - 1)
+    if (order > MAX_ORDER)
         return;
-    
-    bpa_map_t *map = region->page_alloc_si;
     offset &= ~(1UL);
 
     block_set(region, order, offset);
     block_set(region, order, offset + 1);
     block_clear(region, order+1, offset/2);
 
-    map->pages_free[order] -= 2;
-    ++map->pages_free[order+1];
+    region->bmap.pages_free[order] -= 2;
+    ++region->bmap.pages_free[order+1];
 
-    if (map->next_free_page[order] == offset || map->next_free_page[order] == offset + 1)
-        map->next_free_page[order] = find_next_free_page(region, order, offset + 2);
-    if (map->next_free_page[order+1] > offset/2 || map->pages_free[order+1] == 1)
-        map->next_free_page[order+1] = offset/2;
+    if (region->bmap.next_free_page[order] == offset || region->bmap.next_free_page[order] == offset + 1)
+        region->bmap.next_free_page[order] = _find_next_free_page(region, order, offset + 2);
+    if (region->bmap.next_free_page[order+1] > offset/2 || region->bmap.pages_free[order+1] == 1)
+        region->bmap.next_free_page[order] = offset/2;
     
     if ((offset/2) % 2 == 0) {
         if (!block_check(region, order+1, (offset/2) + 1))
@@ -460,126 +182,360 @@ void block_merge(mregion_t *region, unsigned int order, size_t offset)
             block_merge(region, order+1, offset/2);
 }
 
-uintptr_t pages_alloc(mregion_t *region, unsigned int order)
+static inline void _free_area_map(m_region_t * region)
 {
-    if (order >= MAX_ORDER)
+    unsigned long p = region->pages_total;
+
+    ord:;
+    unsigned int order = _order_max(p);
+    if (order != MAX_ORDER) {
+        if (_free_area_length(region->pages_total, order+1) == 0)
+            goto done;
+        unsigned long nfp = _free_area_length(p, order)-1;
+        block_clear(region, order, nfp);
+        if (nfp < region->bmap.next_free_page[order] || region->bmap.pages_free[order] == 0)
+            region->bmap.next_free_page[order] = nfp;
+        ++region->bmap.pages_free[order];
+        p -= (ORDER(order));
+        goto ord;
+    }
+    done:
+    region->bmap.pages_free[order] = _free_area_length(p, order);
+    region->alloc_order_max = order;
+    if (region->alloc_order_max > max_alloc_order) {
+        max_alloc_order = region->alloc_order_max;
+        max_alloc_order_holder = region;
+    }
+    blocks_clear(region, order, 0, region->bmap.pages_free[order]);
+}
+int mregion_init(m_region_t * region, void * pageent)
+{
+    spinlock_lock(&region->lock);
+    // mregion will only use regions with the flag M_REGION_USABLE toggled
+    if (!(region->flags & M_REGION_USABLE))
+        return 1;
+
+    region->pages_free = region->pages_total;
+    region->bmap.free_area_size = pageent_len(region->pages_total);
+    // Set bmap variable to default values
+    for (unsigned int i = 0; i <= MAX_ORDER; ++i) {
+        region->bmap.pages_free[i] = 0;
+        region->bmap.next_free_page[i] = 0;
+    }
+    memset(pageent, 0xFF, region->bmap.free_area_size);
+
+    region->bmap.free_area[0] = pageent;
+    void * current_pos = pageent + (region->pages_total + 7) / 8;
+    unsigned long cpages = (region->pages_total + 1) / 2;
+    for (unsigned int i = 1; i <= MAX_ORDER; ++i) {
+        region->bmap.free_area[i] = current_pos;
+        if (cpages == 1) {
+            cpages = 0;
+            ++current_pos;
+        }
+        current_pos += (cpages + 7) / 8;
+        cpages = (cpages + 1) / 2;
+    }
+    _free_area_map(region);
+    pages_free += region->pages_free;
+    pages_total += region->pages_total;
+    spinlock_unlock(&region->lock);
+    return 1;
+}
+unsigned long mregion_alloc(m_region_t * region, unsigned int order)
+{
+    if (order > MAX_ORDER || region->alloc_order_max < order || region->pages_free == 0)
         return 0;
     spinlock_lock(&region->lock);
-    bpa_map_t *map = region->page_alloc_si;
 
     check_ord:
-    if (map->pages_free[order] > 0)
-    {
-        block_set(region, order, map->next_free_page[order]);
-        uintptr_t phys_addr = (BLOCK_ORDER_SIZE(order) * map->next_free_page[order]) + region->start;
+    if (region->bmap.pages_free[order] > 0) {
+        block_set(region, order, region->bmap.next_free_page[order]);
+        unsigned long phys_addr = ((page_size * (ORDER(order))) * region->bmap.next_free_page[order]) + region->start;
 
-        if (map->pages_free[order] != 1)
-            map->next_free_page[order] = find_next_free_page(region, order, ++map->next_free_page[order]);
-        else
-            map->next_free_page[order] = 0;
-        --map->pages_free[order];
+        if (region->bmap.pages_free[order] != 1) {
+            region->bmap.next_free_page[order] = _find_next_free_page(region, order, region->bmap.next_free_page[order]);
+        }
+        else {
+            region->bmap.next_free_page[order] = 0;
+            if (region->alloc_order_max == order) {
+                region->alloc_order_max = _find_max_alloc_order(region);
+                if (region->alloc_order_max > max_alloc_order || max_alloc_order_holder == region) {
+                    max_alloc_order = region->alloc_order_max;
+                    max_alloc_order_holder = region;
+                }
+            }
+        }
+        --region->bmap.pages_free[order];
 
-        if (region->pages_free <= (1UL << order))
-            out_of_mem(region);
-        region->pages_free -= (1UL << order);
+        region->pages_free -= (ORDER(order));
+        pages_free -= (ORDER(order));
         spinlock_unlock(&region->lock);
         return phys_addr;
     }
-    if (order == MAX_ORDER - 1)
-    {
-        out_of_mem(region);
+    if (order == MAX_ORDER) {
         spinlock_unlock(&region->lock);
         return 0;
     }
     block_split(region, order + 1);
-    if (map->pages_free[order] == 0)
-    {
-        out_of_mem(region);
+    if (region->bmap.pages_free[order] == 0) {
         spinlock_unlock(&region->lock);
         return 0;
     }
     goto check_ord;
 }
-uintptr_t page_alloc(mregion_t *region)
+unsigned long mregion_reserve(m_region_t * region, unsigned long address, unsigned int order)
 {
-    return pages_alloc(region, 0);
-}
-
-uintptr_t pages_reserve(mregion_t *region, unsigned int order, uint64_t offset)
-{
+    if (order > MAX_ORDER)
+        return 0;
     spinlock_lock(&region->lock);
-    bpa_map_t *map = region->page_alloc_si;
-    
-    if (!block_check(region, order, offset))
-    {
-        block_set(region, order, offset);
-        --map->pages_free[order];
-        if (map->next_free_page[order] == offset)
-            map->next_free_page[order] = find_next_free_page(region, order, offset+1);
-        if (region->pages_free <= (1UL << order))
-            out_of_mem(region);
-        region->pages_free -= (1 << order);
+    if (address < region->start || address >= region->start + region->size || region->pages_free == 0) {
         spinlock_unlock(&region->lock);
-        return (BLOCK_ORDER_SIZE(order) * offset) + region->start;
+        return 0;
     }
-    size_t p_offset = offset & ~(1UL);
-    unsigned int split_order_start = order;
-    for (unsigned int i = order+1; i < MAX_ORDER; ++i)
-    {
-        p_offset /= 2;
-        if (!block_check(region, i, p_offset)) {
-            split_order_start = i;
-            break;
+    unsigned long page_start = _page_order_offset((address - region->start) / page_size, 0, order);
+    if (page_start >= region->pages_total) {
+        spinlock_unlock(&region->lock);
+        return 0;
+    }
+
+    for (unsigned int corder = MAX_ORDER; corder > order; --corder) {
+        unsigned p = _page_order_offset(page_start, order, corder);
+        if (block_check(region, corder, p))
+            continue;
+        zblock_split(region, corder, p);
+    }
+
+    unsigned long phys_addr = ((page_size * (ORDER(order))) * page_start) + region->start;
+    if (block_check(region, order, page_start)) {
+        spinlock_unlock(&region->lock);
+        return phys_addr;
+    }
+    block_set(region, order, page_start);
+    if (region->bmap.pages_free[order] != 1) {
+        region->bmap.next_free_page[order] = _find_next_free_page(region, order, region->bmap.next_free_page[order]);
+        --region->bmap.pages_free[order];
+    }
+    else {
+        region->bmap.next_free_page[order] = 0;
+        region->bmap.pages_free[order] = 0;
+        if (region->alloc_order_max == order) {
+            region->alloc_order_max = _find_max_alloc_order(region);
+            if (region->alloc_order_max > max_alloc_order || max_alloc_order_holder == region) {
+                max_alloc_order = region->alloc_order_max;
+                max_alloc_order_holder = region;
+            }
         }
     }
-    for (unsigned int i = split_order_start; i > order; --i)
-    {
-        zblock_split(region, i, p_offset);
-        p_offset *= 2;
-    }
-    if (!block_check(region, order, offset)) {
-        block_set(region, order, offset);
-        --map->pages_free[order];
-        if (map->next_free_page[order] == offset)
-            map->next_free_page[order] = find_next_free_page(region, order, offset+1);
-    }
-    if (region->pages_free <= (1UL << order))
-        out_of_mem(region);
-    region->pages_free -= (1 << order);
 
+    region->pages_free -= (ORDER(order));
+    pages_free -= (ORDER(order));
     spinlock_unlock(&region->lock);
-    return (BLOCK_ORDER_SIZE(order) * offset) + region->start;
+    return phys_addr;
 }
-
-void pages_free(mregion_t *region, uintptr_t phaddr, unsigned int order)
+void mregion_free(m_region_t * region, unsigned long address, unsigned int order)
 {
-    spinlock_lock(&region->lock);
-    if (phaddr < region->start || phaddr >= region->start + region->size)
+    if (order > MAX_ORDER)
         return;
-    size_t offset = (phaddr - region->start) / page_size;
+    spinlock_lock(&region->lock);
+    if (address < region->start || address >= region->start + region->size)
+        return;
+    unsigned long offset = (address - region->start) / page_size;
     if (!block_check(region, order, offset))
         return;
     block_clear(region, order, offset);
 
-    if (region->pages_free == 0)
-        region->mem_full = true;
-    region->pages_free += (1 << order);
+    ++region->bmap.pages_free[order];
+    region->pages_free += (ORDER(order));
+    pages_free += (ORDER(order));
 
-    bpa_map_t *map = region->page_alloc_si;
-    ++map->pages_free[order];
-    if (offset < map->next_free_page[order])
-        map->next_free_page[order] = offset;
+    unsigned long buddy = offset & ~(1UL);
     
-    size_t buddy = offset;
-    if (offset & 1)
-        --buddy;
-    else
-        ++buddy;
     if (!block_check(region, order, buddy))
         block_merge(region, order, offset);
     spinlock_unlock(&region->lock);
 }
-void page_free(mregion_t *region, uintptr_t phaddr)
+
+void mregions_insert(m_region_t * region)
+{   
+    if (mregions == NULL || region->size >= mregions->size) {
+        region->next = mregions;
+        mregions = region;
+        return;
+    }
+    m_region_t * cregion;
+    for (cregion = mregions; cregion != NULL && cregion->next != NULL; cregion = cregion->next)
+        if (region->size >= cregion->size && region->size <= cregion->next->size)
+            break;
+    region->next = cregion->next;
+    cregion->next = region;
+}
+void mregions_remove(m_region_t * region)
 {
-    pages_free(region, phaddr, 0);
+    m_region_t * lregion = mregions;
+    m_region_t * cregion = mregions;
+    for (; cregion != NULL; ) {
+        if (cregion == region) {
+            if (cregion == lregion) {
+                mregions = mregions->next;
+                return;
+            }
+            lregion->next = cregion->next;
+            return;
+        }
+        lregion = cregion;
+        cregion = cregion->next;
+    }
+}
+unsigned int pages_to_order(unsigned long pages)
+{
+    unsigned int order;
+    for (order = 63; order > 0; --order)
+        if (pages & (ORDER(order)))
+            break;
+    if (pages & ~(ORDER(order)))
+        return order+1;
+    return order;
+}
+unsigned long pageent_len(unsigned long pages)
+{
+    unsigned long bytes = 0;
+    unsigned long p = pages;
+    for (unsigned int i = 0; i <= MAX_ORDER; ++i) {
+        bytes += (p + 7) / 8;
+        if (p == 1)
+            break;
+        p = (p + 1) / 2;
+    }
+    return bytes+1;
+}
+unsigned long ppages_alloc(unsigned int order)
+{
+    if (max_alloc_order < order)
+        return 0;
+    for (m_region_t * c = mregions; mregions != NULL; c = c->next) {
+        if (c->pages_free > 0 || c->alloc_order_max >= order) {
+            unsigned long pd = mregion_alloc(c, order);
+            if (pd != 0)
+                return pd;
+        }
+    }
+    return 0;
+}
+unsigned long ppages_reserve(unsigned long paddress, unsigned int order)
+{
+    for (unsigned long i = 0; i < ORDER(order); ++i) {
+        for (m_region_t * c = mregions; c != NULL; c = c->next) {
+            if (paddress + (page_size*i) >= c->start && paddress + (page_size*i) < c->start + (page_size * c->pages_total)) {
+                mregion_reserve(c, paddress + (page_size*i), 0);
+                goto cont;
+            }
+        }
+        cont:
+        continue;
+    }
+    return paddress;
+}
+void ppages_free(unsigned long address, unsigned int order)
+{
+    for (m_region_t * c = mregions; mregions != NULL; c = c->next) {
+        if (address >= c->start && address < c->start + c->size)
+            return mregion_free(c, address, order);
+    } 
+}
+
+static void * kfnfp (void * nfp)
+{
+    for (void *addr = nfp; ; addr += page_size)
+    {
+        if (!kpage_present(addr))
+            return addr;
+    }
+}
+
+int kvs_init ()
+{
+    kvs_next = kfnfp((void*)0x1000);
+
+    return 1;
+}
+void * kvs_map (unsigned long address, unsigned int order, unsigned int flags)
+{
+    for (unsigned long start = (unsigned long)kvs_next; start < ~(0UL); start += page_size) {
+        for (unsigned long pgs = start + page_size; (pgs - start) / page_size < (ORDER(order)); pgs += page_size)
+            if (kpage_present((void*)pgs))
+                goto cont;
+        for (unsigned long i = 0; i < (ORDER(order)); ++i)
+            kpage_map((void*)(start + (page_size*i)), address + (page_size*i), flags);
+        if (start == (unsigned long)kvs_next)
+            kvs_next = kfnfp(kvs_next + (page_size * (ORDER(order))));
+        return (void*)start;
+        cont:
+        continue;
+    }
+    return NULL;
+}
+void kvs_unmap(void * vaddress, unsigned int order)
+{
+    for (unsigned long i = 0; i < (ORDER(order)); ++i)
+        kpage_unmap(vaddress + (page_size * i));
+    if (kvs_next > vaddress)
+        kvs_next = vaddress;
+}
+
+void * kpages_alloc(unsigned int order, unsigned int flags)
+{
+    if (max_alloc_order >= order) {
+        unsigned long pd = ppages_alloc(order);
+        if (pd == 0) return NULL;
+        void * vd = kvs_map(pd, order, flags);
+        if (!vd) {
+            ppages_free(pd, order);
+            return NULL;
+        }
+        return vd;
+    }
+    if (pages_free < (ORDER(order))) return NULL;
+
+    void * vd = kvs_map(0, order, flags);
+    if (!vd) return NULL;
+    void * cpos = vd;
+    unsigned long pages_total = (ORDER(order));
+    while (pages_total > 0) {
+        unsigned int corder = pages_to_order(pages_total);
+        if ((ORDER(corder)) > pages_total)
+            --corder;
+        if (corder > max_alloc_order)
+            corder = max_alloc_order;
+        
+        unsigned long pd = ppages_alloc(corder);
+        for (unsigned int i = 0; i < (ORDER(corder)); ++i)
+            kpage_map(cpos + (page_size * i), pd + (page_size * i), flags);
+        cpos += page_size * (ORDER(corder));
+        pages_total -= (ORDER(corder));
+    }
+    return vd;
+}
+int kpages_free(void * vaddress, unsigned int order)
+{
+    unsigned int i;
+    unsigned long cpd = kpage_paddr(vaddress);
+    unsigned long cpc = 1;
+    if (!cpd) return 0;
+    for (i = 1; i < (ORDER(order)); ++i) {
+        if (kpage_paddr((void*)(vaddress + (page_size*i))) != cpd + (page_size*cpc)) {
+            ppages_free(cpd, pages_to_order(cpc));
+            cpd = kpage_paddr(vaddress + (page_size*i));
+            cpc = 0;
+            continue;
+        }
+        
+        ++cpc;
+    }
+    if (cpc)
+        ppages_free(cpd, pages_to_order(cpc));
+    
+    kvs_unmap(vaddress, order);
+
+    return 1;
 }

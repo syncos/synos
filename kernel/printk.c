@@ -1,22 +1,19 @@
-#include <synos/synos.h>
-#include <synos/arch/arch.h>
-#include <array.h>
+#include <log.h>
+#include <slab.h>
+#include <arch/print.h>
 #include <string.h>
 #include <stdarg.h>
 
-bool printk_enabled = false;
+unsigned int printk_enabled = 0;
 
-Array_t *logs;
+Array_t * logs;
 
 int printk_init()
 {
-    if (arch_printk_init() < 0)
-        panic("arch_printk_init could not initialize");
-    
-    logs = newArray();
+    logs = newarray();
 
-    printk_enabled = true;
-    return 0;
+    printk_enabled = 1;
+    return 1;
 }
 
 void printk(enum Log_Level level, const char* str, ...)
@@ -25,8 +22,8 @@ void printk(enum Log_Level level, const char* str, ...)
         return;
     size_t orgLen = strlen(str);
 
-    string_t *lstr = newString();
-    struct LogEnt *log = kmalloc(sizeof(struct LogEnt));
+    string_t * lstr = newstring();
+    struct LogEnt * log = kmalloc(sizeof(struct LogEnt), GFP_KERNEL);
     log->level = level;
     // TODO: add support for timestamps
     log->seconds = 0;
@@ -54,22 +51,26 @@ void printk(enum Log_Level level, const char* str, ...)
                     case 'i':
                         tempStr = c_str(va_arg(varLst, int));
                         lstr->append(lstr, tempStr, strlen(tempStr));
+                        kfree(tempStr);
                         break;
                     case 'u':
                         tempStr = c_str(va_arg(varLst, unsigned int));
                         lstr->append(lstr, tempStr, strlen(tempStr));
+                        kfree(tempStr);
                         break;
                     case 'o':
                         // TODO: implement octals
                         va_arg(varLst, unsigned int); // Needed to be at the right offset
                         break;
                     case 'x':
-                        tempStr = toLower(hex_str(va_arg(varLst, unsigned int)));
+                        tempStr = toLower(hex_str(va_arg(varLst, unsigned long)));
                         lstr->append(lstr, tempStr, strlen(tempStr));
+                        kfree(tempStr);
                         break;
                     case 'X':
-                        tempStr = hex_str(va_arg(varLst, unsigned int));
+                        tempStr = hex_str(va_arg(varLst, unsigned long));
                         lstr->append(lstr, tempStr, strlen(tempStr));
+                        kfree(tempStr);
                         break;
                     case 's':
                         tempStr = va_arg(varLst, char*);

@@ -1,53 +1,63 @@
-#ifndef _X64_H
-#define _X64_H
-#include <inttypes.h>
-#include <elf/elf.h>
-#include <synos/arch/memory.h>
+#ifndef X64_H
+#define X64_H
 
-enum LOAD_SYSTEMS
+#define KERNEL_START 0x100000
+#define KERNEL_MAX_SIZE 0x200000
+
+enum kerror_codes
+{
+    KERR_OK,
+    KERR_NOCPUID,
+    KERR_NOLONGMD,
+    KERR_NOTMULTIBOOT,
+    KERR_KVIRTSPACE,
+    KERR_KMREGION,
+    KERR_MULTIBOOT_MAP,
+    KERR_KSLAB,
+    KERR_MULTIBOOT_INIT,
+    KERR_NOMEM,
+};
+enum boot_mode
 {
     MULTIBOOT,
+    MULTIBOOT2,
 };
-extern enum LOAD_SYSTEMS load_sys;
-
-enum FRAMEBUFFER_TYPE
+enum framebuffer_types
 {
-    EGA_TEXT,
-    INDEXED_COLOR,
-    DIRECT_RGB,
-
-    FRAMEBUFFER_TYPE_LENGTH
+    FRAMEBUFFER_PIXELS,
+    FRAMEBUFFER_EGA,
 };
 
-struct BootInfo
+extern enum boot_mode boot_loader;
+
+extern void   kernel_AS();
+
+extern void halt();
+#ifdef DDEBUG
+extern char * kerror_string;
+extern unsigned int kerror;
+
+static inline void EHALT(enum kerror_codes errno, char * str)
 {
-    struct 
-    {
-        struct ELF64_Sym *elf_sym;
-        uint32_t elf_sym_size;
-        char* elf_str;
-        uint32_t elf_str_size;
-    }symbols;
-    struct
-    {
-        struct ELF64_Shdr *elf_sh;
-        uint32_t elf_sh_length;
-    }sections;
-    struct
-    {
-        enum FRAMEBUFFER_TYPE type;
-        uintptr_t address;
+    kerror = errno;
+    kerror_string = str;
+    halt();
+}
+#else
+#define EHALT(errno, str) halt();
+#endif
 
-        uint32_t width;
-        uint32_t height;
-    }framebuffer;
+extern unsigned int mbm;
+extern unsigned int mbp;
 
-    struct mem_regions *mmap;
-};
+extern unsigned long          framebuffer_address;
+extern enum framebuffer_types framebuffer_mode;
+extern unsigned int           framebuffer_width;
+extern unsigned int           framebuffer_height;
 
-extern struct BootInfo X64;
-extern const size_t mboot_info_size;
+int framebuffer_init();
 
-extern void nmi_enable();
-extern void nmi_disable();
+unsigned char inb (unsigned short port);
+void          outb(unsigned short port, unsigned char value);
+
 #endif

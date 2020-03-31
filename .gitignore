@@ -1,4 +1,5 @@
 *.o
+*.d
 *.img
 *.iso
 rootdir/

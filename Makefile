@@ -13,11 +13,11 @@ all: $(KERNEL_OUT)
 
 include arch/Makefile
 include kernel/Makefile
-include drivers/Makefile
-include mutils/Makefile
+include modules/Makefile
+include utils/Makefile
 
 # Add modules
-MODULES += kernel arch mutils drivers
+MODULES += kernel arch modules utils
 
 ifeq ($(TARGET), DEBUG)
 DEBUG=TRUE
@@ -39,24 +39,18 @@ CC_FLAGS += -gdwarf
 CXX_FLAGS += -gdwarf
 ASM_FLAGS += -g -F dwarf
 LINK_FLAGS += -g
-DEFINE_VALS += -DKDEBUG
+DEFINE_VALS += -DDDEBUG
 endif
 ifeq ($(OPTIMIZE), TRUE)
+ifeq ($(DEBUG), TRUE)
 CC_FLAGS += -Og
 CXX_FLAGS += -Og
-DEFINE_VALS += -DOPTIMIZE
-endif
-ifeq ($(BITS), 64)
-CC_FLAGS += -m64
-CXX_FLAGS += -m64
-DEFINE_VALS += -D_64BIT_
 else
-CC_FLAGS += -m32
-CXX_FLAGS += -m32
-DEFINE_VALS += -D_32BIT_
+CC_FLAGS += -O2
+CXX_FLAGS += -O2
+LINK_FLAGS += -O2
 endif
-ifeq ($(MULTICORE), TRUE)
-DEFINE_VALS += -DMULTICORE
+DEFINE_VALS += -DOPTIMIZE
 endif
 ifdef LOGLEVEL
 DEFINE_VALS += -DLOGLEVEL=$(LOGLEVEL)

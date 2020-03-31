@@ -33,7 +33,6 @@ extern enum boot_mode boot_loader;
 extern void   kernel_AS();
 
 extern void halt();
-#ifdef DDEBUG
 extern char * kerror_string;
 extern unsigned int kerror;
 
@@ -43,9 +42,6 @@ static inline void EHALT(enum kerror_codes errno, char * str)
     kerror_string = str;
     halt();
 }
-#else
-#define EHALT(errno, str) halt();
-#endif
 
 extern unsigned int mbm;
 extern unsigned int mbp;

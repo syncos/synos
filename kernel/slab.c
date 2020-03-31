@@ -26,7 +26,7 @@ int kslab_init()
 }
 
 // Checks all pointers for the one with the greatest size
-static inline unsigned long findSize_max(mheader_t *header)
+static inline unsigned long findSize_max(mheader_t * header)
 {
     unsigned long max = 0;
     for (mpointer_t *p = (void*)((unsigned long)header + sizeof(mheader_t)); p != NULL; p = p->next)
@@ -35,11 +35,10 @@ static inline unsigned long findSize_max(mheader_t *header)
     return max;
 }
 // Find pointers that aren't allocated neighboring eachother and merge them
-static inline void pointers_merge(mpointer_t *pointer_s)
+static inline void pointers_merge(mheader_t * h)
 {
-    for (mpointer_t *p = pointer_s; p->next != NULL;)
-    {
-        if (p->size > 0 && p->next->size > 0) {
+    for (mpointer_t * p = (void*)((unsigned long)h + sizeof(mheader_t)); p->next != NULL; ) {
+        if (p->size != 0 && p->next->size != 0) {
             p->size += p->next->size;
             p->next = p->next->next;
         }
@@ -122,11 +121,15 @@ void kfree(void * address)
     if (!address)
         return;
     // First, find the heap where the address points to
+    mheader_t *hl = NULL;
     mheader_t *h;
     mpointer_t *p;
-    for (h = header_start; h != NULL; h = h->next)
+    for (h = header_start; h != NULL; h = h->next) {
         if ((unsigned long)address > (unsigned long)h && (unsigned long)address < (unsigned long)h + h->size)
             break;
+        else
+            hl = h;
+    }
     if (!h)
         return;
     // We've found the header, now find the pointer
@@ -142,8 +145,12 @@ void kfree(void * address)
     else
         p->size = h->size - ((unsigned long)address - (unsigned long)h);
 
-    pointers_merge((void*)((unsigned long)h + sizeof(mheader_t)));
+    pointers_merge(h);
     h->size_max = findSize_max(h);
+    if (h->size_max == h->size - sizeof(mheader_t) - sizeof(mpointer_t) && hl != NULL) {
+        hl->next = h->next;
+        kpages_free(h, pages_to_order(h->size / page_size));
+    }
 
     return;
 }

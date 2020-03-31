@@ -34,7 +34,7 @@ void printk(enum Log_Level level, const char* str, ...)
 
     size_t lstart = 0;
     size_t lcpy = 0;
-    char *tempStr;
+    char * tempStr;
     for (size_t i = 0; i < orgLen; ++i)
     {
         switch (str[i])

@@ -12,9 +12,7 @@
 #include <arch/print.h>
 
 enum boot_mode boot_loader;
-#ifdef DDEBUG
 char * kerror_string = NULL;
-#endif
 uint32_t
  kerror = 0;
 const enum ARCH arch = X86_64;
@@ -107,13 +105,13 @@ static void multiboot_init(unsigned long mbp)
             nr->flags = M_REGION_USABLE | M_REGION_READ | M_REGION_WRITE;
             break;
         case MULTIBOOT_MEMORY_RESERVED:
-            nr->flags = M_REGION_PROTECTED;
+            nr->flags = M_REGION_RESERVED;
             break;
         case MULTIBOOT_MEMORY_ACPI_RECLAIMABLE:
             nr->flags = M_REGION_MMAPPED | M_REGION_PROTECTED | M_REGION_READ | M_REGION_WRITE;
             break;
         case MULTIBOOT_MEMORY_NVS:
-            nr->flags = M_REGION_PROTECTED | M_REGION_PRESERVE | M_REGION_READ | M_REGION_WRITE;
+            nr->flags = M_REGION_PROTECTED;
             break;
         default:
             nr->flags = M_REGION_BAD;
@@ -241,8 +239,6 @@ static void multiboot2_init(unsigned long mbp)
         
         switch (tag->type)
         {
-        case MULTIBOOT2_TAG_TYPE_END:
-            goto done;
         case MULTIBOOT2_TAG_TYPE_FRAMEBUFFER:;
             struct multiboot2_tag_framebuffer_common * fb = (struct multiboot2_tag_framebuffer_common *)tag;
             framebuffer_address = fb->framebuffer_addr;
@@ -275,13 +271,13 @@ static void multiboot2_init(unsigned long mbp)
                     nr->flags = M_REGION_USABLE | M_REGION_READ | M_REGION_WRITE;
                     break;
                 case MULTIBOOT2_MEMORY_RESERVED:
-                    nr->flags = M_REGION_PROTECTED;
+                    nr->flags = M_REGION_RESERVED;
                     break;
                 case MULTIBOOT2_MEMORY_ACPI_RECLAIMABLE:
                     nr->flags = M_REGION_MMAPPED | M_REGION_PROTECTED | M_REGION_READ | M_REGION_WRITE;
                     break;
                 case MULTIBOOT2_MEMORY_NVS:
-                    nr->flags = M_REGION_PROTECTED | M_REGION_PRESERVE | M_REGION_READ | M_REGION_WRITE;
+                    nr->flags = M_REGION_PROTECTED;
                     break;
                 default:
                     nr->flags = M_REGION_BAD;
@@ -371,7 +367,6 @@ static void multiboot2_init(unsigned long mbp)
             break;
         }
     }
-    done:
 
     kfree(mb2data);
 }

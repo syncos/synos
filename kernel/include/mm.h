@@ -55,10 +55,10 @@ struct m_region
 typedef struct m_region m_region_t;
 #define M_REGION_READ 1
 #define M_REGION_WRITE 2
-#define M_REGION_PROTECTED 4
+#define M_REGION_RESERVED 4
 #define M_REGION_MMAPPED 8
 #define M_REGION_BAD 16
-#define M_REGION_PRESERVE 32
+#define M_REGION_PROTECTED 32
 #define M_REGION_USABLE 64
 
 extern m_region_t * p_mem_regions;

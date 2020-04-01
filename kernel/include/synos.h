@@ -3,4 +3,6 @@
 
 #include <log.h>
 
+void panic(const char * str, ...);
+
 #endif

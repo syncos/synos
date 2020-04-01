@@ -18,6 +18,13 @@ int printk_init()
 
 void printk(enum Log_Level level, const char* str, ...)
 {
+    va_list varLst;
+    va_start(varLst, str);
+    vprintk(level, str, varLst);
+    va_end(varLst);
+}
+void vprintk(enum Log_Level level, const char* str, va_list varLst)
+{
     if (!printk_enabled)
         return;
     size_t orgLen = strlen(str);
@@ -28,9 +35,6 @@ void printk(enum Log_Level level, const char* str, ...)
     // TODO: add support for timestamps
     log->seconds = 0;
     log->microseconds = 0;
-
-    va_list varLst;
-    va_start(varLst, str);
 
     size_t lstart = 0;
     size_t lcpy = 0;
@@ -100,6 +104,5 @@ void printk(enum Log_Level level, const char* str, ...)
 
     log->message = lstr->str;
     logs->push(logs, (size_t)&log);
-    va_end(varLst);
     kfree(lstr);
 }

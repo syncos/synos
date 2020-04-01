@@ -1,6 +1,7 @@
 #ifndef LOG_H
 #define LOG_H
 #include <stddef.h>
+#include <stdarg.h>
 
 enum Log_Level
 {
@@ -27,5 +28,6 @@ struct LogEnt
 int printk_init();
 
 void printk(enum Log_Level, const char* str, ...);
+void vprintk(enum Log_Level, const char* str, va_list args);
 
 #endif

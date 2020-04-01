@@ -8,15 +8,14 @@ struct X64_CPUID cpu;
 int cpuinfo()
 {
     asm volatile (
-        "push %0\n"
         "mov eax, 0\n"
         "cpuid\n"
-        "pop rdi\n"
-        "mov [rdi], ebx\n"
-        "mov [rdi+4], edx\n"
-        "mov [rdi+8], ecx"
+        "mov [%0], ebx\n"
+        "mov [%0+4], edx\n"
+        "mov [%0+8], ecx"
         :
         : "r" (cpu.vendor_string)
+        : "eax", "ebx", "edx", "ecx"
     );
 
     cpu.vendor_string[12] = 0;
@@ -51,6 +50,19 @@ int cpuinfo()
     // Else mark as unknown
     // The kernel should give a warning that the cpuid function was not able to detect vendor
     else                                           {cpu.vendor = UNKNOWN;      cpu.isVM = 0; printk(WARNING, "Couldn't detect CPU vendor! Disabling all vendor specific features.");}
+
+    asm volatile (
+        "mov eax, 1\n"
+        "cpuid\n"
+        "mov [%0], ecx\n"
+        "mov [%1], edx"
+        :
+        : "r"(&cpu.FI_EDX), "r"(&cpu.FI_ECX)
+        : "eax", "ecx", "edx"
+    );
+
+    if (!(cpu.FI_ECX & CPUID_FEAT_EDX_APIC))
+        panic("APIC not supported on this processor, CPUID.01h:EDX : %X", cpu.FI_EDX);
 
     return 1;
 }

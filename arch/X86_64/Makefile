@@ -5,7 +5,7 @@ CXX_FLAGS += -m64
 DEFINE_VALS += -D_64BIT_ -D_X86_64_
 
 IMG_LINK+=$(X64DIR)/linkerscript.ld
-ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/headers.o $(X64DIR)/init.o $(X64DIR)/inline.o $(X64DIR)/page.o $(X64DIR)/spinlock.o $(X64DIR)/framebuffer.o $(X64DIR)/cpu.o
+ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/headers.o $(X64DIR)/init.o $(X64DIR)/inline.o $(X64DIR)/page.o $(X64DIR)/spinlock.o $(X64DIR)/framebuffer.o $(X64DIR)/cpu.o $(X64DIR)/acpi.o
 
 X86_64: $(SOURCE_DIR)/arch/arch.o
 $(SOURCE_DIR)/arch/arch.o: $(ARCHOBJECTS)

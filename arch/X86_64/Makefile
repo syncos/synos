@@ -5,7 +5,7 @@ CXX_FLAGS += -m64
 DEFINE_VALS += -D_64BIT_ -D_X86_64_
 
 IMG_LINK+=$(X64DIR)/linkerscript.ld
-ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/headers.o $(X64DIR)/init.o $(X64DIR)/inline.o $(X64DIR)/page.o $(X64DIR)/spinlock.o $(X64DIR)/framebuffer.o $(X64DIR)/cpu.o $(X64DIR)/acpi.o
+ARCHOBJECTS += $(X64DIR)/boot/init.o $(X64DIR)/boot/headers.o $(X64DIR)/init.o $(X64DIR)/inline.o $(X64DIR)/page.o $(X64DIR)/spinlock.o $(X64DIR)/framebuffer.o $(X64DIR)/cpu.o $(X64DIR)/acpi.o $(X64DIR)/apic.o $(X64DIR)/interrupts.o $(X64DIR)/int.o
 
 X86_64: $(SOURCE_DIR)/arch/arch.o
 $(SOURCE_DIR)/arch/arch.o: $(ARCHOBJECTS)
@@ -13,12 +13,12 @@ $(SOURCE_DIR)/arch/arch.o: $(ARCHOBJECTS)
 	@$(LINK) $(LINK_ARCH) -r $(ARCHOBJECTS) -o $(SOURCE_DIR)/arch/arch.o
 
 $(X64DIR)/%.o: $(X64DIR)/%.asm
-	@$(ASM) $(ASM_FLAGS) $< -o $@
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling ASM object $@$(NC)"
+	@$(ASM) $(ASM_FLAGS) $< -o $@
 
 $(X64DIR)/%.o: $(X64DIR)/%.c
-	@$(CC) $(CC_FLAGS) $< -o $@
 	@echo -e "$(SECTIONC)[arch] $(COMPILEC)Compiling C object $@$(NC)"
+	@$(CC) $(CC_FLAGS) $< -o $@
 
 .PHONY: grub
 grub:

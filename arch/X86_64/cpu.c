@@ -61,8 +61,5 @@ int cpuinfo()
         : "eax", "ecx", "edx"
     );
 
-    if (!(cpu.FI_ECX & CPUID_FEAT_EDX_APIC))
-        panic("APIC not supported on this processor, CPUID.01h:EDX : %X", cpu.FI_EDX);
-
     return 1;
 }

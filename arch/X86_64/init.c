@@ -6,6 +6,7 @@
 #include "x64.h"
 #include "cpu.h"
 #include "acpi.h"
+#include "interrupts.h"
 #include "multiboot.h"
 #include "multiboot2.h"
 #include <stdint.h>
@@ -425,6 +426,8 @@ void c_entry()
     printk(DEBUG, "%u KiB used - %u KiB free", ((pages_total - pages_free)*page_size) / 1024, (pages_free*page_size) / 1024);
 
     cpuinfo();
+
+    idt_init();
 
     acpi_init();
 }

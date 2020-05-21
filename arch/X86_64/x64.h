@@ -56,4 +56,7 @@ int framebuffer_init();
 unsigned char inb (unsigned short port);
 void          outb(unsigned short port, unsigned char value);
 
+#define push(v) asm volatile ("mov rax, [%0]\npush rax" : "=r"(v) :: "rax")
+#define pop(v)  asm volatile ("pop rax, mov [%0], rax" :: "r"(v) : "rax")
+
 #endif

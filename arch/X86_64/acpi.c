@@ -4,9 +4,6 @@
 #include "acpi.h"
 #include <string.h>
 
-#define BDA_START   0xE0000
-#define EBDA_START  0x80000
-
 const char * rsdp_signature = "RSD PTR ";
 
 char * acpi_oamid = NULL;
@@ -72,6 +69,8 @@ RSDP_t * findRSDP()
 
 int acpi_init()
 {
+    apic_init();
+
     RSDP_t * rsdp = findRSDP();
     if (!rsdp)
         panic("No RSDP table given needed to initalize ACPI");

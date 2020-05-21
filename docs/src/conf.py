@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Synos'
-copyright = '2019, 64epicks'
+copyright = '2020, 64epicks'
 author = '64epicks'
 
 # The full version, including alpha/beta/rc tags
